@@ -345,8 +345,9 @@
                 var selectedActivity = _.find(res.values, function (act) {
                   return act.target_contact_id.indexOf(role.contact_id) > -1;
                 });
-
-                $scope.roles[key].start_date = selectedActivity.activity_date_time;
+                if (selectedActivity) {
+                  $scope.roles[key].start_date = selectedActivity.activity_date_time;
+                }
               }
             }
           });
