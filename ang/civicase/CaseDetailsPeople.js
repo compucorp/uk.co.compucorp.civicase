@@ -313,7 +313,46 @@
         // Reset if out of range
         $scope.rolesPage = 1;
       }
+
       $scope.roles = _.slice(caseRoles, (25 * ($scope.rolesPage - 1)), 25 * $scope.rolesPage);
+      setStartDateToClients(item.case_id);
+    }
+
+    /**
+     * Function to get the start date of the contacts with the
+     * Client roles
+     *
+     * @params {Integer} case_id
+     */
+    function setStartDateToClients (caseId) {
+      var params = {
+        'sequential': 1,
+        'return': ['activity_type_id', 'activity_date_time', 'target_contact_id'],
+        'case_id': caseId,
+        'options': {
+          sort: 'activity_type_id DESC'
+        },
+        'activity_type_id': {
+          IN: ['Add Client To Case', 'Reassigned Case']
+        }
+      };
+
+      crmApi('Activity', 'get', params).then(function (res) {
+        if ($scope.roles.length > 0) {
+          _.each($scope.roles, function (role, key) {
+            if (role) {
+              if (role.role === 'Client') {
+                var selectedActivity = _.find(res.values, function (act) {
+                  return act.target_contact_id.indexOf(role.contact_id) > -1;
+                });
+                if (selectedActivity) {
+                  $scope.roles[key].start_date = selectedActivity.activity_date_time;
+                }
+              }
+            }
+          });
+        }
+      });
     }
 
     /**
