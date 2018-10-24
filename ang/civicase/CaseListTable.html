@@ -95,6 +95,10 @@
               </span>
               <span ng-switch-when="contact_reference">{{ item[header.name].display_name }}</span>
               <span ng-switch-when="date">{{ CRM.utils.formatDate(item[header.name]) }}</span>
+              <span ng-switch-when="overdue_date" ng-class="{'civicase__overdue-date': item.overdueDates[header.name] }">
+                {{ CRM.utils.formatDate(item[header.name]) }}
+                <i class="material-icons civicase__icon" ng-if="item.overdueDates[header.name]">error</i>
+              </span>
               <span ng-switch-when="multiple_values">{{ item[header.name].join(', ') }}</span>
               <span ng-switch-default>{{ item[header.name] }}</span>
             </span>
