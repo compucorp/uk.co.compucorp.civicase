@@ -140,6 +140,9 @@
       item.case_type = caseTypes[item.case_type_id].title;
       item.selected = false;
       item.is_deleted = item.is_deleted === '1';
+      item.overdueDates = {
+        modified_date: moment().subtract(3, 'months').isSameOrAfter(item.modified_date)
+      };
 
       // Save all activities in a new meaningful key
       if (item['api.Activity.get.1']) {
