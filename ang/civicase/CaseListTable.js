@@ -124,6 +124,24 @@
     };
 
     /**
+     * Modifies the headers according to the headers modifications spec:
+     * - For the modified date it changes its display type to overdue date.
+     */
+    function applyHeadersModifiers () {
+      var headersModifications = {
+        modified_date: { display_type: 'overdue_date' }
+      };
+
+      _.forEach(headersModifications, function (headerModification, headerName) {
+        var header = _.find($scope.headers, { name: headerName });
+
+        if (header) {
+          _.extend(header, headerModification);
+        }
+      });
+    }
+
+    /**
      * Binds all route parameters to scope
      */
     function bindRouteParamsToScope () {
@@ -264,6 +282,7 @@
 
           if (typeof result[2] !== 'undefined') {
             $scope.headers = result[2].values;
+            applyHeadersModifiers();
           }
 
           $scope.cases = cases;

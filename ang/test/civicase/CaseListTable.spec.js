@@ -2,16 +2,17 @@
 
 (function (_) {
   describe('CaseListTable', function () {
-    var $controller, $q, $scope, CasesData, crmApi, formatCase;
+    var $controller, $q, $scope, CasesData, caseHeadersMockData, crmApi, formatCase;
 
     beforeEach(module('civicase', 'civicase.data', 'crmUtil'));
 
-    beforeEach(inject(function (_$controller_, _$q_, $rootScope, _CasesData_, _crmApi_,
-      _formatCase_) {
+    beforeEach(inject(function (_$controller_, _$q_, $rootScope, _CasesData_,
+      _caseHeadersMockData_, _crmApi_, _formatCase_) {
       $controller = _$controller_;
       $q = _$q_;
       $scope = $rootScope.$new();
       CasesData = _CasesData_.get();
+      caseHeadersMockData = _caseHeadersMockData_.get();
       crmApi = _crmApi_;
       formatCase = _formatCase_;
       // custom function added by civicrm:
@@ -20,6 +21,7 @@
         id: _.uniqueId()
       };
     }));
+
     describe('on init', function () {
       var expectedApiCallParams, expectedCases;
 
@@ -57,7 +59,11 @@
           ['Case', 'getcaselistheaders']
         ];
 
-        crmApi.and.returnValue($q.resolve([_.cloneDeep(CasesData)]));
+        crmApi.and.returnValue($q.resolve([
+          _.cloneDeep(CasesData),
+          null, // case count
+          { values: caseHeadersMockData }
+        ]));
         expectedCases = _.chain(CasesData.values).cloneDeep().map(formatCase).value();
         initController();
         $scope.$digest();
@@ -69,6 +75,18 @@
 
       it('stores the cases after formatting them', function () {
         expect($scope.cases).toEqual(expectedCases);
+      });
+
+      describe('case headers', function () {
+        var modifiedDateHeader;
+
+        beforeEach(function () {
+          modifiedDateHeader = _.find($scope.headers, { name: 'modified_date' });
+        });
+
+        it('changes the modified date display type to overdue date', function () {
+          expect(modifiedDateHeader.display_type).toBe('overdue_date');
+        });
       });
     });
 
