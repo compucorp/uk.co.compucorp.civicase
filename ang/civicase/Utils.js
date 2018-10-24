@@ -132,6 +132,9 @@
     var caseStatuses = CRM.civicase.caseStatuses;
 
     return function (item) {
+      var isStatusOpen = caseStatuses[item.status_id].grouping === 'Opened';
+      var isModifiedDateOverdue = moment().subtract(3, 'months').isSameOrAfter(item.modified_date);
+
       item.myRole = [];
       item.client = [];
       item.subject = (typeof item.subject === 'undefined') ? '' : item.subject;
@@ -141,7 +144,7 @@
       item.selected = false;
       item.is_deleted = item.is_deleted === '1';
       item.overdueDates = {
-        modified_date: moment().subtract(3, 'months').isSameOrAfter(item.modified_date)
+        modified_date: isStatusOpen && isModifiedDateOverdue
       };
 
       // Save all activities in a new meaningful key
