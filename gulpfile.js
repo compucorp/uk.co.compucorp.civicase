@@ -11,7 +11,7 @@
 'use strict';
 
 var gulp = require('gulp');
-var bulk = require('gulp-sass-bulk-import');
+var glob = require('gulp-sass-glob');
 var sass = require('gulp-sass');
 var civicrmScssRoot = require('civicrm-scssroot')();
 var postcss = require('gulp-postcss');
@@ -32,8 +32,9 @@ var outsideNamespaceRegExp = /^\.___outside-namespace/;
 /**
   * The gulp task updates and sync the scssRoot paths
   */
-gulp.task('sass:sync', () => {
+gulp.task('sass:sync', (done) => {
   civicrmScssRoot.updateSync();
+  done();
 });
 
 /**
@@ -41,9 +42,9 @@ gulp.task('sass:sync', () => {
  * Also prefix the output css selector with `#bootstrap-theme` selector except the output.
  * selector starts from either `body`, `page-civicrm-case` or `.___outside-namespace` classes.
  */
-gulp.task('sass', ['sass:sync'], function () {
+gulp.task('sass', gulp.series('sass:sync', () => {
   return gulp.src('scss/civicase.scss')
-    .pipe(bulk())
+    .pipe(glob())
     .pipe(sourcemaps.init())
     .pipe(autoprefixer({
       browsers: ['last 2 versions'],
@@ -64,21 +65,31 @@ gulp.task('sass', ['sass:sync'], function () {
     .pipe(rename({ suffix: '.min' }))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('css/'));
-});
+}));
 
 /**
  * Watch task
  */
 gulp.task('watch', function () {
-  gulp.watch('scss/**/*.scss', ['sass']);
-  gulp.watch(['ang/**/*.js', '!ang/test/karma.conf.js'], ['test']);
-  gulp.watch(civicrmScssRoot.getWatchList(), ['sass']);
+  gulp.watch('scss/**/*.scss', gulp.series('sass'));
+  gulp.watch(['ang/**/*.js', '!ang/test/karma.conf.js'], gulp.series('test'));
+  gulp.watch(civicrmScssRoot.getWatchList(), gulp.series('sass'));
+});
+
+/**
+ * Runs the unit tests
+ */
+gulp.task('test', function (done) {
+  new karma.Server({
+    configFile: path.resolve(__dirname, 'ang/test/karma.conf.js'),
+    singleRun: true
+  }, done).start();
 });
 
 /**
  * Default task
  */
-gulp.task('default', ['sass', 'test']);
+gulp.task('default', gulp.series('sass', 'test'));
 
 /**
  * Deletes the special class that was used as marker for styles that should
@@ -90,13 +101,3 @@ gulp.task('default', ['sass', 'test']);
 function removeOutsideNamespaceMarker (selector) {
   return selector.replace(outsideNamespaceRegExp, '');
 }
-
-/**
- * Runs the unit tests
- */
-gulp.task('test', function (done) {
-  new karma.Server({
-    configFile: path.resolve(__dirname, 'ang/test/karma.conf.js'),
-    singleRun: true
-  }, done).start();
-});
