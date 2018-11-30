@@ -70,10 +70,15 @@ gulp.task('sass', gulp.series('sass:sync', () => {
 /**
  * Watch task
  */
-gulp.task('watch', function () {
-  gulp.watch('scss/**/*.scss', gulp.series('sass'));
-  gulp.watch(['ang/**/*.js', '!ang/test/karma.conf.js'], gulp.series('test'));
-  gulp.watch(civicrmScssRoot.getWatchList(), gulp.series('sass'));
+gulp.task('watch', function (done) {
+  gulp.watch('scss/**/*.scss')
+    .on('change', gulp.series('sass'));
+  gulp.watch(['ang/**/*.js', '!ang/test/karma.conf.js'])
+    .on('change', gulp.series('test'));
+  gulp.watch(civicrmScssRoot.getWatchList())
+    .on('change', gulp.series('sass'));
+
+  done();
 });
 
 /**
