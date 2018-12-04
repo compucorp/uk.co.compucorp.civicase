@@ -1,7 +1,7 @@
 (function (angular, $, _) {
   var module = angular.module('civicase');
 
-  module.directive('civicaseActions', function (dialogService) {
+  module.directive('civicaseCaseActions', function (dialogService) {
     return {
       restrict: 'A',
       template:
@@ -9,7 +9,7 @@
       '  <a href ng-click="doAction(action)"><i class="fa {{action.icon}}"></i> {{ action.title }}</a>' +
       '</li>',
       scope: {
-        cases: '=civicaseActions',
+        cases: '=civicaseCaseActions',
         refresh: '=refreshCallback',
         popupParams: '='
       },

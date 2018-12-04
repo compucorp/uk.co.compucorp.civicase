@@ -1,6 +1,6 @@
 /* eslint-env jasmine */
 
-describe('Action', function () {
+describe('Case Actions', function () {
   var $compile, $rootScope;
 
   beforeEach(module('civicase'));
@@ -14,7 +14,7 @@ describe('Action', function () {
     var element;
 
     beforeEach(function () {
-      element = $compile('<div civicase-actions=[]></div>')($rootScope);
+      element = $compile('<div civicase-case-actions=[]></div>')($rootScope);
       $rootScope.$digest();
     });
 
