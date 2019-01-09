@@ -1,7 +1,7 @@
 (function (angular, $, _) {
   var module = angular.module('civicase');
 
-  module.directive('civicaseActions', function (dialogService) {
+  module.directive('civicaseActions', function (dialogService, EmailManagersCaseAction, PrintMergeCaseAction) {
     return {
       restrict: 'A',
       template:
@@ -22,7 +22,7 @@
         var ts = CRM.ts('civicase');
         var multi = $scope.multi = attributes.multiple;
 
-        $scope.isHasSubMenu = function(action) {
+        $scope.isHasSubMenu = function (action) {
           return (action.items && action.items.length);
         };
 
@@ -214,54 +214,8 @@
                   }
                 });
             },
-
-            emailManagers: function (cases) {
-              var managers = [];
-
-              _.each(cases, function (item) {
-                if (item.manager) {
-                  managers.push(item.manager.contact_id);
-                }
-              });
-
-              var popupPath = {
-                path: 'civicrm/activity/email/add',
-                query: {
-                  action: 'add',
-                  reset: 1,
-                  cid: _.uniq(managers).join(',')
-                }
-              };
-
-              if (cases.length === 1) {
-                popupPath.query.caseid = cases[0].id;
-              }
-
-              return popupPath;
-            },
-
-            printMerge: function (cases) {
-              var contactIds = [];
-              var caseIds = [];
-
-              _.each(cases, function (item) {
-                caseIds.push(item.id);
-                contactIds.push(item.client[0].contact_id);
-              });
-
-              var popupPath = {
-                path: 'civicrm/activity/pdf/add',
-                query: {
-                  action: 'add',
-                  reset: 1,
-                  context: 'standalone',
-                  cid: contactIds.join(),
-                  caseid: caseIds.join()
-                }
-              };
-              return popupPath;
-            },
-
+            emailManagers: EmailManagersCaseAction.getPath,
+            printMerge: PrintMergeCaseAction.getpath,
             exportCases: function (cases) {
               var caseIds = _.collect(cases, 'id');
               var popupPath = {
@@ -307,8 +261,8 @@
               win.focus();
             },
 
-            gotoWebform: function(selectedCase, path, clientId) {
-              var clientId = 'cid' + clientId;
+            gotoWebform: function (selectedCase, path, clientId) {
+              clientId = 'cid' + clientId;
               var url = CRM.url(path, {
                 case1: selectedCase.id,
                 [clientId]: selectedCase.client[0].contact_id

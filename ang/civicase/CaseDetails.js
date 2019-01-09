@@ -16,7 +16,7 @@
 
   module.controller('civicaseCaseDetailsController', civicaseCaseDetailsController);
 
-  function civicaseCaseDetailsController ($location, $scope, BulkActions, crmApi, formatActivity, formatCase, getActivityFeedUrl, getCaseQueryParams, $route, $timeout, CasesUtils) {
+  function civicaseCaseDetailsController ($location, $scope, BulkActions, crmApi, formatActivity, formatCase, getActivityFeedUrl, getCaseQueryParams, $route, $timeout, CasesUtils, EmailManagersCaseAction, PrintMergeCaseAction) {
     // The ts() and hs() functions help load strings for this module.
     // TODO: Move the common logic into a common controller (based on the usage of ContactCaseTabCaseDetails)
     var ts = $scope.ts = CRM.ts('civicase');
@@ -49,6 +49,24 @@
 
     $scope.caseGetParams = function () {
       return JSON.stringify(caseGetParams());
+    };
+
+    /**
+     * Open the popup for Creating Email
+     */
+    $scope.createEmail = function () {
+      var email = EmailManagersCaseAction.getPath([$scope.item]);
+
+      CRM.loadForm(CRM.url(email.path, email.query));
+    };
+
+    /**
+     * Open the popup for Creating PDF letter
+     */
+    $scope.createPDFLetter = function () {
+      var pdfLetter = PrintMergeCaseAction.getPath([$scope.item]);
+
+      CRM.loadForm(CRM.url(pdfLetter.path, pdfLetter.query));
     };
 
     /**
