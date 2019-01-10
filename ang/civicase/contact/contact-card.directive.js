@@ -1,13 +1,11 @@
 (function (angular, $, _, CRM) {
   var module = angular.module('civicase');
 
-  module.directive('contactCard', function ($document, ContactsCache) {
-    contactCardController.$inject = ['$scope'];
-
+  module.directive('civicaseContactCard', function ($document, ContactsCache) {
     return {
       restrict: 'A',
       replace: true,
-      controller: contactCardController,
+      controller: civicaseContactCardController,
       templateUrl: '~/civicase/contact/contact-card.directive.html',
       scope: {
         data: '=contacts',
@@ -16,7 +14,7 @@
       }
     };
 
-    function contactCardController (scope) {
+    function civicaseContactCardController (scope) {
       scope.ts = CRM.ts('civicase');
       scope.url = CRM.url;
       scope.mainContact = null;
