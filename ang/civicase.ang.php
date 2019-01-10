@@ -239,6 +239,7 @@ return array(
     'ang/civicase/*.js',
     'ang/civicase/*/*.js',
     'ang/civicase/*/*/*.js',
+    'ang/civicase/*/*/*/*.js',
   ),
   'css' => array(
     'assetBuilder://visual-bundle.css', // at the moment, it's safe to include this multiple times -- deduped by resource manager

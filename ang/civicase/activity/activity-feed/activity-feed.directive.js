@@ -4,7 +4,7 @@
   module.directive('civicaseActivityFeed', function () {
     return {
       restrict: 'A',
-      templateUrl: '~/civicase/activity/activity-card/activity-feed.directive.html',
+      templateUrl: '~/civicase/activity/activity-feed/activity-feed.directive.html',
       controller: civicaseActivityFeedController,
       scope: {
         params: '=civicaseActivityFeed',
