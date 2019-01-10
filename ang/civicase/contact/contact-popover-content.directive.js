@@ -11,7 +11,7 @@
     };
   });
 
-  module.controller('civicaseContactPopoverContentController', function ($scope, ContactsDataService) {
-    $scope.contact = ContactsDataService.getCachedContact($scope.contactId);
+  module.controller('civicaseContactPopoverContentController', function ($scope, ContactsCache) {
+    $scope.contact = ContactsCache.getCachedContact($scope.contactId);
   });
 })(angular);

@@ -1,7 +1,7 @@
 (function (angular, _) {
   var module = angular.module('civicase');
 
-  module.service('CasesUtils', function (ContactsDataService) {
+  module.service('CasesUtils', function (ContactsCache) {
     /**
      * Fetch additional information about the contacts
      *
@@ -14,7 +14,7 @@
         contacts = contacts.concat(getAllContactIdsForCase(caseObj));
       });
 
-      ContactsDataService.add(contacts);
+      ContactsCache.add(contacts);
     };
 
     /**

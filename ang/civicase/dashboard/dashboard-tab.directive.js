@@ -12,7 +12,7 @@
   module.controller('dashboardTabController', dashboardTabController);
 
   function dashboardTabController ($location, $rootScope, $route, $sce, $scope,
-    ContactsDataService, crmApi, formatCase, formatActivity) {
+    ContactsCache, crmApi, formatCase, formatActivity) {
     var ACTIVITIES_QUERY_PARAMS_DEFAULTS = {
       'contact_id': 'user_contact_id',
       'is_current_revision': 1,
@@ -294,7 +294,7 @@
       // The try/catch block is necessary because the service does not
       // return a Promise if it doesn't find any new contacts to fetch
       try {
-        return ContactsDataService.add(contactIds)
+        return ContactsCache.add(contactIds)
           .then(function () {
             return formattedResults;
           });

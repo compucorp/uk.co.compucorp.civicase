@@ -7,7 +7,7 @@
       resolve: {
         hiddenFilters: function () {}
       },
-      templateUrl: '~/civicase/CaseList.html'
+      templateUrl: '~/civicase/case/case-list/case-list.html'
     });
   });
 
@@ -15,7 +15,7 @@
     $routeProvider.when('/case', {
       reloadOnSearch: false,
       controller: 'civicaseDashboardController',
-      templateUrl: '~/civicase/Dashboard.html'
+      templateUrl: '~/civicase/dashboard/dashboard.html'
     });
   });
 

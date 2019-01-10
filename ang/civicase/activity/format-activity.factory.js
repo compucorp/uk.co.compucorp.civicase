@@ -1,7 +1,7 @@
 (function (angular, $, _, CRM) {
   var module = angular.module('civicase');
 
-  module.factory('formatActivity', function (ContactsDataService) {
+  module.factory('formatActivity', function (ContactsCache) {
     var activityTypes = CRM.civicase.activityTypes;
     var activityStatuses = CRM.civicase.activityStatuses;
     var caseTypes = CRM.civicase.caseTypes;

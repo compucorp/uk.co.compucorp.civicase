@@ -17,7 +17,7 @@
 
   module.controller('civicaseActivityFeedController', civicaseActivityFeedController);
 
-  function civicaseActivityFeedController ($scope, $q, BulkActions, crmApi, crmUiHelp, crmThrottle, formatActivity, $rootScope, dialogService, ContactsDataService) {
+  function civicaseActivityFeedController ($scope, $q, BulkActions, crmApi, crmUiHelp, crmThrottle, formatActivity, $rootScope, dialogService, ContactsCache) {
     // The ts() and hs() functions help load strings for this module.
     var ts = $scope.ts = CRM.ts('civicase');
     var ITEMS_PER_PAGE = 25;
@@ -212,7 +212,7 @@
         contacts.push(activity.source_contact_id);
       });
 
-      return ContactsDataService.add(contacts);
+      return ContactsCache.add(contacts);
     }
 
     /**

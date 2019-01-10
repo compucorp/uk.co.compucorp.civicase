@@ -1,7 +1,7 @@
 (function (angular, $, _, CRM) {
   var module = angular.module('civicase');
 
-  module.directive('contactCard', function ($document, ContactsDataService) {
+  module.directive('contactCard', function ($document, ContactsCache) {
     contactCardController.$inject = ['$scope'];
 
     return {
@@ -41,9 +41,9 @@
           });
         } else if (typeof scope.data === 'string') {
           if (scope.isAvatar) {
-            prepareAvatarData(ContactsDataService.getCachedContact(scope.data).display_name, scope.data);
+            prepareAvatarData(ContactsCache.getCachedContact(scope.data).display_name, scope.data);
           } else {
-            scope.contacts.push({display_name: ContactsDataService.getCachedContact(scope.data).display_name, contact_id: scope.data});
+            scope.contacts.push({display_name: ContactsCache.getCachedContact(scope.data).display_name, contact_id: scope.data});
           }
         } else {
           scope.contacts = _.cloneDeep(scope.data);
@@ -87,7 +87,7 @@
           display_name: name,
           contact_id: contactID,
           avatar: avatarText,
-          image_URL: ContactsDataService.getImageUrlOf(contactID)
+          image_URL: ContactsCache.getImageUrlOf(contactID)
         });
       }
 

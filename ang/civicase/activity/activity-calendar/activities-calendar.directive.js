@@ -151,7 +151,7 @@
   module.controller('civicaseActivitiesCalendarController', civicaseActivitiesCalendarController);
 
   function civicaseActivitiesCalendarController ($q, $rootScope, $route, $sce,
-    $scope, crmApi, formatActivity, ContactsDataService) {
+    $scope, crmApi, formatActivity, ContactsCache) {
     var ACTIVITIES_DISPLAY_LIMIT = 25;
     var DEBOUNCE_WAIT = 300;
 
@@ -492,7 +492,7 @@
     function loadContactsOfActivities (activities) {
       var contactIds = _(activities).pluck('case_id.contacts').flatten().pluck('contact_id').value();
 
-      return ContactsDataService.add(contactIds);
+      return ContactsCache.add(contactIds);
     }
 
     /**

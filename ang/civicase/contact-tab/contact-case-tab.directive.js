@@ -12,7 +12,7 @@
 
   module.controller('CivicaseContactCaseTabController', CivicaseContactCaseTabController);
 
-  function CivicaseContactCaseTabController ($scope, crmApi, formatCase, Contact, ContactsDataService) {
+  function CivicaseContactCaseTabController ($scope, crmApi, formatCase, Contact, ContactsCache) {
     var commonConfigs = {
       'isLoaded': false,
       'showSpinner': false,
@@ -108,7 +108,7 @@
         contacts = contacts.concat(getAllContactIdsForCase(caseObj));
       });
 
-      ContactsDataService.add(contacts);
+      ContactsCache.add(contacts);
     }
 
     /**
