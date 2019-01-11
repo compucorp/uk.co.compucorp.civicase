@@ -14,37 +14,37 @@
       }
     };
 
-    function civicaseContactCardController (scope) {
-      scope.ts = CRM.ts('civicase');
-      scope.url = CRM.url;
-      scope.mainContact = null;
+    function civicaseContactCardController ($scope) {
+      $scope.ts = CRM.ts('civicase');
+      $scope.url = CRM.url;
+      $scope.mainContact = null;
 
       (function init () {
-        scope.$watch('data', refresh);
+        $scope.$watch('data', refresh);
       }());
 
       /**
        * Watch function for data refresh
        */
       function refresh () {
-        scope.contacts = [];
+        $scope.contacts = [];
 
-        if (_.isPlainObject(scope.data)) {
-          _.each(scope.data, function (name, contactID) {
-            if (scope.isAvatar) {
+        if (_.isPlainObject($scope.data)) {
+          _.each($scope.data, function (name, contactID) {
+            if ($scope.isAvatar) {
               prepareAvatarData(name, contactID);
             } else {
-              scope.contacts.push({display_name: name, contact_id: contactID});
+              $scope.contacts.push({display_name: name, contact_id: contactID});
             }
           });
-        } else if (typeof scope.data === 'string') {
-          if (scope.isAvatar) {
-            prepareAvatarData(ContactsCache.getCachedContact(scope.data).display_name, scope.data);
+        } else if (typeof $scope.data === 'string') {
+          if ($scope.isAvatar) {
+            prepareAvatarData(ContactsCache.getCachedContact($scope.data).display_name, $scope.data);
           } else {
-            scope.contacts.push({display_name: ContactsCache.getCachedContact(scope.data).display_name, contact_id: scope.data});
+            $scope.contacts.push({display_name: ContactsCache.getCachedContact($scope.data).display_name, contact_id: $scope.data});
           }
         } else {
-          scope.contacts = _.cloneDeep(scope.data);
+          $scope.contacts = _.cloneDeep($scope.data);
         }
       }
 
@@ -81,7 +81,7 @@
           avatarText = getInitials(name);
         }
 
-        scope.contacts.push({
+        $scope.contacts.push({
           display_name: name,
           contact_id: contactID,
           avatar: avatarText,
