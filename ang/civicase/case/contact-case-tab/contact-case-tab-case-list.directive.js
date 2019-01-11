@@ -6,7 +6,7 @@
       restrict: 'EA',
       replace: true,
       controller: CivicaseContactCaseTabCaseListController,
-      templateUrl: '~/civicase/contact-tab/contact-case-tab-case-list.directive.html',
+      templateUrl: '~/civicase/case/contact-case-tab/contact-case-tab-case-list.directive.html',
       scope: {
         'casesList': '=',
         'viewingCaseId': '='

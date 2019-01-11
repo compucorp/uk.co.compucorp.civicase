@@ -5,7 +5,7 @@
     return {
       restrict: 'AE',
       replace: true,
-      templateUrl: '~/civicase/activity/activity-feed/activity-filters-contact.directive.html',
+      templateUrl: '~/civicase/activity/activity-filters/activity-filters-contact.directive.html',
       scope: {
         filters: '=civicaseActivityFiltersContact'
       },

@@ -5,7 +5,7 @@
     return {
       restrict: 'EA',
       replace: true,
-      templateUrl: '~/civicase/contact-tab/contact-case-tab-case-details.directive.html',
+      templateUrl: '~/civicase/case/contact-case-tab/contact-case-tab-case-details.directive.html',
       scope: {
         item: '=selectedCase',
         refreshCases: '=refreshCallback'

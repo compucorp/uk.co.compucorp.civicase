@@ -16,7 +16,7 @@
         selectedActivities: '='
       },
       replace: true,
-      templateUrl: '~/civicase/activity/activity-feed/activity-filters.directive.html',
+      templateUrl: '~/civicase/activity/activity-filters/activity-filters.directive.html',
       link: activityFiltersLink,
       transclude: true
     };

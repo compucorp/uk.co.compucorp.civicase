@@ -1,12 +1,12 @@
 <div>
-  <civicase-case-card 
+  <civicase-case-card
     mode="contact-record"
     case="case"
     show-contact-role="casesList.showContactRole"
     ng-click="viewCase(case)"
     ng-repeat="case in casesList.cases">
     </civicase-case-card>
-  <div 
+  <div
     class="panel panel-default panel-strip-primary civicase__case-card civicase__case-card--detached"
     ng-repeat="placeholder in loadingPlaceholders"
     ng-if="!casesList.isLoaded">
@@ -23,9 +23,9 @@
   </div>
   <div class="text-center civicase__contact-case-tab__case-list__footer">
     <div ng-if="casesList.showSpinner" class="civicase__spinner"></div>
-    <button 
-      class="btn btn-default" 
-      ng-if="casesList.isLoadMoreAvailable && casesList.isLoaded && !casesList.showSpinner  && !casesList.disableLoadMore" 
+    <button
+      class="btn btn-default"
+      ng-if="casesList.isLoadMoreAvailable && casesList.isLoaded && !casesList.showSpinner  && !casesList.disableLoadMore"
       ng-click="loadMore()">Load More Cases</button>
     <div ng-if="!casesList.isLoadMoreAvailable">
       <span ng-if="casesList.cases.length > 0"> Showing all {{ casesList.cases.length }}</span>

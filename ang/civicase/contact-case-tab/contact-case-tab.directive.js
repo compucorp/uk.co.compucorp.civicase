@@ -5,7 +5,7 @@
     return {
       restrict: 'EA',
       controller: 'CivicaseContactCaseTabController',
-      templateUrl: '~/civicase/contact-tab/contact-case-tab.directive.html',
+      templateUrl: '~/civicase/contact-case-tab/contact-case-tab.directive.html',
       scope: {}
     };
   });
