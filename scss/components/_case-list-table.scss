@@ -1,8 +1,7 @@
 .civicase__case-list-table-container {
   border-left: 1px solid $gray-light;
-  margin-left: $case-card-width;
-  overflow-x: auto;
-  overflow-y: visible;
+  margin-left: -1px;
+  position: relative;
 }
 
 .civicase__case-list-table {
@@ -131,6 +130,8 @@
 
 .civicase__case-list-panel--summary {
   float: left;
+  height: 486px;
+  overflow: auto;
   width: $case-card-width;
 
   .civicase__pager--fixed {
@@ -164,8 +165,8 @@
 }
 
 .civicase__case-details-panel--summary {
-  height: auto;
-  overflow: visible;
+  height: 513px;
+  overflow: auto;
   width: calc(100% - #{$case-card-width});
 }
 
