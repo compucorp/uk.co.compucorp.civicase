@@ -17,16 +17,6 @@
     <li>
       <a
         href=""
-        ng-disabled="!isSelectAllAvailable"
-        ng-class="{'civicase__link-disabled disabled': !isSelectAllAvailable}"
-        ng-click="select('all')"
-        ng-attr-title="{{isSelectAllAvailable ? 'Select everything that matches search.' : 'Loading, Please wait! ...'}}">
-        Everything ({{everythingCount}})
-      </a>
-    </li>
-    <li>
-      <a
-        href=""
         ng-click="select('visible')"
         title="Select all displayed items">
         Displayed ({{displayedCount}})
