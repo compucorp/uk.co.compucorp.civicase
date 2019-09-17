@@ -10,6 +10,7 @@
       item.client = [];
       item.subject = (typeof item.subject === 'undefined') ? '' : item.subject;
       item.status = caseStatuses[item.status_id].label;
+      item.name = caseStatuses[item.status_id].name;
       item.color = caseStatuses[item.status_id].color;
       item.case_type = caseTypes[item.case_type_id].title;
       item.selected = false;

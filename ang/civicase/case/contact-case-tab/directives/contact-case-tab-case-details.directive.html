@@ -246,7 +246,7 @@
       <!-- End Last Modified -->
     </div>
     <div class="civicase__contact-cases-tab__panel-row civicase__contact-cases-tab__panel-actions">
-      <a ng-href="/civicrm/case/a/#/case/list?caseId={{item.id}}" class="btn btn-primary">
+      <a ng-href='/civicrm/case/a/#/case/list?caseId={{item.id}}&cf={ "status_id":["{{ item.name }}"] }' class="btn btn-primary">
         Go To Case
       </a>
     </div>
