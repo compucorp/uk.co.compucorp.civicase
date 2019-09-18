@@ -162,7 +162,7 @@
      * @params {Boolean} replace
      */
     $scope.assignRole = function (role, replace) {
-      var message = '<input name="caseRoleSelector" placeholder="' + ts('Select Coantact') + '" />';
+      var message = '<input name="caseRoleSelector" placeholder="' + ts('Select Contact') + '" />';
       if (role.role !== 'Client') {
         message = message + '<br/><textarea rows="3" cols="35" name="description" class="crm-form-textarea" style="margin-top: 10px;padding-left: 10px;border-color: #C2CFDE;color: #9494A4;" placeholder="Description"></textarea>';
       }
