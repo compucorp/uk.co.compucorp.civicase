@@ -56,22 +56,6 @@
       margin-top: 0;
     }
   }
-
-  &.civicase__activity__status-draft .help {
-    display: block;
-
-    .button {
-      background-color: #42afcb;
-      color: #fff;
-      float: none;
-
-      &:hover {
-        color: #fff;
-        opacity: 0.8 !important;
-        text-decoration: none;
-      }
-    }
-  }
 }
 
 .civicase__activity-panel__close,
@@ -115,8 +99,22 @@
   position: static !important;
 
   /* stylelint-disable max-nesting-depth, selector-max-compound-selectors */
-  .help {
+  &:not(.civicase__activity-panel__core_container--draft) .help {
     display: none;
+  }
+
+  &.civicase__activity-panel__core_container--draft .help {
+    .button {
+      background-color: $brand-primary;
+      color: $crm-white;
+      float: none;
+
+      &:hover {
+        color: $crm-white;
+        opacity: 0.8 !important;
+        text-decoration: none;
+      }
+    }
   }
 
   .crm-activity-form-block-separation {
