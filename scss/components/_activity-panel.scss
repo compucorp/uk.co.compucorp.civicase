@@ -56,6 +56,22 @@
       margin-top: 0;
     }
   }
+
+  &.civicase__activity__status-draft .help {
+    display: block;
+
+    .button {
+      background-color: #42afcb;
+      color: #fff;
+      float: none;
+
+      &:hover {
+        color: #fff;
+        opacity: 0.8 !important;
+        text-decoration: none;
+      }
+    }
+  }
 }
 
 .civicase__activity-panel__close,

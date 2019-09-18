@@ -1,4 +1,4 @@
-<div class="civicase__activity-panel" ng-controller="caseActivityCardController">
+<div class="civicase__activity-panel civicase__activity__status-{{ activity.status | lowercase }}" ng-controller="caseActivityCardController">
   <div class="panel panel-default panel-w-subheading">
     <div class="panel-heading clearfix">
       <span class="civicase__activity-panel__id">ID-{{activity.id}}</span>
