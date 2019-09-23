@@ -89,10 +89,15 @@
   display: inline-block;
   margin-left: 8px;
   padding: 1px 0 !important;
+}
 
+.civicase__activity-filter__timeline,
+.civicase__activity-filter__category,
+.civicase__case-filters-container,
+.civicase__people-tab__sub-tab {
   .select2-choice {
     .select2-arrow {
-      top: 0;
+      top: 4px;
       width: 24px;
     }
   }
