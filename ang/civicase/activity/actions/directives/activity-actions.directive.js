@@ -47,8 +47,9 @@
    * @param {object} TagsActivityAction tags action service
    * @param {object} DeleteActivityAction delete activity service
    * @param {object} ts ts
+   * @param {object} ActivityType ActivityType service
    */
-  function civicaseActivityActionsController ($window, $rootScope, $scope, crmApi, getActivityFeedUrl, MoveCopyActivityAction, TagsActivityAction, DeleteActivityAction, ts) {
+  function civicaseActivityActionsController ($window, $rootScope, $scope, crmApi, getActivityFeedUrl, MoveCopyActivityAction, TagsActivityAction, DeleteActivityAction, ts, ActivityType) {
     $scope.ts = ts;
     $scope.getActivityFeedUrl = getActivityFeedUrl;
     $scope.deleteActivity = DeleteActivityAction.deleteActivity;
@@ -75,7 +76,7 @@
      * @returns {boolean} if activity is editable
      */
     function isActivityEditable (activity) {
-      var activityType = CRM.civicase.activityTypes[activity.activity_type_id].name;
+      var activityType = ActivityType.getAll()[activity.activity_type_id].name;
       var nonEditableActivityTypes = [
         'Email',
         'Print PDF Letter'

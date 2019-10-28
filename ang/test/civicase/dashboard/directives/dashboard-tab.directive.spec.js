@@ -2,8 +2,11 @@
 (function ($, _, moment) {
   describe('dashboardTabController', function () {
     var $controller, $rootScope, $scope, crmApi, formatActivity, formatCase,
-      mockedCases;
+      mockedCases, ActivityStatusType;
 
+    /**
+     * Generate Mocked Cases
+     */
     function generateMockedCases () {
       mockedCases = _.times(5, function () {
         return { id: _.uniqueId() };
@@ -12,12 +15,13 @@
 
     beforeEach(module('civicase.templates', 'civicase', 'crmUtil'));
     beforeEach(inject(function (_$controller_, _$rootScope_, _crmApi_,
-      _formatActivity_, _formatCase_) {
+      _formatActivity_, _formatCase_, _ActivityStatusType_) {
       $controller = _$controller_;
       $rootScope = _$rootScope_;
       crmApi = _crmApi_;
       formatActivity = _formatActivity_;
       formatCase = _formatCase_;
+      ActivityStatusType = _ActivityStatusType_;
       $scope = $rootScope.$new();
 
       $scope.filters = { caseRelationshipType: 'all' };
@@ -41,7 +45,7 @@
       it('queries the API for the ids of all the cases that match the relationship filter', function () {
         expect(crmApi).toHaveBeenCalledWith('Case', 'getcaselist', jasmine.objectContaining(_.assign({
           'status_id.grouping': 'Opened',
-          'return': 'id',
+          return: 'id',
           sequential: 1,
           options: {
             limit: 0
@@ -187,7 +191,7 @@
               it('filters by `start_date` between start and end of the current week', function () {
                 expect($scope.newCasesPanel.query.params.start_date).toBeDefined();
                 expect($scope.newCasesPanel.query.params.start_date).toEqual({
-                  'BETWEEN': getStartEndOfRange('week', 'YYYY-MM-DD')
+                  BETWEEN: getStartEndOfRange('week', 'YYYY-MM-DD')
                 });
               });
             });
@@ -200,7 +204,7 @@
               it('filters by `start_date` between start and end of the current month', function () {
                 expect($scope.newCasesPanel.query.params.start_date).toBeDefined();
                 expect($scope.newCasesPanel.query.params.start_date).toEqual({
-                  'BETWEEN': getStartEndOfRange('month', 'YYYY-MM-DD')
+                  BETWEEN: getStartEndOfRange('month', 'YYYY-MM-DD')
                 });
               });
             });
@@ -380,7 +384,7 @@
 
         it('fetches only the milestones', function () {
           expect($scope.newMilestonesPanel.query.params['activity_type_id.grouping']).toEqual({
-            'LIKE': '%milestone%'
+            LIKE: '%milestone%'
           });
         });
 
@@ -399,7 +403,7 @@
 
         it('fetches only the incomplete milestones', function () {
           expect($scope.newMilestonesPanel.query.params.status_id).toEqual({
-            'IN': CRM.civicase.activityStatusTypes.incomplete
+            IN: ActivityStatusType.getAll().incomplete
           });
         });
 
@@ -468,7 +472,7 @@
               it('filters by `activity_date_time` between today and end of the current week', function () {
                 expect($scope.newMilestonesPanel.query.params.activity_date_time).toBeDefined();
                 expect($scope.newMilestonesPanel.query.params.activity_date_time).toEqual({
-                  'BETWEEN': getStartEndOfRange('week', 'YYYY-MM-DD HH:mm:ss', true)
+                  BETWEEN: getStartEndOfRange('week', 'YYYY-MM-DD HH:mm:ss', true)
                 });
               });
             });
@@ -481,7 +485,7 @@
               it('filters by `activity_date_time` between today and end of the current month', function () {
                 expect($scope.newMilestonesPanel.query.params.activity_date_time).toBeDefined();
                 expect($scope.newMilestonesPanel.query.params.activity_date_time).toEqual({
-                  'BETWEEN': getStartEndOfRange('month', 'YYYY-MM-DD HH:mm:ss', true)
+                  BETWEEN: getStartEndOfRange('month', 'YYYY-MM-DD HH:mm:ss', true)
                 });
               });
             });
@@ -654,7 +658,7 @@
 
         it('fetches only the incomplete activities', function () {
           expect($scope.activitiesPanel.query.params.status_id).toEqual({
-            'IN': CRM.civicase.activityStatusTypes.incomplete
+            IN: ActivityStatusType.getAll().incomplete
           });
         });
 
@@ -723,7 +727,7 @@
               it('filters by `activity_date_time` between start and end of the current week', function () {
                 expect($scope.activitiesPanel.query.params.activity_date_time).toBeDefined();
                 expect($scope.activitiesPanel.query.params.activity_date_time).toEqual({
-                  'BETWEEN': getStartEndOfRange('week', 'YYYY-MM-DD HH:mm:ss')
+                  BETWEEN: getStartEndOfRange('week', 'YYYY-MM-DD HH:mm:ss')
                 });
               });
             });
@@ -736,7 +740,7 @@
               it('filters by `activity_date_time` between start and end of the current month', function () {
                 expect($scope.activitiesPanel.query.params.activity_date_time).toBeDefined();
                 expect($scope.activitiesPanel.query.params.activity_date_time).toEqual({
-                  'BETWEEN': getStartEndOfRange('month', 'YYYY-MM-DD HH:mm:ss')
+                  BETWEEN: getStartEndOfRange('month', 'YYYY-MM-DD HH:mm:ss')
                 });
               });
             });
@@ -868,9 +872,9 @@
      * given "contacts list" property and returns the total of all the ids and of
      * all the unique ids
      *
-     * @param {Array} mockResults
-     * @param {Array} contactsListKey
-     * @return {Object}
+     * @param {Array} mockedResults mock results
+     * @param {Array} contactsListKey contacts list key
+     * @returns {object} total and unique
      */
     function countTotalAndUniqueContactIds (mockedResults, contactsListKey) {
       var total, uniq;
@@ -891,9 +895,10 @@
      * Returns the start and end of the given range (week/month) formatted
      * in the given format
      *
-     * @param {String} range
-     * @param {String} format
-     * @return {Array}
+     * @param {string} range range
+     * @param {string} format format
+     * @param {string} useNowAsStart use now as start
+     * @returns {Array} stand and end date
      */
     function getStartEndOfRange (range, format, useNowAsStart) {
       var now = moment();
@@ -907,7 +912,8 @@
      * Mocks a list of results (either cases or activities), and for each of them
      * places a list of mocked contacts in the property with the given name
      *
-     * @param {String} contactsListKey
+     * @param {string} contactsListKey contacts list key
+     * @returns {Array} Mock results
      */
     function mockResults (contactsListKey) {
       return _.times(5, function () {

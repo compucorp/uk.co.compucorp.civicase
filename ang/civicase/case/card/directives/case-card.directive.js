@@ -24,11 +24,11 @@
     };
   });
 
-  module.controller('CivicaseCaseCardController', function ($scope, getActivityFeedUrl, DateHelper, ts) {
+  module.controller('CivicaseCaseCardController', function ($scope, getActivityFeedUrl, DateHelper, ts, ActivityCategory) {
     $scope.ts = ts;
     $scope.getActivityFeedUrl = getActivityFeedUrl;
     $scope.formatDate = DateHelper.formatDate;
-    $scope.otherCategories = _.map(_.filter(CRM.civicase.activityCategories, function (category) {
+    $scope.otherCategories = _.map(_.filter(ActivityCategory.getAll(), function (category) {
       return category.name !== 'task' && category.name !== 'communication';
     }), function (category) {
       return category.name;

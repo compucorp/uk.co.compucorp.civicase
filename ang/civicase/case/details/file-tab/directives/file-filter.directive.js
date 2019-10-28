@@ -15,12 +15,14 @@
   /**
    * Controller for civicaseFileFilter directive
    *
-   * @params {Object} $scope
+   * @param {object} $scope $scope
+   * @param {object} ActivityCategory ActivityCategory
+   * @param {object} FileCategory FileCategory
    */
-  function civicaseFileFilterController ($scope) {
+  function civicaseFileFilterController ($scope, ActivityCategory, FileCategory) {
     $scope.ts = CRM.ts('civicase');
-    $scope.fileCategoriesIT = CRM.civicase.fileCategories;
-    $scope.activityCategories = CRM.civicase.activityCategories;
+    $scope.fileCategoriesIT = FileCategory.getAll();
+    $scope.activityCategories = ActivityCategory.getAll();
     $scope.customFilters = {
       grouping: ''
     };
@@ -34,7 +36,7 @@
      */
     function customFiltersWatcher () {
       if (!_.isEmpty($scope.customFilters.grouping)) {
-        $scope.fileFilter.params['activity_type_id.grouping'] = {'LIKE': '%' + $scope.customFilters.grouping + '%'};
+        $scope.fileFilter.params['activity_type_id.grouping'] = { LIKE: '%' + $scope.customFilters.grouping + '%' };
       } else {
         delete $scope.fileFilter.params['activity_type_id.grouping'];
       }

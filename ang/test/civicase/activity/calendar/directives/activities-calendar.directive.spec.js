@@ -3,7 +3,7 @@
 (function ($, _, moment) {
   describe('civicaseActivitiesCalendarController', function () {
     var $controller, $q, $scope, $rootScope, $route, crmApi, formatActivity, dates,
-      mockedActivities;
+      mockedActivities, ActivityStatusType;
 
     beforeEach(function () {
       jasmine.clock().install();
@@ -22,12 +22,13 @@
     });
 
     beforeEach(inject(function (_$controller_, _$q_, _$rootScope_, _crmApi_,
-      _formatActivity_, datesMockData) {
+      _formatActivity_, datesMockData, _ActivityStatusType_) {
       $controller = _$controller_;
       $q = _$q_;
       $rootScope = _$rootScope_;
       crmApi = _crmApi_;
       formatActivity = _formatActivity_;
+      ActivityStatusType = _ActivityStatusType_;
 
       $scope = $rootScope.$new();
       dates = datesMockData;
@@ -50,9 +51,9 @@
 
       it('loads the days with incomplete activities of the currently selected month', function () {
         expect(crmApi).toHaveBeenCalledWith('Activity', 'getdayswithactivities', jasmine.objectContaining({
-          status_id: { 'IN': CRM.civicase.activityStatusTypes.incomplete },
+          status_id: { IN: ActivityStatusType.getAll().incomplete },
           activity_date_time: {
-            'BETWEEN': [startOfMonth + ' 00:00:00', endOfMonth + ' 23:59:59']
+            BETWEEN: [startOfMonth + ' 00:00:00', endOfMonth + ' 23:59:59']
           }
         }));
       });
@@ -69,9 +70,9 @@
 
         it('loads the days with complete activities of the currently selected month', function () {
           expect(crmApi).toHaveBeenCalledWith('Activity', 'getdayswithactivities', jasmine.objectContaining({
-            status_id: CRM.civicase.activityStatusTypes.completed[0],
+            status_id: ActivityStatusType.getAll().completed[0],
             activity_date_time: {
-              'BETWEEN': [startOfMonth + ' 00:00:00', endOfMonth + ' 23:59:59']
+              BETWEEN: [startOfMonth + ' 00:00:00', endOfMonth + ' 23:59:59']
             }
           }));
         });
@@ -162,12 +163,16 @@
           var apiParams1 = crmApi.calls.argsFor(0)[2];
           var apiParams2 = crmApi.calls.argsFor(1)[2];
 
-          expect(apiParams1.case_id).toEqual({ 'IN': [
-            $scope.caseId[0], $scope.caseId[1], $scope.caseId[2]
-          ]});
-          expect(apiParams2.case_id).toEqual({ 'IN': [
-            $scope.caseId[0], $scope.caseId[1], $scope.caseId[2]
-          ]});
+          expect(apiParams1.case_id).toEqual({
+            IN: [
+              $scope.caseId[0], $scope.caseId[1], $scope.caseId[2]
+            ]
+          });
+          expect(apiParams2.case_id).toEqual({
+            IN: [
+              $scope.caseId[0], $scope.caseId[1], $scope.caseId[2]
+            ]
+          });
         });
 
         describe('when selecting a date with activities', function () {
@@ -178,9 +183,11 @@
           it('loads activities from all the given cases when selecting a day', function () {
             var apiParams = crmApi.calls.argsFor(0)[2];
 
-            expect(apiParams.case_id).toEqual({ 'IN': [
-              $scope.caseId[0], $scope.caseId[1], $scope.caseId[2]
-            ]});
+            expect(apiParams.case_id).toEqual({
+              IN: [
+                $scope.caseId[0], $scope.caseId[1], $scope.caseId[2]
+              ]
+            });
           });
 
           describe('case info footer on activity card', function () {
@@ -387,10 +394,10 @@
        * gets bound to the date picker, which allows access to some of its internal
        * properties and methods.
        *
-       * @param {String|Date} date the current date to use to determine the class.
-       * @param {String} mode the current view mode for the calendar. Can be
+       * @param {string|Date} date the current date to use to determine the class.
+       * @param {string} mode the current view mode for the calendar. Can be
        *  day, month, or year. Defaults to day.
-       * @return {String} the class name.
+       * @returns {string} the class name.
        */
       function getDayCustomClass (date, mode) {
         var uibDatepicker = {
@@ -465,7 +472,7 @@
 
             expect(params).toEqual(jasmine.objectContaining({
               activity_date_time: {
-                BETWEEN: [ formattedDay + ' 00:00:00', formattedDay + ' 23:59:59' ]
+                BETWEEN: [formattedDay + ' 00:00:00', formattedDay + ' 23:59:59']
               }
             }));
           });
@@ -553,7 +560,7 @@
        * Initializes the controller so that it's ready to execute the
        * onDateSelected() scope method
        *
-       * @param {Boolean} returnDateFromApi
+       * @param {boolean} returnDateFromApi return date from api
        *   whether the selected date should be returned as a date with activities
        */
       function initializeForDateSelect (returnDateFromApi) {
@@ -627,7 +634,7 @@
         expect(crmApi.calls.count()).toBe(2);
         allArgs.forEach(function (args) {
           expect(args[2].activity_date_time).toEqual({
-            'BETWEEN': [startOfMonth + ' 00:00:00', endOfMonth + ' 23:59:59']
+            BETWEEN: [startOfMonth + ' 00:00:00', endOfMonth + ' 23:59:59']
           });
         });
       });
@@ -668,7 +675,7 @@
 
       it('automatically filters the feed by the given date', function () {
         expect(queryParams.af.activity_date_time).toEqual({
-          'BETWEEN': [
+          BETWEEN: [
             moment(dates.yesterday).startOf('day').format('YYYY-MM-DD+HH:mm:ss'),
             moment(dates.yesterday).endOf('day').format('YYYY-MM-DD+HH:mm:ss')
           ]
@@ -688,7 +695,7 @@
       mockedActivities = _.times(5, function () {
         var obj = {};
 
-        obj['id'] = _.uniqueId();
+        obj.id = _.uniqueId();
         obj['case_id.contacts'] = _.times(2, function () {
           return { contact_id: _.random(1, 5) };
         });
@@ -701,19 +708,19 @@
      * It returns the given date as part of the response of
      * the Activity.getdayswithactivities endpoint call for the given status type
      *
-     * @param {String} date formatted in local time
-     * @param {String} status any|completed|incomplete
+     * @param {string} date formatted in local time
+     * @param {string} status any|completed|incomplete
      */
     function returnDateForStatus (date, status) {
       crmApi.and.callFake(function (entity, action, params) {
         var dates = [];
-        var isCompleteActivitiesApiCall = params.status_id === CRM.civicase.activityStatusTypes.completed[0];
-        var isIncompleteActivitiesApiCall = _.isEqual(params.status_id.IN, CRM.civicase.activityStatusTypes.incomplete);
+        var isCompleteActivitiesApiCall = params.status_id === ActivityStatusType.getAll().completed[0];
+        var isIncompleteActivitiesApiCall = _.isEqual(params.status_id.IN, ActivityStatusType.getAll().incomplete);
 
         if (status === 'any' ||
           (status === 'completed' && isCompleteActivitiesApiCall) ||
           (status === 'incomplete' && isIncompleteActivitiesApiCall)) {
-          dates = [ moment(date).format('YYYY-MM-DD') ];
+          dates = [moment(date).format('YYYY-MM-DD')];
         }
 
         return $q.resolve({ values: dates });
@@ -723,8 +730,8 @@
     /**
      * Initializes the activities calendar component
      *
-     * @param {Object} scopeProps additional properties to add to the scope
-     * @param {Object} otherDeps any addition dependencies to be injected
+     * @param {object} scopeProps additional properties to add to the scope
+     * @param {object} otherDeps any addition dependencies to be injected
      */
     function initController (scopeProps, otherDeps) {
       $controller('civicaseActivitiesCalendarController', _.assign({

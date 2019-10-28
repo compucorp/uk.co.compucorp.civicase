@@ -1,9 +1,9 @@
 (function (angular, $, _, CRM) {
   var module = angular.module('civicase');
 
-  module.factory('formatCase', function (formatActivity, ContactsCache) {
-    var caseTypes = CRM.civicase.caseTypes;
-    var caseStatuses = CRM.civicase.caseStatuses;
+  module.factory('formatCase', function (formatActivity, ContactsCache, CaseStatus, CaseType) {
+    var caseTypes = CaseType.getAll();
+    var caseStatuses = CaseStatus.getAll();
 
     return function (item) {
       item.myRole = [];
@@ -50,7 +50,7 @@
      * Accumulates non communication and task counts as
      * other count for incomplete tasks
      *
-     * @param {Object} categoryCount - Object of related categoryCount of a case
+     * @param {object} item case
      */
     function countIncompleteOtherTasks (item) {
       item.category_count.other = {};

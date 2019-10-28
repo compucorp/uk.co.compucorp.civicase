@@ -1,11 +1,11 @@
 (function (angular, $, _, CRM) {
   var module = angular.module('civicase');
 
-  module.factory('formatActivity', function (ContactsCache) {
-    var activityTypes = CRM.civicase.activityTypes;
-    var activityStatuses = CRM.civicase.activityStatuses;
-    var caseTypes = CRM.civicase.caseTypes;
-    var caseStatuses = CRM.civicase.caseStatuses;
+  module.factory('formatActivity', function (ContactsCache, ActivityStatusType, ActivityStatus, ActivityType, CaseStatus, CaseType) {
+    var activityTypes = ActivityType.getAll();
+    var activityStatuses = ActivityStatus.getAll();
+    var caseTypes = CaseType.getAll();
+    var caseStatuses = CaseStatus.getAll();
 
     return function (act, caseId) {
       act.category = (activityTypes[act.activity_type_id].grouping ? activityTypes[act.activity_type_id].grouping.split(',') : []);
@@ -60,13 +60,20 @@
       return act;
     };
 
+    /**
+     * Get Status Types
+     *
+     * @param {number/string} statusId statusId
+     * @returns {object} status type
+     */
     function getStatusType (statusId) {
       var statusType;
-      _.each(CRM.civicase.activityStatusTypes, function (statuses, type) {
+      _.each(ActivityStatusType.getAll(), function (statuses, type) {
         if (statuses.indexOf(parseInt(statusId)) >= 0) {
           statusType = type;
         }
       });
+
       return statusType;
     }
   });

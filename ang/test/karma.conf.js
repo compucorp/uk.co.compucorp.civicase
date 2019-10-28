@@ -35,7 +35,9 @@ module.exports = function (config) {
       extPath + '/ang/civicase/**/*.html',
 
       // Source Files
+      extPath + '/ang/civicase-base.js',
       extPath + '/ang/civicase.js',
+      { pattern: extPath + '/ang/civicase-base/**/*.js' },
       { pattern: extPath + '/ang/civicase/**/*.js' },
 
       // Spec files

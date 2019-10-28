@@ -3,13 +3,19 @@
 
   module.service('ChangeStatusCaseAction', ChangeStatusCaseAction);
 
-  function ChangeStatusCaseAction () {
+  /**
+   * Change Status Case Action
+   *
+   * @param {object} CaseStatus CaseStatus
+   * @param {object} CaseType CaseType
+   */
+  function ChangeStatusCaseAction (CaseStatus, CaseType) {
     /**
      * Click event handler for the Action
      *
-     * @param {Array} cases
-     * @param {Object} action
-     * @param {Function} callbackFn
+     * @param {Array} cases cases
+     * @param {object} action action
+     * @param {Function} callbackFn callback function
      */
     this.doAction = function (cases, action, callbackFn) {
       var ts = CRM.ts('civicase');
@@ -22,7 +28,7 @@
           '<label for="change_case_status_details">' + ts('Notes') + '</label>' +
           '<textarea id="change_case_status_details"></textarea>' +
           '</form>';
-      var statuses = _.map(CRM.civicase.caseStatuses, function (item, statusId) {
+      var statuses = _.map(CaseStatus.getAll(), function (item, statusId) {
         return {
           id: item.name,
           text: item.label,
@@ -31,7 +37,7 @@
       });
 
       _.each(types, function (caseTypeId) {
-        var allowedStatuses = CRM.civicase.caseTypes[caseTypeId].definition.statuses || [];
+        var allowedStatuses = CaseType.getAll()[caseTypeId].definition.statuses || [];
 
         if (allowedStatuses.length) {
           _.remove(statuses, function (status) {
@@ -72,11 +78,11 @@
       /**
        * Aligns the dialog box center to the screen
        *
-       * @param {jQuery} dialog box to be aligned center
+       * @param {object} dialog box to be aligned center
        */
       function alignDialogBoxCenter (dialog) {
         if (dialog && dialog.data('uiDialog')) {
-          dialog.parent().position({ 'my': 'center', 'at': 'center', 'of': window });
+          dialog.parent().position({ my: 'center', at: 'center', of: window });
         }
       }
     };

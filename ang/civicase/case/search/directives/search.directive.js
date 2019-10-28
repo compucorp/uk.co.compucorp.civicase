@@ -19,11 +19,11 @@
    * Controller Function for civicase-search directive
    */
   module.controller('civicaseSearchController', function ($scope, $rootScope, $timeout,
-    crmApi, getSelect2Value, ts) {
+    crmApi, getSelect2Value, ts, CaseStatus, CaseTypeCategory, CaseType, CustomSearchField) {
     $scope.ts = ts;
-    var caseTypes = CRM.civicase.caseTypes;
-    var caseStatuses = CRM.civicase.caseStatuses;
-    var caseTypeCategories = CRM.civicase.caseTypeCategories;
+    var caseTypes = CaseType.getAll();
+    var caseStatuses = CaseStatus.getAll();
+    var caseTypeCategories = CaseTypeCategory.getAll();
     var allSearchFields = {
       id: { label: ts('Case ID'), html_type: 'Number' },
       has_role: { label: ts('Contact Search') },
@@ -34,25 +34,25 @@
       tag_id: { label: ts('Tags') }
     };
     var caseRelationshipConfig = [
-      {'text': ts('All Cases'), 'id': 'all'},
-      {'text': ts('My cases'), 'id': 'is_case_manager'},
-      {'text': ts('Cases I am involved'), 'id': 'is_involved'}
+      { text: ts('All Cases'), id: 'all' },
+      { text: ts('My cases'), id: 'is_case_manager' },
+      { text: ts('Cases I am involved'), id: 'is_involved' }
     ];
 
     $scope.pageTitle = '';
     $scope.caseStatusOptions = _.map(caseStatuses, mapSelectOptions);
-    $scope.customGroups = CRM.civicase.customSearchFields;
+    $scope.customGroups = CustomSearchField.getAll();
     $scope.caseRelationshipOptions = caseRelationshipConfig;
     $scope.checkPerm = CRM.checkPerm;
     $scope.filterDescription = buildDescription();
     $scope.filters = angular.extend({}, $scope.defaults);
     $scope.contactRoles = [
-      {id: 'all-case-roles', text: ts('All Case Roles')},
-      {id: 'client', text: ts('Client')}
+      { id: 'all-case-roles', text: ts('All Case Roles') },
+      { id: 'client', text: ts('Client') }
     ];
     $scope.contactRoleFilter = {
       selectedContacts: null,
-      selectedContactRoles: [ 'all-case-roles' ]
+      selectedContactRoles: ['all-case-roles']
     };
 
     (function init () {
@@ -83,7 +83,7 @@
      * This is configured from the backend
      *
      * @param {string} field - key of the field to be checked for
-     * @return {Boolean} - boolean value if the filter is enabled
+     * @returns {boolean} - boolean value if the filter is enabled
      */
     $scope.isEnabled = function (field) {
       return !$scope.hiddenFilters || !$scope.hiddenFilters[field];
@@ -91,6 +91,8 @@
 
     /**
      * Checks if the current logged in user is a case manager
+     *
+     * @returns {boolean} if the current logged in user is a case manager
      */
     $scope.caseManagerIsMe = function () {
       return $scope.filters.case_manager && $scope.filters.case_manager.length === 1 && parseInt($scope.filters.case_manager[0], 10) === CRM.config.user_contact_id;
@@ -114,7 +116,7 @@
     $scope.clearSearch = function () {
       $scope.contactRoleFilter = {
         selectedContacts: null,
-        selectedContactRoles: [ 'all-case-roles' ]
+        selectedContactRoles: ['all-case-roles']
       };
       $scope.filters = {};
       $scope.doSearch();
@@ -142,15 +144,15 @@
      * Binds all route parameters to scope
      */
     function bindRouteParamsToScope () {
-      $scope.$bindToRoute({expr: 'expanded', param: 'sx', format: 'bool', default: false});
-      $scope.$bindToRoute({expr: 'filters', param: 'cf', default: {}});
-      $scope.$bindToRoute({expr: 'contactRoleFilter', param: 'crf', default: $scope.contactRoleFilter});
+      $scope.$bindToRoute({ expr: 'expanded', param: 'sx', format: 'bool', default: false });
+      $scope.$bindToRoute({ expr: 'filters', param: 'cf', default: {} });
+      $scope.$bindToRoute({ expr: 'contactRoleFilter', param: 'crf', default: $scope.contactRoleFilter });
     }
 
     /**
      * Builds human readable filter description to be shown on the UI
      *
-     * @return {Array} des - Arrayed output to be shown as the fitler
+     * @returns {Array} des - Arrayed output to be shown as the fitler
      *   description with human readable key value pair
      */
     function buildDescription () {
@@ -158,19 +160,19 @@
       _.each($scope.filters, function (val, key) {
         var field = allSearchFields[key];
         if (field) {
-          var d = {label: field.label};
+          var d = { label: field.label };
           if (field.options) {
             var text = [];
             _.each(val, function (o) {
-              text.push(_.findWhere(field.options, {key: o}).value);
+              text.push(_.findWhere(field.options, { key: o }).value);
             });
             d.text = text.join(', ');
           } else if (key === 'case_manager' && $scope.caseManagerIsMe()) {
             d.text = ts('Me');
           } else if (key === 'has_role') {
-            d.text = ts('%1 selected', {'1': val.contact.IN.length});
+            d.text = ts('%1 selected', { 1: val.contact.IN.length });
           } else if ($.isArray(val)) {
-            d.text = ts('%1 selected', {'1': val.length});
+            d.text = ts('%1 selected', { 1: val.length });
           } else if ($.isPlainObject(val)) {
             if (val.BETWEEN) {
               d.text = val.BETWEEN[0] + ' - ' + val.BETWEEN[1];
@@ -242,8 +244,8 @@
     /**
      * Formats search filter as per the API request header format
      *
-     * @params {object} inp - Object for input option to be formatted
-     * @return (object} search - returns formatted key value pair of filters
+     * @param {object} inp - Object for input option to be formatted
+     * @returns {object} search - returns formatted key value pair of filters
      */
     function formatSearchFilters (inp) {
       var search = {};
@@ -270,8 +272,8 @@
     /**
      * Returns case types filtered by given category
      *
-     * @param {String} categoryName
-     * @return {Array}
+     * @param {string} categoryName category name
+     * @returns {Array} case types
      */
     function getCaseTypesFilteredByCategory (categoryName) {
       var caseTypeCategory = _.find(caseTypeCategories, function (category) {
@@ -310,7 +312,7 @@
      * to show up correctly on the UI.
      *
      * @param {object} opt object for caseTypes
-     * @return {object} mapped value to be used in UI
+     * @returns {object} mapped value to be used in UI
      */
     function mapSelectOptions (opt) {
       return {
@@ -335,7 +337,7 @@
      * Requests the list of relationship types that have been assigned to case
      * types.
      *
-     * @return {Promise} resolves to a list of relationship types.
+     * @returns {Promise} resolves to a list of relationship types.
      */
     function requestCaseRoles () {
       return crmApi('RelationshipType', 'getcaseroles', {
@@ -361,7 +363,7 @@
      * Set custom search fields to search filter fields object
      */
     function setCustomSearchFieldsAsSearchFilters () {
-      _.each(CRM.civicase.customSearchFields, function (group) {
+      _.each(CustomSearchField, function (group) {
         _.each(group.fields, function (field) {
           allSearchFields['custom_' + field.id] = field;
         });
@@ -371,9 +373,9 @@
     /**
      * Set the title of the page
      *
-     * @params {Object} event
-     * @params {String} displayNameOfSelectedItem
-     * @params {String} totalCount
+     * @param {object} event event
+     * @param {string} displayNameOfSelectedItem displayNameOfSelectedItem
+     * @param {string} totalCount totalCount
      */
     function setPageTitle (event, displayNameOfSelectedItem, totalCount) {
       var filters = $scope.filters;
@@ -389,7 +391,7 @@
         var status = [];
         if (filters.status_id && filters.status_id.length) {
           _.each(filters.status_id, function (s) {
-            status.push(_.findWhere(caseStatuses, {name: s}).label);
+            status.push(_.findWhere(caseStatuses, { name: s }).label);
           });
         } else {
           status = [ts('All Open')];
@@ -397,7 +399,7 @@
         var type = [];
         if (filters.case_type_id && filters.case_type_id.length) {
           _.each(filters.case_type_id, function (t) {
-            type.push(_.findWhere(caseTypes, {name: t}).title);
+            type.push(_.findWhere(caseTypes, { name: t }).title);
           });
         }
         $scope.pageTitle = status.join(' & ') + ' ' + type.join(' & ') + ' ' + ts('Cases');

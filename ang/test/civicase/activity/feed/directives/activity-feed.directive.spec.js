@@ -3,18 +3,19 @@
 (function (_) {
   describe('civicaseActivityFeed', function () {
     describe('Activity Feed Controller', function () {
-      var $provide, $controller, $rootScope, $scope, $q, crmApi, CaseTypes, activitiesMockData;
+      var $provide, $controller, $rootScope, $scope, $q, crmApi, CaseTypes, activitiesMockData, ActivityType;
       var activitiesInCurrentPage, totalNumberOfActivities;
 
       beforeEach(module('civicase', 'civicase.data', function (_$provide_) {
         $provide = _$provide_;
       }));
 
-      beforeEach(inject(function (_$controller_, _$rootScope_, _$q_, _CaseTypes_, _crmApi_, _activitiesMockData_) {
+      beforeEach(inject(function (_$controller_, _$rootScope_, _$q_, _CaseTypes_, _crmApi_, _activitiesMockData_, _ActivityType_) {
         $controller = _$controller_;
         $rootScope = _$rootScope_;
         $q = _$q_;
         CaseTypes = _CaseTypes_;
+        ActivityType = _ActivityType_;
         activitiesMockData = _activitiesMockData_;
 
         $scope = $rootScope.$new();
@@ -42,7 +43,7 @@
             $scope.$digest();
 
             _.each(CaseTypes.get()['1'].definition.activitySets[0].activityTypes, function (activityTypeFromSet) {
-              expectedActivityTypeIDs.push(_.findKey(CRM.civicase.activityTypes, function (activitySet) {
+              expectedActivityTypeIDs.push(_.findKey(ActivityType.getAll(), function (activitySet) {
                 return activitySet.name === activityTypeFromSet.name;
               }));
             });

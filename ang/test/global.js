@@ -1,13 +1,14 @@
 /* eslint-env jasmine */
 
 (function (CRM) {
+  CRM['civicase-base'] = {};
   CRM.civicase = {};
   CRM.angular = { requires: {} };
   /**
    * Dependency Injection for civicase module, defined in ang/civicase.ang.php
    * For unit testing they needs to be mentioned here
    */
-  CRM.angular.requires['civicase'] = ['crmAttachment', 'crmUi', 'crmUtil', 'ngRoute', 'angularFileUpload', 'bw.paging', 'crmRouteBinder', 'crmResource', 'ui.bootstrap', 'uibTabsetClass', 'dialogService'];
+  CRM.angular.requires.civicase = ['civicase-base', 'crmAttachment', 'crmUi', 'crmUtil', 'ngRoute', 'angularFileUpload', 'bw.paging', 'crmRouteBinder', 'crmResource', 'ui.bootstrap', 'uibTabsetClass', 'dialogService'];
 
   CRM.loadForm = jasmine.createSpy('loadForm');
   CRM.url = jasmine.createSpy('url');
@@ -19,8 +20,8 @@
      * Given a full url, it extracts the querystring parameters, making sure
      * to decode and parse any value that is an encoded JSON object
      *
-     * @param {String} url
-     * @return {Object}
+     * @param {string} url url
+     * @returns {object} parameters
      */
     extractQueryStringParams: function (url) {
       var queryString, paramsCouples;

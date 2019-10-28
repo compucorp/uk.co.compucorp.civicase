@@ -1,8 +1,8 @@
 /* eslint-env jasmine */
 
-(function (_, activityStatusTypes, extractQueryStringParams) {
+(function (_, extractQueryStringParams) {
   describe('getActivityFeedUrl', function () {
-    var $location, $route, $sce, activityFeedUrlObject, getActivityFeedUrl;
+    var $location, $route, $sce, activityFeedUrlObject, getActivityFeedUrl, ActivityStatusType;
 
     beforeEach(module('civicase', function ($provide) {
       $location = jasmine.createSpyObj('$location', ['path']);
@@ -12,9 +12,10 @@
       $provide.value('$route', $route);
     }));
 
-    beforeEach(inject(function (_$sce_, _getActivityFeedUrl_) {
+    beforeEach(inject(function (_$sce_, _getActivityFeedUrl_, _ActivityStatusType_) {
       $sce = _$sce_;
       getActivityFeedUrl = _getActivityFeedUrl_;
+      ActivityStatusType = _ActivityStatusType_;
     }));
 
     describe('when getting the activity feed url from the dashboard page', function () {
@@ -82,7 +83,7 @@
       });
 
       it('filter activities by status type', function () {
-        expect(activityFeedUrlObject.params.af.status_id).toEqual(activityStatusTypes.completed);
+        expect(activityFeedUrlObject.params.af.status_id).toEqual(ActivityStatusType.getAll().completed);
       });
     });
 
@@ -107,7 +108,7 @@
 
       it('overrides the current filters with the new ones', function () {
         expect(activityFeedUrlObject.params.af).toEqual({
-          status_id: activityStatusTypes.completed
+          status_id: ActivityStatusType.getAll().completed
         });
       });
     });
@@ -131,8 +132,8 @@
      * some extra information: the base URL, the query parameters, and the full
      * url path.
      *
-     * @param {Object} urlParams the urlParams to pass to the `getActivityFeedUrl` service.
-     * @return {Object} the base url, the query params, and the full url for the activity feed.
+     * @param {object} urlParams the urlParams to pass to the `getActivityFeedUrl` service.
+     * @returns {object} the base url, the query params, and the full url for the activity feed.
      */
     function getActivityFeedUrlAsObject (urlParams) {
       var wrappedActivityFeedUrl = getActivityFeedUrl(urlParams);
@@ -149,6 +150,5 @@
   });
 })(
   CRM._,
-  CRM.civicase.activityStatusTypes,
   CRM.testUtils.extractQueryStringParams
 );

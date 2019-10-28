@@ -1,6 +1,6 @@
 (function () {
   var module = angular.module('civicase.data');
-  CRM.civicase.caseStatuses = {
+  CRM['civicase-base'].caseStatuses = {
     1: {
       label: 'Ongoing',
       color: '#42afcb',
@@ -25,6 +25,6 @@
   };
 
   module.constant('CaseStatuses', {
-    values: CRM.civicase.caseStatuses
+    values: CRM['civicase-base'].caseStatuses
   });
 }());

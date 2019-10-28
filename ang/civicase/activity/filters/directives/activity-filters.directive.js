@@ -1,7 +1,7 @@
 (function (angular, $, _) {
   var module = angular.module('civicase');
 
-  module.directive('civicaseActivityFilters', function ($rootScope, $timeout, crmUiHelp) {
+  module.directive('civicaseActivityFilters', function ($rootScope, $timeout, crmUiHelp, ActivityCategory, ActivityStatus, ActivityType, CustomActivityField) {
     return {
       restrict: 'A',
       scope: {
@@ -25,8 +25,8 @@
     /**
      * Link function for civicaseActivityFilters
      *
-     * @param {Object} $scope
-     * @param {Object} element
+     * @param {object} $scope scope
+     * @param {object} element element
      */
     function activityFiltersLink ($scope, element) {
       var ts = $scope.ts = CRM.ts('civicase');
@@ -54,8 +54,8 @@
       /**
        * Exposes the selected filter in the UI
        *
-       * @param {Object} field
-       * @param {Object} $event
+       * @param {object} field field
+       * @param {object} $event event
        */
       $scope.exposeFilter = function (field, $event) {
         var shown = !$scope.exposedFilters[field.name];
@@ -80,7 +80,7 @@
       /**
        * Checks if any filter has been applied
        *
-       * @return {Boolean}
+       * @returns {boolean} if it has filters
        */
       $scope.hasFilters = function () {
         var result = false;
@@ -113,8 +113,8 @@
       /**
        * Subscribe listener for civicaseActivityFeed.query
        *
-       * @param {Object} event
-       * @param {Object} feedQueryParams
+       * @param {object} event event
+       * @param {object} feedQueryParams params
        */
       function feedQueryListener (event, feedQueryParams) {
         $scope.combinedFilterParams = angular.extend({}, feedQueryParams.apiParams, feedQueryParams.filters);
@@ -124,7 +124,7 @@
       /**
        * Prepare Activity Filters
        *
-       * @return {Array}
+       * @returns {Array} filters
        */
       function prepareAvailableFilters () {
         var availableFilters = [
@@ -132,7 +132,7 @@
             name: 'activity_type_id',
             label: ts('Activity type'),
             html_type: 'Select',
-            options: _.chain(CRM.civicase.activityTypes)
+            options: _.chain(ActivityType.getAll())
               .filter(function (activity) {
                 return activity.name !== 'Bulk Email';
               })
@@ -143,7 +143,7 @@
             name: 'status_id',
             label: ts('Status'),
             html_type: 'Select',
-            options: _.map(CRM.civicase.activityStatuses, mapSelectOptions)
+            options: _.map(ActivityStatus.getAll(), mapSelectOptions)
           },
           {
             name: 'target_contact_id',
@@ -162,7 +162,7 @@
             label: ts('Tagged'),
             html_type: 'Autocomplete-Select',
             entity: 'Tag',
-            api_params: {used_for: {LIKE: '%civicrm_activity%'}}
+            api_params: { used_for: { LIKE: '%civicrm_activity%' } }
           },
           {
             name: 'text',
@@ -186,17 +186,17 @@
             name: 'is_deleted',
             label: ts('Deleted Activities'),
             html_type: 'Select',
-            options: [{id: 1, text: ts('Deleted')}, {id: 0, text: ts('Normal')}]
+            options: [{ id: 1, text: ts('Deleted') }, { id: 0, text: ts('Normal') }]
           },
           {
             name: 'is_test',
             label: ts('Test Activities'),
             html_type: 'Select',
-            options: [{id: 1, text: ts('Test')}, {id: 0, text: ts('Normal')}]
+            options: [{ id: 1, text: ts('Test') }, { id: 0, text: ts('Normal') }]
           });
         }
 
-        availableFilters = availableFilters.concat(CRM.civicase.customActivityFields);
+        availableFilters = availableFilters.concat(CustomActivityField.getAll());
 
         return availableFilters;
       }
@@ -204,10 +204,10 @@
       /**
        * Prepare Activity Categories
        *
-       * @return {Array}
+       * @returns {Array} categories
        */
       function prepareActivityCategories () {
-        return _.map(CRM.civicase.activityCategories, function (category, key) {
+        return _.map(ActivityCategory.getAll(), function (category, key) {
           category.id = key;
           category.text = category.label;
 
@@ -218,8 +218,8 @@
       /**
        * Maps Options to be used in the dropdown
        *
-       * @param {Object} option
-       * @return {Object}
+       * @param {object} option option
+       * @returns {object} options
        */
       function mapSelectOptions (option) {
         return {

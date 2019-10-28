@@ -3,13 +3,15 @@
 (function (_) {
   describe('AddActivityMenu', function () {
     describe('Add Activity Menu Controller', function () {
-      var $controller, $rootScope, $scope;
+      var $controller, $rootScope, $scope, CaseType, ActivityType;
 
       beforeEach(module('civicase', 'civicase.data'));
 
-      beforeEach(inject(function (_$controller_, _$rootScope_) {
+      beforeEach(inject(function (_$controller_, _$rootScope_, _CaseType_, _ActivityType_) {
         $controller = _$controller_;
         $rootScope = _$rootScope_;
+        ActivityType = _ActivityType_;
+        CaseType = _CaseType_;
       }));
 
       describe('creating the activity count', function () {
@@ -45,11 +47,11 @@
         var activityTypeWithMaxInstance, activityTypeExceedingMaxInstanceIsHidden;
 
         beforeEach(function () {
-          var activityTypes = CRM.civicase.caseTypes[1].definition.activityTypes;
+          var activityTypes = CaseType.getAll()[1].definition.activityTypes;
           activityTypeWithMaxInstance = activityTypes.find(function (activity) {
             return activity.max_instances;
           });
-          var actTypeId = _.findKey(CRM.civicase.activityTypes, {
+          var actTypeId = _.findKey(ActivityType.getAll(), {
             name: activityTypeWithMaxInstance.name
           });
           var mockCase = {
@@ -74,7 +76,7 @@
       /**
        * Initializes the add activity menu controller.
        *
-       * @param {Object} caseData a sample case to pass to the controller.
+       * @param {object} caseData a sample case to pass to the controller.
        */
       function initController (caseData) {
         $scope = $rootScope.$new();

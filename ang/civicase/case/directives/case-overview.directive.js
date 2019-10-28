@@ -16,9 +16,9 @@
     /**
      * Link function for civicaseCaseOverview
      *
-     * @param {Object} $scope
+     * @param {object} $scope
      * @param {jQuery} element
-     * @param {Object} attrs
+     * @param {object} attrs
      */
     function civicaseCaseOverviewLink ($scope, element, attrs) {
       (function init () {
@@ -39,16 +39,21 @@
   /**
    * Controller for civicaseCaseOverview
    *
-   * @param {Object} $scope
+   * @param crmApi
+   * @param BrowserCache
+   * @param CaseStatus
+   * @param CaseTypeCategory
+   * @param CaseType
+   * @param {object} $scope
    * @param {crmApi} Object
    */
-  function civicaseCaseOverviewController ($scope, crmApi, BrowserCache) {
+  function civicaseCaseOverviewController ($scope, crmApi, BrowserCache, CaseStatus, CaseTypeCategory, CaseType) {
     var BROWSER_CACHE_IDENTIFIER = 'civicase.CaseOverview.hiddenCaseStatuses';
-    var caseTypes = CRM.civicase.caseTypes;
-    var caseTypeCategories = CRM.civicase.caseTypeCategories;
+    var caseTypes = CaseType.getAll();
+    var caseTypeCategories = CaseTypeCategory.getAll();
 
     $scope.summaryData = [];
-    $scope.caseStatuses = _.chain(CRM.civicase.caseStatuses)
+    $scope.caseStatuses = _.chain(CaseStatus.getAll())
       .sortBy(function (status) { return status.weight; })
       .indexBy('weight')
       .value();
@@ -67,7 +72,7 @@
     /**
      * Checks if all statuses are hidden
      *
-     * @return {Boolean}
+     * @returns {boolean}
      */
     $scope.areAllStatusesHidden = function () {
       return _.filter($scope.caseStatuses, function (status) {
@@ -78,9 +83,9 @@
     /**
      * Creates link to the filtered cases list
      *
-     * @param {String} type
-     * @param {String} status
-     * @return {String} link to the filtered list of cases
+     * @param {string} type
+     * @param {string} status
+     * @returns {string} link to the filtered list of cases
      */
     $scope.caseListLink = function (type, status) {
       var cf = {};
@@ -97,14 +102,15 @@
         cf.case_manager = [CRM.config.user_contact_id];
       }
 
-      return '#/case/list?' + $.param({cf: JSON.stringify(cf)});
+      return '#/case/list?' + $.param({ cf: JSON.stringify(cf) });
     };
 
     /**
      * Toggle status view
      *
+     * @param $event
      * @param {event} event object
-     * @param {Number} index of the case status
+     * @param {number} index of the case status
      */
     $scope.toggleStatusVisibility = function ($event, index) {
       $scope.caseStatuses[index + 1].isHidden = !$scope.caseStatuses[index + 1].isHidden;
@@ -166,8 +172,8 @@
     /**
      * Returns case types filtered by given category
      *
-     * @param {String} categoryName
-     * @return {Array}
+     * @param {string} categoryName
+     * @returns {Array}
      */
     function getCaseTypesFilteredByCategory (categoryName) {
       var caseTypeCategory = _.find(caseTypeCategories, function (category) {

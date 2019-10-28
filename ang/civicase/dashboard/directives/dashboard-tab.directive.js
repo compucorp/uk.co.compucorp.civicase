@@ -1,4 +1,4 @@
-(function (angular, $, _, statusTypes) {
+(function (angular, $, _) {
   var module = angular.module('civicase');
 
   module.directive('civicaseDashboardTab', function () {
@@ -11,18 +11,33 @@
 
   module.controller('dashboardTabController', dashboardTabController);
 
+  /**
+   * Dashboard Tab Controller
+   *
+   * @param {*} $location $location
+   * @param {*} $rootScope $rootScope
+   * @param {*} $route $route
+   * @param {*} $sce $sce
+   * @param {*} $scope $scope
+   * @param {*} ContactsCache ContactsCache
+   * @param {*} crmApi crmApi
+   * @param {*} formatCase formatCase
+   * @param {*} formatActivity formatActivity
+   * @param {*} ts ts
+   * @param {*} ActivityStatusType ActivityStatusType
+   */
   function dashboardTabController ($location, $rootScope, $route, $sce, $scope,
-    ContactsCache, crmApi, formatCase, formatActivity, ts) {
+    ContactsCache, crmApi, formatCase, formatActivity, ts, ActivityStatusType) {
     var ACTIVITIES_QUERY_PARAMS_DEFAULTS = {
-      'contact_id': 'user_contact_id',
-      'is_current_revision': 1,
-      'is_deleted': 0,
-      'is_test': 0,
+      contact_id: 'user_contact_id',
+      is_current_revision: 1,
+      is_deleted: 0,
+      is_test: 0,
       'activity_type_id.grouping': { 'NOT LIKE': '%milestone%' },
-      'activity_type_id': { '!=': 'Bulk Email' },
-      'status_id': { 'IN': CRM.civicase.activityStatusTypes.incomplete },
-      'options': { 'sort': 'is_overdue DESC, activity_date_time ASC' },
-      'return': [
+      activity_type_id: { '!=': 'Bulk Email' },
+      status_id: { IN: ActivityStatusType.getAll().incomplete },
+      options: { sort: 'is_overdue DESC, activity_date_time ASC' },
+      return: [
         'subject', 'details', 'activity_type_id', 'status_id', 'source_contact_name',
         'target_contact_name', 'assignee_contact_name', 'activity_date_time', 'is_star',
         'original_id', 'tag_id.name', 'tag_id.description', 'tag_id.color', 'file_id',
@@ -32,18 +47,18 @@
     };
     var CASES_QUERY_PARAMS_DEFAULTS = {
       'status_id.grouping': 'Opened',
-      'options': { 'sort': 'start_date DESC' },
-      'is_deleted': 0
+      options: { sort: 'start_date DESC' },
+      is_deleted: 0
     };
     var MILESTONES_QUERY_PARAMS_DEFAULTS = {
-      'contact_id': 'user_contact_id',
-      'is_current_revision': 1,
-      'is_deleted': 0,
-      'is_test': 0,
-      'activity_type_id.grouping': { 'LIKE': '%milestone%' },
-      'status_id': { 'IN': CRM.civicase.activityStatusTypes.incomplete },
-      'options': { 'sort': 'is_overdue DESC, activity_date_time ASC' },
-      'return': [
+      contact_id: 'user_contact_id',
+      is_current_revision: 1,
+      is_deleted: 0,
+      is_test: 0,
+      'activity_type_id.grouping': { LIKE: '%milestone%' },
+      status_id: { IN: ActivityStatusType.getAll().incomplete },
+      options: { sort: 'is_overdue DESC, activity_date_time ASC' },
+      return: [
         'subject', 'details', 'activity_type_id', 'status_id', 'source_contact_name',
         'target_contact_name', 'assignee_contact_name', 'activity_date_time', 'is_star',
         'original_id', 'tag_id.name', 'tag_id.description', 'tag_id.color', 'file_id',
@@ -119,7 +134,7 @@
     /**
      * Refresh callback triggered by activity cards in the activities panel
      *
-     * @param {Array} [apiCalls]
+     * @param {Array} apiCalls api calls
      */
     function activityCardRefreshActivities (apiCalls) {
       activityCardRefresh($scope.activitiesPanel.name, apiCalls);
@@ -128,7 +143,7 @@
     /**
      * Refresh callback triggered by activity cards in the calendar
      *
-     * @param {Array} [apiCalls]
+     * @param {Array} apiCalls api calls
      */
     function activityCardRefreshCalendar (apiCalls) {
       activityCardRefresh([
@@ -140,7 +155,7 @@
     /**
      * Refresh callback triggered by activity cards in the milestones panel
      *
-     * @param {Array} [apiCalls]
+     * @param {Array} apiCalls api calls
      */
     function activityCardRefreshMilestones (apiCalls) {
       activityCardRefresh($scope.newMilestonesPanel.name, apiCalls);
@@ -156,8 +171,8 @@
      *
      * @see {@link https://github.com/compucorp/uk.co.compucorp.civicase/blob/develop/ang/civicase/ActivityCard.js#L97}
      *
-     * @param {Array/String} panelName the name of the panel to refresh
-     * @param {Array} [apiCalls]
+     * @param {Array/string} panelName the name of the panel to refresh
+     * @param {Array} apiCalls api calls
      */
     function activityCardRefresh (panelName, apiCalls) {
       if (!_.isArray(apiCalls)) {
@@ -173,7 +188,7 @@
     /**
      * Click handler that redirects the browser to the given case's details page
      *
-     * @param {Object} caseObj
+     * @param {object} caseObj case object
      */
     function casesCustomClick (caseObj) {
       $location.path('case/list').search('caseId', caseObj.id);
@@ -183,8 +198,8 @@
      * Get the processed list of query pars of the given collection (cases,
      * milestones, etc)
      *
-     * @param {String}
-     * @return {Object{}}
+     * @param {string} collection collection
+     * @returns {object} params
      */
     function getQueryParams (collection) {
       var activityFiltersCopy = _.cloneDeep($scope.activityFilters);
@@ -257,7 +272,7 @@
     function loadCaseIds () {
       crmApi('Case', 'getcaselist', _.assign({
         'status_id.grouping': 'Opened',
-        'return': 'id',
+        return: 'id',
         sequential: 1,
         options: { limit: 0 }
       }, $scope.activityFilters.case_filter))
@@ -271,20 +286,20 @@
     /**
      * Sets the range of the date of the entity (Case / Activity)
      *
-     * @param {String} property the property where the information about the
+     * @param {string} property the property where the information about the
      *   date is stored
-     * @param {String} format the date format
-     * @param {Boolean} useNowAsStart whether the starting point should be the
+     * @param {string} format the date format
+     * @param {boolean} useNowAsStart whether the starting point should be the
      *   current datetime
-     * @param {String} selectedRange the currently selected period range
-     * @param {Object} queryParams
+     * @param {string} selectedRange the currently selected period range
+     * @param {object} queryParams params
      */
     function rangeHandler (property, format, useNowAsStart, selectedRange, queryParams) {
       var now = moment();
       var start = (useNowAsStart ? now : now.startOf(selectedRange)).format(format);
       var end = now.endOf(selectedRange).format(format);
 
-      queryParams[property] = { 'BETWEEN': [start, end] };
+      queryParams[property] = { BETWEEN: [start, end] };
     }
 
     /**
@@ -292,9 +307,10 @@
      * call, and fetches the data of all the contacts referenced in the list
      *
      * @param {Function} formatFn the function that will do the formatting
-     * @param {String} contactsProp the property where the list of contacts is
+     * @param {string} contactsProp the property where the list of contacts is
      *   stored
      * @param {Array} results the list of results
+     * @returns {Promise} results
      */
     function resultsHandler (formatFn, contactsProp, results) {
       // Flattened list of all the contact ids of all the contacts of all the cases
@@ -318,7 +334,7 @@
      * action is "getcontactactivities" and "getcontactactivitiescount",
      * otherwise it's "get" and "getcount".
      *
-     * @param {Object} panelQueryData
+     * @param {object} panelQueryData panel query data
      */
     function updatePanelQueryActions (panelQueryData) {
       var defaultActions = { action: 'get', countAction: 'getcount' };
@@ -338,7 +354,7 @@
      * is updated automatically whenever the relationship type filter value
      * changes
      *
-     * @return {Object}
+     * @returns {object} cases link object
      */
     function viewCasesLink () {
       var queryParams = viewCasesQueryParams();
@@ -362,7 +378,7 @@
      * If the relationship type filter is set on "All Cases", then
      * no parameter is needed
      *
-     * @return {Object}
+     * @returns {object} parameters
      */
     function viewCasesQueryParams () {
       var params = {};
@@ -384,4 +400,4 @@
       return params;
     }
   }
-})(angular, CRM.$, CRM._, CRM.civicase.activityStatusTypes);
+})(angular, CRM.$, CRM._);
