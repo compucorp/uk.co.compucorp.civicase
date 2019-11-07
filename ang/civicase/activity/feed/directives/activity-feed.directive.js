@@ -19,8 +19,9 @@
     /**
      * Link function for civicaseActivityFeed
      *
-     * @param {Object} $scope
-     * @param {Object} element
+     * @param {object} scope scope object
+     * @param {object} element direcitve element
+     * @param {object} attrs attributes
      */
     function civicaseActivityFeedLink (scope, element, attrs) {
       (function init () {
@@ -49,27 +50,43 @@
 
   module.controller('civicaseActivityFeedController', civicaseActivityFeedController);
 
+  /**
+   *
+   * @param {object} $scope scope object
+   * @param {object} $q $q service
+   * @param {object} BulkActions bulk actions service
+   * @param {object} crmApi crm api service
+   * @param {object} crmUiHelp crm ui help service
+   * @param {object} crmThrottle crm throttle service
+   * @param {object} formatActivity format activity service
+   * @param {object} $rootScope root scope object
+   * @param {object} dialogService dialog service
+   * @param {object} ContactsCache contacts cache service
+   * @param {object} ActivityStatus activity status service
+   * @param {object} ActivityType activity type service
+   * @param {object} CaseType case type service
+   */
   function civicaseActivityFeedController ($scope, $q, BulkActions, crmApi,
     crmUiHelp, crmThrottle, formatActivity, $rootScope, dialogService,
-    ContactsCache) {
+    ContactsCache, ActivityStatus, ActivityType, CaseType) {
     // The ts() and hs() functions help load strings for this module.
     var ts = $scope.ts = CRM.ts('civicase');
     var ITEMS_PER_PAGE = 25;
     var activityStartingOffset = 0;
     var caseId = $scope.params ? $scope.params.case_id : null;
     var pageNum = { down: 0, up: 0 };
-    var allActivities = [];
 
     $scope.isMonthNavVisible = true;
     $scope.isLoading = true;
-    $scope.activityTypes = CRM.civicase.activityTypes;
-    $scope.activityStatuses = CRM.civicase.activityStatuses;
+    $scope.isSelectAll = false;
+    $scope.activityTypes = ActivityType.getAll();
+    $scope.activityStatuses = ActivityStatus.getAll();
     $scope.activities = {};
     $scope.activityGroups = [];
     $scope.bulkAllowed = $scope.showBulkActions && BulkActions.isAllowed();
     $scope.selectedActivities = [];
     $scope.viewingActivity = {};
-    $scope.caseTimelines = $scope.caseTypeId ? _.sortBy(CRM.civicase.caseTypes[$scope.caseTypeId].definition.activitySets, 'label') : [];
+    $scope.caseTimelines = $scope.caseTypeId ? _.sortBy(CaseType.getAll()[$scope.caseTypeId].definition.activitySets, 'label') : [];
     $scope.refreshAll = refreshAll;
     $scope.showSpinner = { up: false, down: false };
 
@@ -81,8 +98,8 @@
     /**
      * Check if more records are vailable in the given direction
      *
-     * @param {String} direction
-     * @return {Boolean}
+     * @param {string} direction direction
+     * @returns {boolean} yes/no
      */
     $scope.checkIfRecordsAvailableOnDirection = function (direction) {
       if ($scope.totalCount === 0) {
@@ -106,7 +123,8 @@
      * Find activity by given ID
      *
      * @param {Array} searchIn - array of activities to search into
-     * @param {Int/String} activityID
+     * @param {number/string} activityID activityID
+     * @returns {object} activity
      */
     $scope.findActivityById = function (searchIn, activityID) {
       return _.find(searchIn, { id: activityID });
@@ -114,10 +132,16 @@
 
     /**
      * Toggle Bulk Actions checkbox of the given activity
+     *
+     * @param {object} activity activity
      */
     $scope.toggleSelected = function (activity) {
+      if ($scope.isSelectAll) {
+        deselectAllActivities();
+      }
+
       if (!$scope.findActivityById($scope.selectedActivities, activity.id)) {
-        $scope.selectedActivities.push($scope.findActivityById(allActivities, activity.id));
+        $scope.selectedActivities.push($scope.findActivityById($scope.activities, activity.id));
       } else {
         _.remove($scope.selectedActivities, { id: activity.id });
       }
@@ -142,14 +166,14 @@
     /**
      * View an activity in details view
      *
-     * @param {int} id
-     * @param {Event} e
+     * @param {number} id id
+     * @param {object} e event
      */
     $scope.viewActivity = function (id, e) {
       if (e && $(e.target).closest('a, button').length) {
         return;
       }
-      var act = _.find($scope.activities, {id: id});
+      var act = _.find($scope.activities, { id: id });
       // If the same activity is selected twice, it's a deselection. If the activity doesn't exist, abort.
       if (($scope.viewingActivity && $scope.viewingActivity.id === id) || !act) {
         $scope.viewingActivity = {};
@@ -158,8 +182,8 @@
       } else {
         // Mark email read
         if (act.status === 'Unread') {
-          var statusId = _.findKey(CRM.civicase.activityStatuses, {name: 'Completed'});
-          crmApi('Activity', 'setvalue', {id: act.id, field: 'status_id', value: statusId}).then(function () {
+          var statusId = _.findKey(ActivityStatus.getAll(), { name: 'Completed' });
+          crmApi('Activity', 'setvalue', { id: act.id, field: 'status_id', value: statusId }).then(function () {
             act.status_id = statusId;
             formatActivity(act);
           });
@@ -190,8 +214,8 @@
     /**
      * Bulk Selection Event Listener
      *
-     * @params {Object} event
-     * @params {String} condition
+     * @param {object} event event
+     * @param {string} condition condition
      */
     function bulkSelectionsListener (event, condition) {
       if (condition === 'none') {
@@ -206,8 +230,8 @@
     /**
      * Sets the activities array based on direction
      *
-     * @param {String} mode
-     * @param {Array} newActivities
+     * @param {string} mode mode
+     * @param {Array} newActivities new activities
      */
     function buildActivitiesArray (mode, newActivities) {
       if (mode.direction === 'down') {
@@ -225,6 +249,7 @@
      * Deselection of all activities
      */
     function deselectAllActivities () {
+      $scope.isSelectAll = false;
       $scope.selectedActivities = [];
     }
 
@@ -232,22 +257,22 @@
      * Select all Activity
      */
     function selectEveryActivity () {
-      $scope.selectedActivities = [];
-      $scope.selectedActivities = _.cloneDeep(allActivities);
-      selectDisplayedActivities(); // Update the UI model with displayed cases selected;
+      deselectAllActivities();
+      $scope.isSelectAll = true;
     }
 
     /**
      * Select All visible data.
      */
     function selectDisplayedActivities () {
+      $scope.isSelectAll = false;
       var isCurrentActivityInSelectedCases;
 
       _.each($scope.activities, function (activity) {
         isCurrentActivityInSelectedCases = $scope.findActivityById($scope.selectedActivities, activity.id);
 
         if (!isCurrentActivityInSelectedCases) {
-          $scope.selectedActivities.push($scope.findActivityById(allActivities, activity.id));
+          $scope.selectedActivities.push($scope.findActivityById($scope.activities, activity.id));
         }
       });
     }
@@ -255,8 +280,8 @@
     /**
      * Groups the activities into Overdue/Future/Past
      *
-     * @param {Array} activities
-     * @return {Array}
+     * @param {Array} activities activities
+     * @returns {Array} grouped activities
      */
     function groupActivities (activities) {
       var group, overdue, upcoming, past;
@@ -265,11 +290,11 @@
       var now = CRM.utils.formatDate(date, 'yy-mm-dd') + ' ' + date.toTimeString().slice(0, 8);
 
       if ($scope.displayOptions.overdue_first) {
-        groups.push(overdue = {key: 'overdue', title: ts('Overdue Activities'), activities: []});
+        groups.push(overdue = { key: 'overdue', title: ts('Overdue Activities'), activities: [] });
       }
 
-      groups.push(upcoming = {key: 'upcoming', title: ts('Future Activities'), activities: []});
-      groups.push(past = {key: 'past', title: ts('Past Activities - Prior to Today'), activities: []});
+      groups.push(upcoming = { key: 'upcoming', title: ts('Future Activities'), activities: [] });
+      groups.push(past = { key: 'past', title: ts('Past Activities - Prior to Today'), activities: [] });
       _.each(activities, function (act, index) {
         if (act.activity_date_time > now) {
           group = upcoming;
@@ -290,7 +315,8 @@
     /**
      * Fetch additional information about the contacts
      *
-     * @param {array} cases
+     * @param {Array} activities activities
+     * @returns {Promise} Promise
      */
     function fetchContactsData (activities) {
       var contacts = [];
@@ -314,7 +340,8 @@
     /**
      * Get all activities
      *
-     * @param {Object} mode
+     * @param {object} mode mode
+     * @returns {Promise} Promise
      */
     function getActivities (mode) {
       showSpinner(mode);
@@ -328,12 +355,11 @@
         return loadActivities(mode);
       }).then(function (result) {
         var newActivities = _.each(result[0].acts.values, formatActivity);
-        allActivities = result[0].all.values;
 
         buildActivitiesArray(mode, newActivities);
 
         $scope.activityGroups = groupActivities($scope.activities);
-        $scope.totalCount = allActivities.length;
+        $scope.totalCount = result[0].all;
         // reset viewingActivity to get latest data
         $scope.viewingActivity = {};
         $scope.viewActivity($scope.aid);
@@ -352,12 +378,14 @@
      * been delegated to someone else. This query can't be replicated using
      * api params hence the need for a specialized action.
      *
-     * @return {Promise}
+     * @param {string} mode mode
+     * @returns {Promise} Promise
      */
     function loadActivities (mode) {
       var options = setActivityAPIOptions(mode);
       var isMyActivitiesFilter = $scope.filters['@involvingContact'] === 'myActivities';
       var apiAction = isMyActivitiesFilter ? 'getcontactactivities' : 'get';
+      var apiActionAll = isMyActivitiesFilter ? 'getcontactactivitiescount' : 'getcount';
       var returnParams = {
         sequential: 1,
         return: [
@@ -368,24 +396,18 @@
         ],
         options: options
       };
-      var getActionLinksParams = {
-        activity_id :'$value.id',
-        activity_type_id :'$value.activity_type_id',
-        source_record_id: '$value.source_record_id',
-        case_id :'$value.case_id'
-      };
       var params = {
         is_current_revision: 1,
         is_deleted: 0,
         is_test: 0,
-        'api.Activity.getactionlinks' : getActionLinksParams,
+        activity_type_id: { '!=': 'Bulk Email' },
         options: {}
       };
 
       if (caseId) {
         params.case_id = caseId;
       } else if (!$scope.displayOptions.include_case) {
-        params.case_id = {'IS NULL': 1};
+        params.case_id = { 'IS NULL': 1 };
       } else {
         returnParams.return = returnParams.return.concat(['case_id.case_type_id', 'case_id.status_id', 'case_id.contacts']);
       }
@@ -396,13 +418,13 @@
           setActivityTypeIDsFilter(params);
         } else if (val) {
           if (key === 'text') {
-            params.subject = {LIKE: '%' + val + '%'};
-            params.details = {LIKE: '%' + val + '%'};
+            params.subject = { LIKE: '%' + val + '%' };
+            params.details = { LIKE: '%' + val + '%' };
             params.options.or = [['subject', 'details']];
           } else if (_.isString(val)) {
-            params[key] = {LIKE: '%' + val + '%'};
+            params[key] = { LIKE: '%' + val + '%' };
           } else if (_.isArray(val) && val.length) {
-            params[key] = val.length === 1 ? val[0] : {IN: val};
+            params[key] = val.length === 1 ? val[0] : { IN: val };
           } else if (!_.isArray(val)) {
             params[key] = val;
           }
@@ -424,11 +446,8 @@
       );
 
       return crmApi({
-        acts: ['Activity', apiAction, $.extend(true, {}, returnParams, params)],
-        all: ['Activity', apiAction, $.extend(true, {
-          sequential: 1,
-          return: ['id'],
-          options: { limit: 0 }}, params)] // all activities, also used to get count
+        acts: ['Activity', apiAction, prepareActivityParams(returnParams, params)],
+        all: ['Activity', apiActionAll, params]
       }).then(function (result) {
         return $q.all([
           result,
@@ -462,8 +481,8 @@
     /**
      * Listener for 'civicase::month-nav::set-starting-offset' event
      *
-     * @param {Object} event
-     * @param {Object} param
+     * @param {object} event event
+     * @param {object} param param
      */
     function monthNavSetStartingOffsetListener (event, param) {
       pageNum.up = 0;
@@ -474,6 +493,28 @@
         direction: 'down',
         monthNavClicked: true
       });
+    }
+
+    /**
+     * Prepares Activity Params
+     * Adds Action Links chained Api call
+     *
+     * @param {object} returnParams returnParams
+     * @param {object} params params
+     *
+     * @returns {Array} params
+     */
+    function prepareActivityParams (returnParams, params) {
+      var actionLinksParams = {
+        'api.Activity.getactionlinks': {
+          activity_id: '$value.id',
+          activity_type_id: '$value.activity_type_id',
+          source_record_id: '$value.source_record_id',
+          case_id: '$value.case_id'
+        }
+      };
+
+      return $.extend(true, actionLinksParams, returnParams, params);
     }
 
     /**
@@ -491,7 +532,7 @@
      * If: refreshCase callback is passed to the directive, calls the same
      * Else: Calls crmApi directly
      *
-     * @param {Array} apiCalls
+     * @param {Array} apiCalls apiCalls
      */
     function refreshAll (apiCalls) {
       if (_.isFunction($scope.refreshCase)) {
@@ -510,8 +551,8 @@
     /**
      * Sets the Activity API option parameters
      *
-     * @param {Object} mode
-     * @return {Object}
+     * @param {object} mode mode
+     * @returns {object} options
      */
     function setActivityAPIOptions (mode) {
       var options = {
@@ -539,7 +580,7 @@
      * gets the activity type ids from the selected timeline.
      * Also adds those activity types ids with the "Activity Type" filter
      *
-     * @param {*} params
+     * @param {object} params params
      */
     function setActivityTypeIDsFilter (params) {
       var activityTypeIDs = [];
@@ -551,7 +592,7 @@
 
         if (activitySet) {
           _.each(activitySet.activityTypes, function (activityTypeFromSet) {
-            activityTypeIDs.push(_.findKey(CRM.civicase.activityTypes, function (activitySet) {
+            activityTypeIDs.push(_.findKey(ActivityType.getAll(), function (activitySet) {
               return activitySet.name === activityTypeFromSet.name;
             }));
           });
@@ -559,19 +600,19 @@
       }
 
       // add activity types ids from the "Activity Type" filter
-      if ($scope.filters['activity_type_id']) {
-        activityTypeIDs = activityTypeIDs.concat($scope.filters['activity_type_id']);
+      if ($scope.filters.activity_type_id) {
+        activityTypeIDs = activityTypeIDs.concat($scope.filters.activity_type_id);
       }
 
       if (activityTypeIDs.length) {
-        params['activity_type_id'] = {IN: activityTypeIDs};
+        params.activity_type_id = { IN: activityTypeIDs };
       }
     }
 
     /**
      * Shows the spinner before loading new data
      *
-     * @param {Object} mode
+     * @param {object} mode mode
      */
     function showSpinner (mode) {
       if (mode.direction === 'up' || mode.monthNavClicked === true) {
@@ -585,7 +626,7 @@
      * Toggles the visiblity of month nav,
      * when hideQuickNavWhenDetailsIsVisible is true
      *
-     * @param {Boolean} isMonthNavVisible
+     * @param {boolean} isMonthNavVisible is month navigation visible
      */
     function toggleMonthNavVisibility (isMonthNavVisible) {
       if ($scope.hideQuickNavWhenDetailsIsVisible) {

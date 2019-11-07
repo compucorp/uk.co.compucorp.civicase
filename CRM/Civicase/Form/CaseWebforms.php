@@ -81,6 +81,7 @@ class CRM_Civicase_Form_CaseWebforms extends CRM_Admin_Form {
       }
     }
     Civi::settings()->set('civi_drupal_webforms', $items);
+    CRM_Core_Session::setStatus(ts('Your changes have been saved successfully.'), 'Case Webforms', 'success');
   }
 
 }

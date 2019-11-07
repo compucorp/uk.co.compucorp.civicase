@@ -2,15 +2,16 @@
 
 (function ($, _) {
   describe('civicaseActivityPanel', function () {
-    var $compile, $rootScope, $scope, activityPanel, activitiesMockData, refreshFunction, formatActivity;
+    var $compile, $rootScope, $scope, activityPanel, activitiesMockData, refreshFunction, formatActivity, ActivityStatus;
 
     beforeEach(module('civicase', 'civicase.templates', 'civicase.data'));
 
-    beforeEach(inject(function (_$compile_, _$rootScope_, _activitiesMockData_, _formatActivity_) {
+    beforeEach(inject(function (_$compile_, _$rootScope_, _activitiesMockData_, _formatActivity_, _ActivityStatus_) {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
       activitiesMockData = _activitiesMockData_;
       formatActivity = _formatActivity_;
+      ActivityStatus = _ActivityStatus_;
 
       $scope = $rootScope.$new();
 
@@ -29,7 +30,7 @@
         beforeEach(function () {
           expectedActivityStatuses = {};
 
-          _.each(CRM.civicase.activityStatuses, function (activityStatus, activityStatusID) {
+          _.each(ActivityStatus.getAll(), function (activityStatus, activityStatusID) {
             var ifStatusIsInSameCategory = _.intersection($scope.viewingActivity.category, activityStatus.grouping.split(',')).length > 0;
             var ifStatusIsInNoneCategory = $scope.viewingActivity.category.length === 0 && activityStatus.grouping.split(',').indexOf('none') !== -1;
 
@@ -45,7 +46,9 @@
       });
 
       it('shows the activity details', function () {
-        expect(CRM.loadForm).toHaveBeenCalledWith('crm url mock', jasmine.objectContaining({target: jasmine.any(Object)}));
+        expect(CRM.loadForm).toHaveBeenCalledWith('crm url mock', jasmine.objectContaining({
+          target: jasmine.any(Object)
+        }));
         expect(CRM.url).toHaveBeenCalledWith('civicrm/activity', {
           action: 'view',
           id: $scope.viewingActivity.id,
@@ -79,7 +82,9 @@
       });
 
       it('changes the status to the new value', function () {
-        expect(activityPanel.isolateScope().refresh).toHaveBeenCalledWith([['Activity', 'setvalue', {id: activity.id, field: 'status_id', value: 2}]], true);
+        expect(activityPanel.isolateScope().refresh).toHaveBeenCalledWith([
+          ['Activity', 'setvalue', { id: activity.id, field: 'status_id', value: 2 }]
+        ], true);
       });
     });
 
@@ -92,7 +97,9 @@
       });
 
       it('changes the priority to the new value', function () {
-        expect(activityPanel.isolateScope().refresh).toHaveBeenCalledWith([['Activity', 'setvalue', {id: activity.id, field: 'priority_id', value: 2}]], true);
+        expect(activityPanel.isolateScope().refresh).toHaveBeenCalledWith([
+          ['Activity', 'setvalue', { id: activity.id, field: 'priority_id', value: 2 }]
+        ], true);
       });
     });
 

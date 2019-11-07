@@ -3,13 +3,13 @@
   describe('CaseOverview', function () {
     var $compile, $provide, $q, $rootScope, $scope, BrowserCache,
       CasesOverviewStats, crmApi, element, targetElementScope, CaseTypes,
-      caseTypeCategoriesMockData;
+      caseTypeCategoriesMockData, CaseStatus, CaseType;
 
     beforeEach(module('civicase', 'civicase.data', 'civicase.templates', function (_$provide_) {
       $provide = _$provide_;
     }));
 
-    beforeEach(inject(function (_$compile_, _$q_, _$rootScope_, BrowserCacheMock, _crmApi_, _CasesOverviewStatsData_, _CaseTypes_, _caseTypeCategoriesMockData_) {
+    beforeEach(inject(function (_$compile_, _$q_, _$rootScope_, BrowserCacheMock, _crmApi_, _CasesOverviewStatsData_, _CaseTypes_, _caseTypeCategoriesMockData_, _CaseStatus_, _CaseType_) {
       $compile = _$compile_;
       $q = _$q_;
       $rootScope = _$rootScope_;
@@ -18,6 +18,8 @@
       CasesOverviewStats = _CasesOverviewStatsData_.get();
       BrowserCache = BrowserCacheMock;
       CaseTypes = _CaseTypes_;
+      CaseType = _CaseType_;
+      CaseStatus = _CaseStatus_;
       caseTypeCategoriesMockData = _caseTypeCategoriesMockData_;
 
       BrowserCache.get.and.returnValue([1, 3]);
@@ -26,8 +28,8 @@
     }));
 
     beforeEach(function () {
-      $scope.caseStatuses = CRM.civicase.caseStatuses;
-      $scope.caseTypesLength = _.size(CRM.civicase.caseTypes);
+      $scope.caseStatuses = CaseStatus.getAll();
+      $scope.caseTypesLength = _.size(CaseType.getAll());
       $scope.summaryData = [];
     });
 
@@ -99,7 +101,7 @@
         });
 
         it('stores the hidden case statuses including the new one', function () {
-          expect(BrowserCache.set).toHaveBeenCalledWith('civicase.CaseOverview.hiddenCaseStatuses', [ '1', '2', '3' ]);
+          expect(BrowserCache.set).toHaveBeenCalledWith('civicase.CaseOverview.hiddenCaseStatuses', ['1', '2', '3']);
         });
       });
 
@@ -113,7 +115,7 @@
         });
 
         it('stores the hidden case statuses including the new one', function () {
-          expect(BrowserCache.set).toHaveBeenCalledWith('civicase.CaseOverview.hiddenCaseStatuses', [ '3' ]);
+          expect(BrowserCache.set).toHaveBeenCalledWith('civicase.CaseOverview.hiddenCaseStatuses', ['3']);
         });
       });
     });
@@ -158,6 +160,8 @@
 
     /**
      * Initialise directive
+     *
+     * @param {object} caseTypeCategory case type category
      */
     function compileDirective (caseTypeCategory) {
       $scope.caseFilter = { 'case_type_id.case_type_category': caseTypeCategory };
@@ -166,8 +170,8 @@
     }
 
     /**
-    * Listen for `civicase::custom-scrollbar::recalculate` event
-    */
+     * Listen for `civicase::custom-scrollbar::recalculate` event
+     */
     function listenForCaseOverviewRecalculate () {
       $rootScope.$on('civicase::custom-scrollbar::recalculate', function (event) {
         targetElementScope = event.targetScope;

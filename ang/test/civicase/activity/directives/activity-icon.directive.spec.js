@@ -1,13 +1,14 @@
 /* eslint-env jasmine */
 (function (_) {
   describe('ActivityIcon', function () {
-    var $compile, $rootScope, $scope;
+    var $compile, $rootScope, $scope, ActivityType;
 
     beforeEach(module('civicase.templates', 'civicase'));
 
-    beforeEach(inject(function (_$compile_, _$rootScope_) {
+    beforeEach(inject(function (_$compile_, _$rootScope_, _ActivityType_) {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
+      ActivityType = _ActivityType_;
       $scope = $rootScope.$new();
     }));
 
@@ -63,14 +64,14 @@
     /**
      * Get the Activity ID from the Activity Name
      *
-     * @param {String} activityName
-     * @return {String}
+     * @param {string} activityName activity name
+     * @returns {string} id of activity type
      */
     function getIDOfActivityType (activityName) {
       var activityTypeId;
 
       // get the id of activity type
-      _.each(CRM.civicase.activityTypes, function (activty, index) {
+      _.each(ActivityType.getAll(), function (activty, index) {
         if (activty.name === activityName) {
           activityTypeId = index;
         }

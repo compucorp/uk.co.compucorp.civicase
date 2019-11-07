@@ -32,7 +32,7 @@ gulp.task('sass:sync', sassSyncTask);
 /**
  * Compiles civicase.scss under scss folder to CSS counterpart
  */
-gulp.task('sass', ['sass:sync'], sassTask);
+gulp.task('sass', gulp.series('sass:sync', sassTask));
 
 /**
  * Runs Karma unit tests
@@ -57,4 +57,4 @@ gulp.task('watch', watchTask);
 /**
  * Runs sass and test task
  */
-gulp.task('default', ['sass', 'test']);
+gulp.task('default', gulp.series('sass', 'test'));

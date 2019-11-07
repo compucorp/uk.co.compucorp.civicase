@@ -12,14 +12,21 @@
 
   module.controller('CivicaseContactCaseTabController', CivicaseContactCaseTabController);
 
+  /**
+   * @param {object} $scope the controller scope
+   * @param {Function} crmApi the crm api service
+   * @param {Function} formatCase the format case service
+   * @param {object} Contact the contact service
+   * @param {object} ContactsCache the contacts cache service
+   */
   function CivicaseContactCaseTabController ($scope, crmApi, formatCase, Contact, ContactsCache) {
     var commonConfigs = {
-      'isLoaded': false,
-      'showSpinner': false,
-      'isLoadMoreAvailable': false,
-      'page': {
-        'size': 3,
-        'num': 1
+      isLoaded: false,
+      showSpinner: false,
+      isLoadMoreAvailable: false,
+      page: {
+        size: 3,
+        num: 1
       }
     };
 
@@ -29,28 +36,31 @@
     $scope.newCaseWebformClient = CRM.civicase.newCaseWebformClient;
     $scope.casesListConfig = [
       {
-        'name': 'opened',
-        'title': 'Open Cases',
-        'filterParams': {
+        name: 'opened',
+        title: 'Open Cases',
+        filterParams: {
           'status_id.grouping': 'Opened',
-          'contact_id': $scope.contactId
+          contact_id: $scope.contactId,
+          is_deleted: 0
         },
-        'showContactRole': false
+        showContactRole: false
       }, {
-        'name': 'closed',
-        'title': 'Resolved cases',
-        'filterParams': {
+        name: 'closed',
+        title: 'Resolved cases',
+        filterParams: {
           'status_id.grouping': 'Closed',
-          'contact_id': $scope.contactId
+          contact_id: $scope.contactId,
+          is_deleted: 0
         },
-        'showContactRole': false
+        showContactRole: false
       }, {
-        'name': 'related',
-        'title': 'Other cases for this contact',
-        'filterParams': {
-          'case_manager': $scope.contactId
+        name: 'related',
+        title: 'Other cases for this contact',
+        filterParams: {
+          case_manager: $scope.contactId,
+          is_deleted: 0
         },
-        'showContactRole': true
+        showContactRole: true
       }
     ];
 
@@ -74,8 +84,8 @@
     /**
      * Watcher for civicase::contact-record-list::loadmore event
      *
-     * @param {Object} event
-     * @param {String} name of the list
+     * @param {object} event scope watch event reference
+     * @param {string} name of the list
      */
     function contactRecordListLoadmoreWatcher (event, name) {
       var caseListIndex = _.findIndex($scope.casesListConfig, function (caseObj) {
@@ -87,11 +97,11 @@
       updateCase(caseListIndex, params);
     }
 
-    /*
+    /**
      * Watcher for civicase::contact-record-list::view-case event
      *
-     * @params {Object} event
-     * @params {Object} caseObj case object of the list
+     * @param {object} event scope watch event reference
+     * @param {object} caseObj the data belonging to a case
      */
     function contactRecordListViewCaseWatcher (event, caseObj) {
       setCaseAsSelected(caseObj);
@@ -100,8 +110,7 @@
     /**
      * Fetch additional information about the contacts
      *
-     * @param {object} event
-     * @param {array} cases
+     * @param {object[]} cases a list of cases
      */
     function fetchContactsData (cases) {
       var contacts = [];
@@ -114,10 +123,10 @@
     }
 
     /**
-     * Get all the contacts of the given case
+     * Returns all the contact ids for the given case
      *
-     * @param {object} caseObj
-     * @return {array}
+     * @param {object} caseObj the data belonging to a case
+     * @returns {number[]} a list of contact ids
      */
     function getAllContactIdsForCase (caseObj) {
       var contacts = [];
@@ -154,10 +163,9 @@
     /**
      * Get parameters to load cases
      *
-     * @param {object} filters
-     * @param {object} sort
-     * @param {object} page
-     * @return {array}
+     * @param {object} filter the filters to use when loading the cases
+     * @param {object} page the current page and the page size
+     * @returns {object} the parameters needed to load cases
      */
     function getCaseApiParams (filter, page) {
       var caseReturnParams = [
@@ -175,7 +183,7 @@
           offset: page.size * (page.num - 1)
         }
       };
-      var params = {'case_type_id.is_active': 1};
+      var params = { 'case_type_id.is_active': 1 };
 
       return {
         cases: ['Case', 'getcaselist', $.extend(true, returnCaseParams, filter, params)],
@@ -186,8 +194,8 @@
     /**
      * Returns contact role for the currently viewing contact
      *
-     * @param {Object} caseObj
-     * @return {String} role
+     * @param {object} caseObj the data belonging to a case
+     * @returns {string} role
      */
     function getContactRole (caseObj) {
       var contact = _.find(caseObj.contacts, {
@@ -200,7 +208,7 @@
     /**
      * Fetches count of all the cases a contact have
      *
-     * @param {Array} apiCall
+     * @param {Array|object} apiCall the api call parameters to use for counting cases
      */
     function getTotalCasesCount (apiCall) {
       var count = 0;
@@ -253,7 +261,7 @@
     /**
      * Sets passed case object as selected case
      *
-     * @params {Object} caseObj
+     * @param {object} caseObj the data belonging to a case
      */
     function setCaseAsSelected (caseObj) {
       $scope.selectedCase = caseObj;
@@ -261,6 +269,8 @@
 
     /**
      * Watcher function for cases collections
+     *
+     * @returns {boolean} true when all cases list have been loaded
      */
     function isAllCasesLoaded () {
       return _.reduce($scope.casesListConfig, function (memoriser, data) {
@@ -271,8 +281,8 @@
     /**
      * Updates the list with new entries
      *
-     * @param {String} caseListIndex
-     * @param {Array} params
+     * @param {string} caseListIndex the case list config index to update
+     * @param {Array} params the parameters to use when updating the case list
      */
     function updateCase (caseListIndex, params) {
       crmApi(params).then(function (response) {

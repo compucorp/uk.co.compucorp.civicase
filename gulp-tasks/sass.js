@@ -6,9 +6,9 @@
 'use strict';
 
 var autoprefixer = require('gulp-autoprefixer');
-var bulk = require('gulp-sass-bulk-import');
+var glob = require('gulp-sass-glob');
 var civicrmScssRoot = require('civicrm-scssroot')();
-var cssmin = require('gulp-cssmin');
+var cleanCSS = require('gulp-clean-css');
 var gulp = require('gulp');
 var postcss = require('gulp-postcss');
 var postcssDiscardDuplicates = require('postcss-discard-duplicates');
@@ -22,17 +22,18 @@ var transformSelectors = require('gulp-transform-selectors');
 var BOOTSTRAP_NAMESPACE = '#bootstrap-theme';
 var OUTSIDE_NAMESPACE_REGEX = /^\.___outside-namespace/;
 
-/*
+/**
  * The gulp task compiles and minifies scss/civicase.scss file into css/civicase.min.css.
  * Also prefix the output css selector with `#bootstrap-theme` selector except the output.
  * selector starts from either `body`, `page-civicrm-case` or `.___outside-namespace` classes.
+ *
+ * @returns {object} stream
  */
 function sassTask () {
   return gulp.src('scss/civicase.scss')
-    .pipe(bulk())
+    .pipe(glob())
     .pipe(sourcemaps.init())
     .pipe(autoprefixer({
-      browsers: ['last 2 versions'],
       cascade: false
     }))
     .pipe(sass({
@@ -46,7 +47,7 @@ function sassTask () {
       exclude: [/^body/, /page-civicrm-case/, OUTSIDE_NAMESPACE_REGEX]
     }), postcssDiscardDuplicates]))
     .pipe(transformSelectors(removeOutsideNamespaceMarker, { splitOnCommas: true }))
-    .pipe(cssmin({ sourceMap: true }))
+    .pipe(cleanCSS({ sourceMap: true }))
     .pipe(rename({ suffix: '.min' }))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest('css/'));
@@ -56,8 +57,8 @@ function sassTask () {
  * Deletes the special class that was used as marker for styles that should
  * not be nested inside the bootstrap namespace from the given selector
  *
- * @param  {String} selector
- * @return {String}
+ * @param  {string} selector selector
+ * @returns {string} replaced string
  */
 function removeOutsideNamespaceMarker (selector) {
   return selector.replace(OUTSIDE_NAMESPACE_REGEX, '');

@@ -9,8 +9,11 @@
      *
      * @param {String} operation
      * @param {Array} activities
+     * @param {Boolean} isSelectAll
+     * @param {Object} params
+     * @param {int} totalCount
      */
-    this.manageTags = function (operation, activities) {
+    this.manageTags = function (operation, activities, isSelectAll, params, totalCount) {
       var title, saveButtonLabel;
       title = saveButtonLabel = 'Tag Activities';
 
@@ -21,9 +24,13 @@
 
       getTags()
         .then(function (tags) {
-          var model = setModelObjectForModal(tags, activities);
+          var model = setModelObjectForModal(tags, activities.length || totalCount);
 
-          openTagsModal(model, title, saveButtonLabel, operation, activities);
+          openTagsModal(model, title, saveButtonLabel, operation, {
+            selectedActivities: activities,
+            isSelectAll: isSelectAll,
+            searchParams: params
+          });
         });
     };
 
@@ -31,13 +38,13 @@
      * Set the model object to be used in the modal
      *
      * @param {Array} tags
-     * @param {Array} activities
+     * @param {int} numberOfActivities
      * @return {Object}
      */
-    function setModelObjectForModal (tags, activities) {
+    function setModelObjectForModal (tags, numberOfActivities) {
       var model = {};
 
-      model.selectedActivitiesLength = activities.length;
+      model.selectedActivitiesLength = numberOfActivities;
       model.genericTags = prepareGenericTags(tags);
       model.tagSets = prepareTagSetsTree(tags);
 
@@ -70,9 +77,9 @@
      * @param {String} title
      * @param {String} saveButtonLabel
      * @param {String} operation
-     * @param {Array} activities
+     * @param {Object} activitiesObject
      */
-    function openTagsModal (model, title, saveButtonLabel, operation, activities) {
+    function openTagsModal (model, title, saveButtonLabel, operation, activitiesObject) {
       dialogService.open('TagsActivityAction', '~/civicase/activity/actions/services/tags-activity-action.html', model, {
         autoOpen: false,
         height: 'auto',
@@ -82,7 +89,7 @@
           text: saveButtonLabel,
           icons: operation === 'add' ? {primary: 'fa-check'} : false,
           click: function () {
-            addRemoveTagsConfirmationHandler.call(this, operation, activities, model);
+            addRemoveTagsConfirmationHandler.call(this, operation, activitiesObject, model);
           }
         }]
       });
@@ -92,11 +99,11 @@
      * Add/Remove tags confirmation handler
      *
      * @param {String} operation
-     * @param {Array} activities
+     * @param {Object} activitiesObject
      * @param {Object} model
      * @return {Promise}
      */
-    function addRemoveTagsConfirmationHandler (operation, activities, model) {
+    function addRemoveTagsConfirmationHandler (operation, activitiesObject, model) {
       var tagIds = model.selectedGenericTags;
 
       _.each(model.tagSets, function (tag) {
@@ -105,7 +112,7 @@
         }
       });
 
-      var apiCalls = prepareApiCalls(operation, activities, tagIds);
+      var apiCalls = prepareApiCalls(operation, activitiesObject, tagIds);
 
       crmApi(apiCalls)
         .then(function () {
@@ -119,24 +126,30 @@
      * Prepare the API calls for the Add/Remove operation
      *
      * @param {String} operation
-     * @param {Array} activities
+     * @param {Object} activitiesObject
      * @param {Array} tagIds
      * @return {Array}
      */
-    function prepareApiCalls (operation, activities, tagIds) {
-      var apiCalls = [];
-      var action = operation === 'add' ? 'create' : 'delete';
+    function prepareApiCalls (operation, activitiesObject, tagIds) {
+      var action = operation === 'add' ? 'createByQuery' : 'deleteByQuery';
 
-      _.each(activities, function (activity) {
-        apiCalls.push(['EntityTag', action, {
+      if (activitiesObject.isSelectAll) {
+        return [['EntityTag', action, {
           entity_table: 'civicrm_activity',
-          entity_id: activity.id,
-          tag_id: tagIds
-        }]);
-      });
-
-      return apiCalls;
+          tag_id: tagIds,
+          params: activitiesObject.searchParams
+        }]];
+      } else {
+        return [['EntityTag', action, {
+          entity_table: 'civicrm_activity',
+          tag_id: tagIds,
+          entity_id: activitiesObject.selectedActivities.map(function (activity) {
+            return activity.id;
+          })
+        }]];
+      }
     }
+
     /**
      * Get the tags for Activities from API end point
      *

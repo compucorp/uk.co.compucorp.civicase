@@ -30,10 +30,19 @@ function civicase_civicrm_tabset($tabsetName, &$tabs, $context) {
           ]);
         }
         if ($tab['id'] === 'activity') {
+          $activity_types = array_flip(CRM_Activity_BAO_Activity::buildOptions('activity_type_id', 'validate'));
           $useAng = TRUE;
           $tab['url'] = CRM_Utils_System::url('civicrm/case/contact-act-tab', [
             'cid' => $context['contact_id'],
           ]);
+          // Exclude bulk email activity type from the Activity count because
+          // there are issues with target contact for this activity type.
+          // To remove this code once issue is fixed from core.
+          $params = [
+            'activity_type_exclude_id' => $activity_types['Bulk Email'],
+            'contact_id' => $context['contact_id'],
+          ];
+          $tab['count'] = CRM_Activity_BAO_Activity::getActivitiesCount($params);
         }
       }
 
@@ -445,6 +454,19 @@ function civicase_civicrm_validateForm($formName, &$fields, &$files, &$form, &$e
 }
 
 /**
+ * Implements hook_civicrm_post().
+ */
+function civicase_civicrm_post($op, $objectName, $objectId, &$objectRef) {
+  $hooks = [
+    new CRM_Civicase_Hook_Post_PopulateCaseCategoryForCaseType(),
+  ];
+
+  foreach ($hooks as $hook) {
+    $hook->run($op, $objectName, $objectId, $objectRef);
+  }
+}
+
+/**
  * Implements hook_civicrm_postProcess().
  */
 function civicase_civicrm_postProcess($formName, &$form) {
@@ -502,7 +524,7 @@ function civicase_civicrm_alterAPIPermissions($entity, $action, &$params, &$perm
     'access uploaded files',
   ];
 
-  $permissions['case']['get'] = [
+  $permissions['case']['get'] = $permissions['custom_value']['gettreevalues'] = [
     [
       'access my cases and activities',
       'access all cases and activities',
@@ -629,13 +651,16 @@ function civicase_civicrm_navigationMenu(&$menu) {
 }
 
 /**
+ * Civicase Add new case URL map.
+ *
  * Adds the add case URL mapping to the array depending on
  * the case settings config for the system. IF an alternate add Case
  * URL is set, the url mapping is added.
  *
  * @param array $urlMapArray
+ *   URL Map array.
  */
-function _civicase_addNewCaseUrlMap(&$urlMapArray) {
+function _civicase_addNewCaseUrlMap(array &$urlMapArray) {
   $allowCaseWebform = Civi::settings()->get('civicaseAllowCaseWebform');
   $newCaseWebformUrl = $allowCaseWebform ? Civi::settings()
     ->get('civicaseWebformUrl') : NULL;
@@ -644,6 +669,7 @@ function _civicase_addNewCaseUrlMap(&$urlMapArray) {
     $urlMapArray['civicrm/case/add?reset=1'] = $newCaseWebformUrl;
   }
 }
+
 /**
  * Visit every link in the navigation menu, and alter it using $callback.
  *

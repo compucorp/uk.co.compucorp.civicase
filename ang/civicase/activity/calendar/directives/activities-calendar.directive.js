@@ -16,8 +16,8 @@
     /**
      * AngularJS's link function for the civicase activity calendar directive.
      *
-     * @param {Object} $scope
-     * @param {Object} element
+     * @param {object} $scope scope
+     * @param {object} element element
      */
     function civicaseActivitiesCalendarLink ($scope, element) {
       var datepickerScope;
@@ -39,7 +39,7 @@
        * For example, if the popover is hidden by the right window limit, it will position
        * the popover relative to the bottom left of the element.
        *
-       * @param {Object} element a jQuery reference to the element to position the popover against.
+       * @param {object} element a jQuery reference to the element to position the popover against.
        */
       function adjustPopoverIfHiddenByWindowsLimits (element) {
         var popoverArrowWidth = 22; // needs to be harcoded because how it is defined in Bootstrap
@@ -68,12 +68,12 @@
       /**
        * Adjusts the popover's position against the provided element and in the desired position direction.
        *
-       * @param {Object} adjustments
-       * @param {Object} adjustments.element the jQuery reference to the element to position the popover against.
-       * @param {String} adjustments.direction the direction to position the popover against. Can be one of top, left, bottom, right,
+       * @param {object} adjustments adjustments object
+       * @param {object} adjustments.element the jQuery reference to the element to position the popover against.
+       * @param {string} adjustments.direction the direction to position the popover against. Can be one of top, left, bottom, right,
        *   or combinations such as bottom-right, etc.
-       * @param {String} adjustments.arrowPosition the popover's arrow position
-       * @param {Number} adjustments.arrowAdjustment this value can be used to make small adjustments to the popover
+       * @param {string} adjustments.arrowPosition the popover's arrow position
+       * @param {number} adjustments.arrowAdjustment this value can be used to make small adjustments to the popover
        *   based on the position of the arrow so they can be aligned properly.
        */
       function adjustPopoverToElement (adjustments) {
@@ -90,7 +90,7 @@
        * container. Also unbinds the mouseup event in order to reduce the amount
        * of active DOM event listeners.
        *
-       * @param {Event} event DOM event triggered by the user mouse up action.
+       * @param {document#event:mouseup} event DOM event triggered by the user mouse up action.
        */
       function closeActivitiesDropdown (event) {
         // Note: it breaks when checking `popover.is(event.target)`.
@@ -135,7 +135,7 @@
       /**
        * Positions the popover on top of the given element
        *
-       * @param {Object} element a jQuery reference to the element to position the popover against.
+       * @param {object} element a jQuery reference to the element to position the popover against.
        */
       function positionPopoverOnTopOfElement (element) {
         var bodyOffset = $uibPosition.positionElements(element, popover, 'bottom', true);
@@ -150,8 +150,22 @@
 
   module.controller('civicaseActivitiesCalendarController', civicaseActivitiesCalendarController);
 
+  /**
+   * Activities Calendar Controller
+   *
+   * @param {*} $q $q service
+   * @param {*} $rootScope root scope object
+   * @param {*} $route route service
+   * @param {*} $sce sce service
+   * @param {*} $scope $scope scope object
+   * @param {*} ContactsCache contacts cache service
+   * @param {*} crmApi crm api service
+   * @param {*} formatActivity format activity service
+   * @param {*} getActivityFeedUrl get activity feed url service
+   * @param {*} ActivityStatusType activity status type service
+   */
   function civicaseActivitiesCalendarController ($q, $rootScope, $route, $sce,
-    $scope, ContactsCache, crmApi, formatActivity, getActivityFeedUrl) {
+    $scope, ContactsCache, crmApi, formatActivity, getActivityFeedUrl, ActivityStatusType) {
     var ACTIVITIES_DISPLAY_LIMIT = 25;
     var DEBOUNCE_WAIT = 300;
 
@@ -188,9 +202,9 @@
      * 'incomplete' already exists. The only exception is if the 'completed' day
      * is marked to be flushed.
      *
-     * @param {Object} days api response
-     * @param {String} status
-     * @param {String} yearMonth YYYY-MM format
+     * @param {object} days api response
+     * @param {string} status status
+     * @param {string} yearMonth YYYY-MM format
      */
     function addDays (days, status, yearMonth) {
       daysWithActivities[yearMonth] = daysWithActivities[yearMonth] || {};
@@ -228,8 +242,8 @@
      * Deletes the days with the given status that have not been updated
      * in the last refresh (ie they had activites initially, but now they haven't anymore)
      *
-     * @param {String} status
-     * @param {String} yearMonth
+     * @param {string} status status
+     * @param {string} yearMonth yearMonth
      */
     function flushDays (status, yearMonth) {
       _.forEach(daysWithActivities[yearMonth], function (day, date) {
@@ -245,8 +259,8 @@
      * the `case` property is removed from each activity object, so that the footer
      * with the case info won't be displayed on the card
      *
-     * @param {Object} activity
-     * @return {Object}
+     * @param {object} activity activity
+     * @returns {object} formatted activity
      */
     function formatActivityCardData (activity) {
       activity = formatActivity(activity);
@@ -261,20 +275,21 @@
     /**
      * Prepares the value of the case_id api param based on the $scope.caseId property
      *
-     * @return {Number/Object}
+     * @returns {number/object} case id api param
      */
     function getCaseIdApiParam () {
-      return _.isArray($scope.caseId) ? { 'IN': $scope.caseId } : $scope.caseId;
+      return _.isArray($scope.caseId) ? { IN: $scope.caseId } : $scope.caseId;
     }
 
     /**
      * Returns the class that the given date should have depending on the status
      * of all the activities for the date.
      *
-     * @param {Object} params
+     * @param {object} params parameters
      * @param {Date}   params.date the given date that requires the class
-     * @param {String} params.mode the current viewing mode of the calendar.
+     * @param {string} params.mode the current viewing mode of the calendar.
      *   can be "day", "month", or "year".
+     * @returns {string} class
      */
     function getDayCustomClass (params) {
       var classSuffix, day;
@@ -304,8 +319,8 @@
     /**
      * Gets the internally stored day with activities (if any) of the given date
      *
-     * @param {Date} date
-     * @return {Object/null}
+     * @param {Date} date date
+     * @returns {object/null} day
      */
     function getDayWithActivities (date) {
       var day = moment(date).format('YYYY-MM-DD');
@@ -321,16 +336,16 @@
      * Returns the activity filters params for the "see more" link, so that the link
      * sends the user to the activity feed already filtered by the given date
      *
-     * @param {Date} date
-     * @return {Object}
+     * @param {Date} date date
+     * @returns {object} filters
      */
     function getSeeMoreActivityFilters (date) {
       var dateMoment = moment(date);
 
       return {
         '@moreFilters': true,
-        'activity_date_time': {
-          'BETWEEN': [
+        activity_date_time: {
+          BETWEEN: [
             dateMoment.startOf('day').format('YYYY-MM-DD HH:mm:ss'),
             dateMoment.endOf('day').format('YYYY-MM-DD HH:mm:ss')
           ]
@@ -342,8 +357,8 @@
      * Utility function that returns the year+month of the given date in
      * the YYYY-MM format
      *
-     * @param {Date} date
-     * @return {String}
+     * @param {Date} date date
+     * @returns {string} date
      */
     function getYearMonth (date) {
       return moment(date).format('YYYY-MM');
@@ -375,7 +390,7 @@
     /**
      * Entry point of the load logic
      *
-     * @param {Boolean} [useCache=true]
+     * @param {boolean} options [useCache=true]
      */
     function load (options) {
       options = _.defaults({}, options, { useCache: true });
@@ -416,24 +431,25 @@
      * Loads via the api all the activities of the current case, filtered by
      * the given query params
      *
-     * @param {Object} params
-     * @return {Promise} resolves to {Array}
+     * @param {object} params params
+     * @returns {Promise} resolves to {Array}
      */
     function loadActivities (params) {
       params = params || {};
 
       if ($scope.caseId) {
-        params['case_id'] = getCaseIdApiParam();
+        params.case_id = getCaseIdApiParam();
       }
 
       return crmApi('Activity', 'get', _.assign(params, {
-        'return': [
+        return: [
           'subject', 'details', 'activity_type_id', 'status_id',
           'source_contact_name', 'target_contact_name', 'assignee_contact_name',
           'activity_date_time', 'is_star', 'original_id', 'tag_id.name', 'tag_id.description',
           'tag_id.color', 'file_id', 'is_overdue', 'case_id', 'priority_id',
           'case_id.case_type_id', 'case_id.status_id', 'case_id.contacts'
         ],
+        activity_type_id: { '!=': 'Bulk Email' },
         sequential: 1,
         options: {
           // We try to get one activity more than the display limit, so we can
@@ -451,8 +467,8 @@
      * Loads the activities of the given date. It checks if the activities are
      * already cached before making an API request
      *
-     * @param {Date} date
-     * @return {Promise} resolves to {Array}
+     * @param {Date} date date
+     * @returns {Promise} resolves to {Array}
      */
     function loadActivitiesOfDate (date) {
       var dateMoment = moment(date);
@@ -480,8 +496,8 @@
     /**
      * Load the data of all the contacts referenced by the given activities
      *
-     * @param {Array} activities
-     * @return {Promise}
+     * @param {Array} activities activities
+     * @returns {Promise} promise
      */
     function loadContactsOfActivities (activities) {
       var contactIds = _(activities).pluck('case_id.contacts').flatten().pluck('contact_id').value();
@@ -496,14 +512,15 @@
      * The days are returned in an object containing also the year+month they
      * belong to, so that they can be properly grouped in the internal list of days
      *
-     * @param {Date} date
-     * @param {*} status
-     * @return {Promise}
+     * @param {Date} date date
+     * @param {*} status status
+     * @returns {Promise} promise
      */
     function loadDaysWithActivities (date, status) {
       var params = {};
       var dateMoment = moment(date);
 
+      params.activity_type_id = { '!=': 'Bulk Email' };
       params.status_id = status;
       params.activity_date_time = {
         BETWEEN: [
@@ -528,11 +545,11 @@
     /**
      * Loads the days with at least a completed activity
      *
-     * @param {Date} date
-     * @return {Promise}
+     * @param {Date} date date
+     * @returns {Promise} promise
      */
     function loadDaysWithActivitiesCompleted (date) {
-      var status = CRM.civicase.activityStatusTypes.completed[0];
+      var status = ActivityStatusType.getAll().completed[0];
 
       return loadDaysWithActivities(date, status)
         .then(_.curryRight(updateDaysList)(date)('completed'));
@@ -541,11 +558,11 @@
     /**
      * Loads the days with at least an incomplete activity
      *
-     * @param {Date} date
-     * @return {Promise}
+     * @param {Date} date date
+     * @returns {Promise} promise
      */
     function loadDaysWithActivitiesIncomplete (date) {
-      var status = { 'IN': CRM.civicase.activityStatusTypes.incomplete };
+      var status = { IN: ActivityStatusType.getAll().incomplete };
 
       return loadDaysWithActivities(date, status)
         .then(_.curryRight(updateDaysList)(date)('incomplete'));
@@ -611,8 +628,8 @@
      * Creates the url for the "see all" link, based on the given date
      * (the link will send the user to the activity feed, filtered by that date)
      *
-     * @return {Date} date
-     * @return {TrustedValueHolderType}
+     * @param {Date} date date
+     * @returns {string} url
      */
     function seeAllLinkUrl (date) {
       var activityFilters = getSeeMoreActivityFilters(date);
@@ -624,8 +641,8 @@
      * Stores the date currently selected on the datepicker
      * and triggers the load logic (debounced, if specified)
      *
-     * @param {Date} selectedDate
-     * @param {Boolean} debounce whether the load logic should be debounced to
+     * @param {Date} _selectedDate_ selected date
+     * @param {boolean} debounce whether the load logic should be debounced to
      *   avoid flooding the API
      */
     function setSelectedDateAndLoad (_selectedDate_, debounce) {
@@ -639,9 +656,9 @@
      *
      * It adds the given days and deletes those that are marked for deletion
      *
-     * @param {Object} days api response
-     * @param {String} status
-     * @param {Date} date
+     * @param {object} days api response
+     * @param {string} status status
+     * @param {Date} date date
      */
     function updateDaysList (days, status, date) {
       var yearMonth = getYearMonth(date);

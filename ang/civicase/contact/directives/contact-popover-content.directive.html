@@ -4,13 +4,9 @@
     <hr />
   </div>
   <div class="civicase__contact-popover__column">
-    <div class="civicase__contact-popover__detail-group">
-      <div class="civicase__contact-popover__detail-header"><strong>Home Phone</strong></div>
-      <div class="civicase__contact-popover__detail-value">{{contact.phone.phone}}</div>
-    </div>
-    <div class="civicase__contact-popover__detail-group">
-      <div class="civicase__contact-popover__detail-header"><strong>Home Mobile</strong></div>
-      <div class="civicase__contact-popover__detail-value">{{contact.mobile.phone}}</div>
+    <div class="civicase__contact-popover__detail-group" ng-repeat="phoneNumber in contact.phoneNumbers">
+      <div class="civicase__contact-popover__detail-header"><strong>{{phoneNumber.type}}</strong></div>
+      <div class="civicase__contact-popover__detail-value">{{phoneNumber.number}}</div>
     </div>
     <div class="civicase__contact-popover__detail-group">
       <div class="civicase__contact-popover__detail-header"><strong>Primary Address</strong></div>

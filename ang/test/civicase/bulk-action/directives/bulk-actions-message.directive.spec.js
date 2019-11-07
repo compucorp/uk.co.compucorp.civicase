@@ -85,6 +85,7 @@ describe('BulkActionsMessage', function () {
     beforeEach(function () {
       element.isolateScope().totalCount = 20;
       element.isolateScope().selectedItems = 10;
+      element.isolateScope().isSelectAll = false;
       $scope.$digest();
     });
 
@@ -137,7 +138,8 @@ describe('BulkActionsMessage', function () {
     $scope.totalCount = 20;
     $scope.showCheckboxes = true;
     $scope.isSelectAllAvailable = false;
-    element = $compile('<civicase-bulk-actions-message selected-items="selectedItems" total-count="totalCount" is-select-all-available="isSelectAllAvailable" show-checkboxes="showCheckboxes"></civicase-bulk-actions-message>')($scope);
+    $scope.isSelectAll = false;
+    element = $compile('<civicase-bulk-actions-message selected-items="selectedItems" total-count="totalCount" is-select-all-available="isSelectAllAvailable" is-select-all="isSelectAll" show-checkboxes="showCheckboxes"></civicase-bulk-actions-message>')($scope);
     $scope.$digest();
   }
 });

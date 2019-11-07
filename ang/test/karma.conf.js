@@ -35,7 +35,9 @@ module.exports = function (config) {
       extPath + '/ang/civicase/**/*.html',
 
       // Source Files
+      extPath + '/ang/civicase-base.js',
       extPath + '/ang/civicase.js',
+      { pattern: extPath + '/ang/civicase-base/**/*.js' },
       { pattern: extPath + '/ang/civicase/**/*.js' },
 
       // Spec files
@@ -51,7 +53,7 @@ module.exports = function (config) {
       return obj;
     })({}),
     ngHtml2JsPreprocessor: {
-      stripPrefix: 'ext/civicase/ang',
+      stripPrefix: extPath + '/ang',
       prependPrefix: '~',
       moduleName: 'civicase.templates'
     },

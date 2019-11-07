@@ -31,17 +31,21 @@
       <div class="btn-group">
         <button
           type="button" class="btn btn-default"
-          ng-class="{disabled: !selectedActivities.length || !showCheckboxes}"
+          ng-class="{disabled: (!selectedActivities.length || !showCheckboxes) && !isSelectAll}"
           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           {{ ts('Actions') }}
         </button>
         <button
           type="button" class="btn btn-default dropdown-toggle"
-          ng-class="{disabled: !selectedActivities.length || !showCheckboxes}"
+          ng-class="{disabled: (!selectedActivities.length || !showCheckboxes) && !isSelectAll}"
           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <span class="caret"></span>
         </button>
-        <ul class="dropdown-menu" refresh-callback="refresh" civicase-activity-actions mode="case-activity-bulk-action" selected-activities="selectedActivities">
+        <ul
+          class="dropdown-menu" refresh-callback="refresh"
+          civicase-activity-actions mode="case-activity-bulk-action"
+          selected-activities="selectedActivities" is-select-all="isSelectAll"
+          total-count="totalCount" params="combinedFilterParams">
         </ul>
       </div>
     </span>

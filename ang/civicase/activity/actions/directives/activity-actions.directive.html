@@ -14,27 +14,27 @@
   </a>
 </li>
 <li>
-  <a href ng-click="moveCopyActivity(selectedActivities, 'move')">
+  <a href ng-click="moveCopyActivity(selectedActivities, 'move', isSelectAll, params, totalCount)">
     <i class="material-icons">next_week</i> {{ ts('Move to Case') }}
   </a>
 </li>
 <li>
-  <a href ng-click="moveCopyActivity(selectedActivities, 'copy')">
+  <a href ng-click="moveCopyActivity(selectedActivities, 'copy', isSelectAll, params, totalCount)">
     <i class="material-icons">filter_none</i> {{ ts('Copy to Case') }}
   </a>
 </li>
-<li ng-repeat="link in selectedActivities[0]['api.Activity.getactionlinks']">
+<li ng-if="mode !== 'case-activity-bulk-action'" ng-repeat="link in selectedActivities[0]['api.Activity.getactionlinks']">
   <a ng-href="{{ link.url }}" class="{{ link.class }}">
     <i class="material-icons">filter_none</i>{{ link.name }}
   </a>
 </li>
 <li ng-if="mode === 'case-activity-bulk-action'">
-  <a href ng-click="manageTags('add', selectedActivities)">
+  <a href ng-click="manageTags('add', selectedActivities, isSelectAll, params, totalCount)">
     <i class="material-icons">add_circle</i> {{ ts('Tag - add to activities') }}
   </a>
 </li>
 <li ng-if="mode === 'case-activity-bulk-action'">
-  <a href ng-click="manageTags('remove', selectedActivities)">
+  <a href ng-click="manageTags('remove', selectedActivities, isSelectAll, params, totalCount)">
     <i class="material-icons">remove_circle</i> {{ ts('Tag - remove from activities') }}
   </a>
 </li>
@@ -46,7 +46,7 @@
 </li>
 <li class="divider"></li>
 <li>
-  <a href ng-click="deleteActivity(selectedActivities)">
+  <a href ng-click="deleteActivity(selectedActivities, isSelectAll, params, totalCount)">
     <i class="material-icons">delete</i> {{ ts('Delete') }}
   </a>
 </li>

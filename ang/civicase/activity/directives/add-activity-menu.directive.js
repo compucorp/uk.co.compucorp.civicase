@@ -1,4 +1,4 @@
-(function ($, _, angular, civicase) {
+(function ($, _, angular) {
   var module = angular.module('civicase');
 
   module.directive('civicaseAddActivityMenu', function () {
@@ -15,8 +15,8 @@
     };
   });
 
-  module.controller('civicaseAddActivityMenuController', function ($scope, getCaseQueryParams) {
-    var definition = civicase.caseTypes[$scope.case.case_type_id].definition;
+  module.controller('civicaseAddActivityMenuController', function ($scope, getCaseQueryParams, CaseType, ActivityType) {
+    var definition = CaseType.getAll()[$scope.case.case_type_id].definition;
 
     (function init () {
       if (_.isEmpty($scope.case.activity_count)) {
@@ -31,7 +31,7 @@
     /**
      * Returns the current activities count using all the activities included in the case.
      *
-     * @return {Object} in the form of { activity_type_id: count }
+     * @returns {object} in the form of { activity_type_id: count }
      */
     function getActivitiesCount () {
       return _.transform($scope.case.allActivities, function (activitiesCount, activity) {
@@ -45,9 +45,9 @@
      * Returns a list of activity types that can be created for the case. Cases
      * activities can have a maximum count which must be respected.
      *
-     * @param {Object} activityCount the list of activity types and their count for the given case.
-     * @param {Object} definition the case type definition for the given case.
-     * @return {Array}
+     * @param {object} activityCount the list of activity types and their count for the given case.
+     * @param {object} definition the case type definition for the given case.
+     * @returns {Array} activity types
      */
     function getAvailableActivityTypes (activityCount, definition) {
       var ret = [];
@@ -55,10 +55,10 @@
 
       _.each(definition.activityTypes, function (actSpec) {
         if (exclude.indexOf(actSpec.name) < 0) {
-          var actTypeId = _.findKey(civicase.activityTypes, {name: actSpec.name});
+          var actTypeId = _.findKey(ActivityType.getAll(), { name: actSpec.name });
 
           if (!actSpec.max_instances || !activityCount[actTypeId] || (actSpec.max_instances > parseInt(activityCount[actTypeId]))) {
-            ret.push($.extend({id: actTypeId}, civicase.activityTypes[actTypeId]));
+            ret.push($.extend({ id: actTypeId }, ActivityType.getAll()[actTypeId]));
           }
         }
       });
@@ -100,8 +100,8 @@
     /**
      * Returns the URL with the form necessary to create a particular activity for the case.
      *
-     * @param {Object} actType
-     * @return {String}
+     * @param {object} actType activity Type
+     * @returns {string} url
      */
     $scope.newActivityUrl = function (actType) {
       var caseQueryParams = JSON.stringify(getCaseQueryParams($scope.case.id));
@@ -129,4 +129,4 @@
       return CRM.url(path, args);
     };
   });
-})(CRM.$, CRM._, angular, CRM.civicase);
+})(CRM.$, CRM._, angular);

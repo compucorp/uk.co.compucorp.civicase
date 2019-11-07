@@ -1,22 +1,7 @@
 .form-control {
-  box-shadow: unset;
+  height: 30px !important;
 
   .select2-choice {
-    height: auto;
-    line-height: 18px;
-    padding: 5px 10px;
-  }
-
-  .select2-arrow b {
-    margin-top: 0;
-    width: 20px;
-  }
-
-  .select2-choices {
-    background-image: none;
-
-    &::before {
-      top: 7px;
-    }
+    height: 28px !important;
   }
 }

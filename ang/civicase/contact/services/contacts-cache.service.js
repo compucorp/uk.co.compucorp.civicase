@@ -48,7 +48,8 @@
         'api.Phone.get': {
           'contact_id': '$value.id',
           'phone_type_id.name': { 'IN': [ 'Mobile', 'Phone' ] },
-          'return': [ 'phone', 'phone_type_id.name' ]
+          'return': ['phone', 'phone_type_id.name', 'location_type_id'],
+          'api.LocationType.get': { 'id': '$value.location_type_id' }
         },
         'api.GroupContact.get': {
           'contact_id': '$value.id',
@@ -73,16 +74,14 @@
      * @return {Object} contact object of the passed contact ID.
      */
     this.getCachedContact = function (contactID) {
-      var phones;
       var contact = _.clone(savedContactDetails[contactID]);
 
       if (!contact) {
         return null;
       }
 
-      phones = _.indexBy(contact['api.Phone.get'].values, 'phone_type_id.name');
-      contact.mobile = phones['Mobile'];
-      contact.phone = phones['Phone'];
+      formatContactPhoneNumbers(contact);
+
       contact.groups = _.map(contact['api.GroupContact.get'].values, 'title').join(', ');
       contact.tags = (contact.tags + '').split(',').join(', '); // Adds spacing to the tags
 
@@ -111,5 +110,23 @@
     this.getContactIconOf = function (contactID) {
       return savedContactDetails[contactID] ? savedContactDetails[contactID].contact_type : '';
     };
+
+    /**
+     * Formats the phone numbers in an array which can be used in the html
+     *
+     * @param {Object} contact
+     */
+    function formatContactPhoneNumbers (contact) {
+      var phoneNumbers = [];
+
+      _.each(contact['api.Phone.get'].values, function (numberObject) {
+        phoneNumbers.push({
+          type: numberObject['api.LocationType.get'].values[0].display_name + ' ' + numberObject['phone_type_id.name'],
+          number: numberObject.phone || numberObject.mobile
+        });
+      });
+
+      contact.phoneNumbers = phoneNumbers;
+    }
   }
 })(angular, CRM.$, CRM._);

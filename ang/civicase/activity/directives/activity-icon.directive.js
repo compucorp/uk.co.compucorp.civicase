@@ -1,7 +1,7 @@
 (function (angular, $, _, CRM) {
   var module = angular.module('civicase');
 
-  module.directive('activityIcon', function () {
+  module.directive('activityIcon', function (ActivityType) {
     return {
       restrict: 'A',
       replace: true,
@@ -15,12 +15,12 @@
     /**
      * Link function for activityIcon directive
      *
-     * @param {object} scope
-     * @param {object} elem
-     * @param {object} attrs
+     * @param {object} scope scope
+     * @param {object} elem element
+     * @param {object} attrs attributes
      */
     function activityIconLink (scope, elem, attrs) {
-      var activityTypes = CRM.civicase.activityTypes;
+      var activityTypes = ActivityType.getAll();
       var activityType = activityTypes[scope.activity.activity_type_id];
 
       // Set direction icon for inbound/outbound email

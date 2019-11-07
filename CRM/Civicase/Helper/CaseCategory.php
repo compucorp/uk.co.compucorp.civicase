@@ -19,7 +19,7 @@ class CRM_Civicase_Helper_CaseCategory {
    *   The Case Category Name.
    */
   public static function getCategoryName($caseId) {
-    $caseTypeCategories = CaseType::buildOptions('case_type_category');
+    $caseTypeCategories = CaseType::buildOptions('case_type_category', 'validate');
 
     $result = civicrm_api3('Case', 'getsingle', [
       'id' => $caseId,
@@ -45,7 +45,7 @@ class CRM_Civicase_Helper_CaseCategory {
    *   Case Category Name.
    */
   public static function getCaseCategoryNameFromOptionValue($caseCategoryValue) {
-    $caseTypeCategories = CaseType::buildOptions('case_type_category');
+    $caseTypeCategories = CaseType::buildOptions('case_type_category', 'validate');
 
     return $caseTypeCategories[$caseCategoryValue];
   }

@@ -36,9 +36,9 @@
           values: []
         }));
         expectedApiParams = {
-          'sequential': 1,
-          'options': { 'limit': 0 },
-          'return': [
+          sequential: 1,
+          options: { limit: 0 },
+          return: [
             'birth_date',
             'city',
             'contact_type',
@@ -52,25 +52,26 @@
             'tag'
           ],
           'api.Phone.get': {
-            'contact_id': '$value.id',
-            'phone_type_id.name': { 'IN': [ 'Mobile', 'Phone' ] },
-            'return': [ 'phone', 'phone_type_id.name' ]
+            contact_id: '$value.id',
+            'phone_type_id.name': { IN: ['Mobile', 'Phone'] },
+            return: ['phone', 'phone_type_id.name', 'location_type_id'],
+            'api.LocationType.get': { id: '$value.location_type_id' }
           },
           'api.GroupContact.get': {
-            'contact_id': '$value.id',
-            'return': [ 'title' ]
+            contact_id: '$value.id',
+            return: ['title']
           },
           'api.EntityTag.get': {
-            'entity_table': 'civicrm_contact',
-            'entity_id': '$value.id',
-            'return': [ 'tag_id.name', 'tag_id.description', 'tag_id.color' ]
+            entity_table: 'civicrm_contact',
+            entity_id: '$value.id',
+            return: ['tag_id.name', 'tag_id.description', 'tag_id.color']
           }
         };
       });
 
       describe('when called for the first time', function () {
         beforeEach(function () {
-          _.extend(expectedApiParams, { 'id': { 'IN': ContactsData.values } });
+          _.extend(expectedApiParams, { id: { IN: ContactsData.values } });
 
           ContactsCache.add(ContactsData.values);
           $rootScope.$digest();
@@ -93,7 +94,7 @@
           ContactsCache.add(contactsForTheFirstCall);
           contactsForTheSecondCall = [ContactsData.values[1]];
 
-          _.extend(expectedApiParams, { 'id': { 'IN': contactsForTheSecondCall } });
+          _.extend(expectedApiParams, { id: { IN: contactsForTheSecondCall } });
           ContactsCache.add(contactsForTheSecondCall);
         });
 
@@ -123,7 +124,6 @@
 
       describe('when the contact exists', function () {
         beforeEach(function () {
-          var phones;
           ContactsData.values[0].tags = 'tag1,tag2,tag3';
 
           crmApi.and.returnValue($q.resolve(ContactsData));
@@ -132,11 +132,14 @@
 
           expectedContact = _.cloneDeep(ContactsData.values[0]);
           expectedContact.tags = expectedContact.tags.split(',').join(', ');
-          phones = _.indexBy(expectedContact['api.Phone.get'].values, 'phone_type_id.name');
 
-          expectedContact.mobile = phones['Mobile'];
-          expectedContact.phone = phones['Phone'];
           expectedContact.groups = _.map(expectedContact['api.GroupContact.get'].values, 'title').join(', ');
+          expectedContact.phoneNumbers = _.map(expectedContact['api.Phone.get'].values, function (numberObject) {
+            return {
+              type: numberObject['api.LocationType.get'].values[0].display_name + ' ' + numberObject['phone_type_id.name'],
+              number: numberObject.phone || numberObject.mobile
+            };
+          });
 
           delete expectedContact['api.Phone.get'];
           delete expectedContact['api.GroupContact.get'];

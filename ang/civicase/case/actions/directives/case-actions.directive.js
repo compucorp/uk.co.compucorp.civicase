@@ -38,7 +38,7 @@
         var isCaseLockAllowed = CRM.civicase.allowCaseLocks;
         var caseActionService = getCaseActionService(action.action);
 
-        if (caseActionService.isActionAllowed) {
+        if (caseActionService && caseActionService.isActionAllowed) {
           isActionAllowed = caseActionService.isActionAllowed(action, $scope.cases);
         }
 
@@ -114,7 +114,11 @@
        * @return {Object}
        */
       function getCaseActionService (action) {
-        return $injector.get(action + 'CaseAction');
+        try {
+          return $injector.get(action + 'CaseAction');
+        } catch (e) {
+          return null;
+        }
       }
 
       /**
@@ -127,7 +131,7 @@
         _.each($scope.caseActions, function (action) {
           var caseActionService = getCaseActionService(action.action);
 
-          if (caseActionService.refreshData) {
+          if (caseActionService && caseActionService.refreshData) {
             caseActionService.refreshData($scope.cases);
           }
         });

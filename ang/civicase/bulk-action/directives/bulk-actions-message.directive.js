@@ -8,6 +8,7 @@
       templateUrl: '~/civicase/bulk-action/directives/bulk-actions-message.directive.html',
       scope: {
         selectedItems: '=',
+        isSelectAll: '=',
         isSelectAllAvailable: '=',
         totalCount: '=',
         showCheckboxes: '='

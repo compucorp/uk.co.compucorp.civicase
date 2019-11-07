@@ -37,7 +37,7 @@
         <div
           class="civicase__case-overview__flow-status civicase__case-overview__flow-status--hoverable"
           ng-if="!status.isHidden"
-          ng-repeat="(statusId, status) in caseStatuses"
+          ng-repeat="status in caseStatuses"
           uib-popover="{{ status.label }}"
           popover-trigger="'mouseenter'"
           popover-placement="bottom"
@@ -45,7 +45,7 @@
           popover-class="civicase__tooltip-popup-list">
           <div class="civicase__case-overview__flow-status__count">
             <a ng-href="{{ caseListLink(null, status.name) }}">
-              {{ summaryData.all[statusId] || '0' }}
+              {{ summaryData.all[status.value] || '0' }}
             </a>
           </div>
           <div class="civicase__case-overview__flow-status__description">
@@ -80,9 +80,9 @@
         <div
           class="civicase__case-overview__breakdown-field"
           ng-if="!status.isHidden"
-          ng-repeat="(statusId, status) in caseStatuses">
+          ng-repeat="status in caseStatuses">
           <a ng-href="{{ caseListLink(caseType.name, status.name) }}">
-            {{ summaryData[ctid][statusId] || '0' }}
+            {{ summaryData[ctid][status.value] || '0' }}
           </a>
         </div>
         <div class="civicase__case-overview__breakdown-field" ng-if="areAllStatusesHidden()"> - </div>

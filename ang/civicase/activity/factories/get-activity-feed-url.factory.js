@@ -1,7 +1,7 @@
 (function (angular, $, _, CRM) {
   var module = angular.module('civicase');
 
-  module.factory('getActivityFeedUrl', function ($route, $location, $sce) {
+  module.factory('getActivityFeedUrl', function ($route, $location, $sce, ActivityStatusType, ActivityStatus) {
     return function (urlParams) {
       var activityFilters = {};
       var baseUrl = '#/case/list?';
@@ -15,11 +15,11 @@
       }
 
       if (urlParams.statusType) {
-        activityFilters.status_id = CRM.civicase.activityStatusTypes[urlParams.statusType];
+        activityFilters.status_id = ActivityStatusType.getAll()[urlParams.statusType];
       }
 
       if (urlParams.status) {
-        activityFilters.status_id = [_.findKey(CRM.civicase.activityStatuses, function (statusObj) {
+        activityFilters.status_id = [_.findKey(ActivityStatus.getAll(), function (statusObj) {
           return statusObj.name === urlParams.status;
         })];
       }

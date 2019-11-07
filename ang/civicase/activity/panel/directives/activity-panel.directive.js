@@ -17,8 +17,10 @@
     /**
      * Link function for civicaseActivityPanelLink
      *
-     * @param {Object} $scope
-     * @param {Object} element
+     * @param {object} scope scope object
+     * @param {object} element directive element
+     * @param {object} attrs attributes
+     * @param {object} ts ts service
      */
     function civicaseActivityPanelLink (scope, element, attrs, ts) {
       (function init () {
@@ -47,8 +49,8 @@
       /**
        * Listener for loadActivityForm event
        *
-       * @param {object} event
-       * @param {object} activity
+       * @param {object} event event
+       * @param {object} activity activity
        */
       function loadActivityForm (event, activity) {
         var context = activity.case_id ? 'case' : 'activity';
@@ -58,21 +60,23 @@
           id: activity.id,
           reset: 1,
           context: context
-        }), {target: $(element).find('.civicase__activity-panel__core_container')});
+        }), { target: $(element).find('.civicase__activity-panel__core_container') });
 
         element.find('.crm-submit-buttons a.edit').addClass('btn btn-primary');
       }
 
       /**
        * Listener for click event of delete button
+       *
+       * @returns {boolean} false
        */
       function onDeleteClickEvent () {
         CRM.confirm({
           title: ts('Delete Activity'),
-          message: ts('Permanently delete this %1 activity?', {1: scope.activity.type})
+          message: ts('Permanently delete this %1 activity?', { 1: scope.activity.type })
         }).on('crmConfirm:yes', function () {
           $(element).children('.civicase__activity-panel__core_container').block();
-          CRM.api3('Activity', 'delete', {id: scope.activity.id})
+          CRM.api3('Activity', 'delete', { id: scope.activity.id })
             .done(scope.close)
             .done(scope.refresh);
         });
@@ -91,9 +95,22 @@
     }
   });
 
+  /**
+   * Activity Panel Controller
+   *
+   * @param {object} $scope scope object
+   * @param {object} $rootScope rootscope object
+   * @param {object} dialogService dialog service
+   * @param {object} crmApi crm api service
+   * @param {object} crmBlocker crm blocker service
+   * @param {object} crmStatus crm status service
+   * @param {object} DateHelper date helper service
+   * @param {object} Priority priority service
+   * @param {object} ActivityStatus activity status service
+   */
   function civicaseActivityPanelController ($scope, $rootScope, dialogService,
-    crmApi, crmBlocker, crmStatus, DateHelper) {
-    $scope.activityPriorties = CRM.civicase.priority;
+    crmApi, crmBlocker, crmStatus, DateHelper, Priority, ActivityStatus) {
+    $scope.activityPriorties = Priority.getAll();
     $scope.allowedActivityStatuses = {};
     $scope.closeDetailsPanel = closeDetailsPanel;
     $scope.setStatusTo = setStatusTo;
@@ -116,25 +133,25 @@
     /**
      * Set status of sent activity
      *
-     * @param {object} activity
-     * @param {object} activityStatusId
+     * @param {object} activity activity
+     * @param {object} activityStatusId activity status id
      */
     function setStatusTo (activity, activityStatusId) {
       activity.status_id = activityStatusId;
       // Setvalue api avoids messy revisioning issues
-      $scope.refresh([['Activity', 'setvalue', {id: activity.id, field: 'status_id', value: activity.status_id}]], true);
+      $scope.refresh([['Activity', 'setvalue', { id: activity.id, field: 'status_id', value: activity.status_id }]], true);
     }
 
     /**
      * Set priority of sent activity
      *
-     * @param {object} activity
-     * @param {object} priorityId
+     * @param {object} activity activity
+     * @param {object} priorityId priority id
      */
     function setPriorityTo (activity, priorityId) {
       activity.priority_id = priorityId;
       // Setvalue api avoids messy revisioning issues
-      $scope.refresh([['Activity', 'setvalue', {id: activity.id, field: 'priority_id', value: activity.priority_id}]], true);
+      $scope.refresh([['Activity', 'setvalue', { id: activity.id, field: 'priority_id', value: activity.priority_id }]], true);
     }
 
     /**
@@ -143,7 +160,7 @@
     function setAllowedActivityStatuses () {
       $scope.allowedActivityStatuses = {};
 
-      _.each(CRM.civicase.activityStatuses, function (activityStatus, activityStatusID) {
+      _.each(ActivityStatus.getAll(), function (activityStatus, activityStatusID) {
         var ifStatusIsInSameCategory = _.intersection($scope.activity.category, activityStatus.grouping.split(',')).length > 0;
         var ifStatusIsInNoneCategory = $scope.activity.category.length === 0 && activityStatus.grouping.split(',').indexOf('none') !== -1;
 

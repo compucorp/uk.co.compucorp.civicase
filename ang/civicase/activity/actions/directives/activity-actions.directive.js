@@ -5,7 +5,10 @@
     return {
       scope: {
         mode: '@',
-        selectedActivities: '='
+        selectedActivities: '=',
+        isSelectAll: '=',
+        totalCount: '=',
+        params: '='
       },
       require: '?^civicaseCaseDetails',
       controller: civicaseActivityActionsController,
@@ -16,10 +19,11 @@
 
     /**
      * Angular JS's link function for the directive civicaseActivityActions
-     * @param {Object} $scope
-     * @param {Object} attrs
-     * @param {Object} element
-     * @param {Object} caseDetails
+     *
+     * @param {object} $scope angular scope
+     * @param {object} attrs attributes
+     * @param {object} element element
+     * @param {object} caseDetails case details service
      */
     function civicaseActivityActionsLink ($scope, attrs, element, caseDetails) {
       if (caseDetails) {
@@ -33,10 +37,22 @@
 
   module.controller('civicaseActivityActionsController', civicaseActivityActionsController);
 
-  function civicaseActivityActionsController ($window, $rootScope, $scope, crmApi, getActivityFeedUrl, MoveCopyActivityAction, TagsActivityAction, ts) {
+  /**
+   * @param {object} $window window object
+   * @param {object} $rootScope rootscope
+   * @param {object} $scope scope
+   * @param {object} crmApi crm api
+   * @param {object} getActivityFeedUrl service to get activity feed url
+   * @param {object} MoveCopyActivityAction move copy action service
+   * @param {object} TagsActivityAction tags action service
+   * @param {object} DeleteActivityAction delete activity service
+   * @param {object} ts ts
+   * @param {object} ActivityType ActivityType service
+   */
+  function civicaseActivityActionsController ($window, $rootScope, $scope, crmApi, getActivityFeedUrl, MoveCopyActivityAction, TagsActivityAction, DeleteActivityAction, ts, ActivityType) {
     $scope.ts = ts;
     $scope.getActivityFeedUrl = getActivityFeedUrl;
-    $scope.deleteActivity = deleteActivity;
+    $scope.deleteActivity = DeleteActivityAction.deleteActivity;
     $scope.moveCopyActivity = MoveCopyActivityAction.moveCopyActivities;
     $scope.manageTags = TagsActivityAction.manageTags;
     $scope.isActivityEditable = isActivityEditable;
@@ -45,7 +61,7 @@
     /**
      * Print a report for the sent activities
      *
-     * @param {Array} selectedActivities
+     * @param {Array} selectedActivities selected activities
      */
     function printReport (selectedActivities) {
       var url = $scope.getPrintActivityUrl(selectedActivities);
@@ -56,45 +72,17 @@
     /**
      * Checks if the sent activity is enabled
      *
-     * @param {Object} activity
+     * @param {object} activity activity
+     * @returns {boolean} if activity is editable
      */
     function isActivityEditable (activity) {
-      var activityType = CRM.civicase.activityTypes[activity.activity_type_id].name;
+      var activityType = ActivityType.getAll()[activity.activity_type_id].name;
       var nonEditableActivityTypes = [
         'Email',
         'Print PDF Letter'
       ];
 
       return !_.includes(nonEditableActivityTypes, activityType) && $scope.getEditActivityUrl;
-    }
-
-    /**
-     * Delete activities
-     *
-     * @param {Array} activities
-     * @param {jQuery} dialog - the dialog which should be closed once deletion
-     *   is over
-     */
-    function deleteActivity (activities, dialog) {
-      CRM.confirm({
-        title: ts('Delete Activity'),
-        message: ts('Permanently delete %1 activit%2?', {1: activities.length, 2: activities.length > 1 ? 'ies' : 'y'})
-      }).on('crmConfirm:yes', function () {
-        var apiCalls = [];
-
-        _.each(activities, function (activity) {
-          apiCalls.push(['Activity', 'delete', {id: activity.id}]);
-        });
-
-        crmApi(apiCalls)
-          .then(function () {
-            $rootScope.$broadcast('civicase::activity::updated');
-          });
-
-        if (dialog && $(dialog).data('uiDialog')) {
-          $(dialog).dialog('close');
-        }
-      });
     }
   }
 })(CRM.$, CRM._, angular);

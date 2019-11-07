@@ -37,8 +37,8 @@
 
       it('fetches the tags from the api endpoint', function () {
         expect(crmApiMock).toHaveBeenCalledWith('Tag', 'get', {
-          'sequential': 1,
-          'used_for': { 'LIKE': '%civicrm_activity%' }
+          sequential: 1,
+          used_for: { LIKE: '%civicrm_activity%' }
         });
       });
 
@@ -169,16 +169,16 @@
         });
 
         describe('api calls', function () {
-          var apiCalls = [];
+          var apiCalls;
 
           beforeEach(function () {
-            _.each(activitiesMockData.get(), function (activity) {
-              apiCalls.push(['EntityTag', 'create', {
-                entity_table: 'civicrm_activity',
-                entity_id: activity.id,
-                tag_id: [TagsMockData.get()[0].id]
-              }]);
-            });
+            apiCalls = [['EntityTag', 'createByQuery', {
+              entity_table: 'civicrm_activity',
+              entity_id: activitiesMockData.get().map(function (activity) {
+                return activity.id;
+              }),
+              tag_id: [TagsMockData.get()[0].id]
+            }]];
           });
 
           it('saves the selected tags to the selected activities', function () {
@@ -204,8 +204,8 @@
 
       it('fetches the tags from the api endpoint', function () {
         expect(crmApiMock).toHaveBeenCalledWith('Tag', 'get', {
-          'sequential': 1,
-          'used_for': { 'LIKE': '%civicrm_activity%' }
+          sequential: 1,
+          used_for: { LIKE: '%civicrm_activity%' }
         });
       });
 
@@ -336,16 +336,16 @@
         });
 
         describe('api calls', function () {
-          var apiCalls = [];
+          var apiCalls;
 
           beforeEach(function () {
-            _.each(activitiesMockData.get(), function (activity) {
-              apiCalls.push(['EntityTag', 'delete', {
-                entity_table: 'civicrm_activity',
-                entity_id: activity.id,
-                tag_id: [TagsMockData.get()[0].id]
-              }]);
-            });
+            apiCalls = [['EntityTag', 'deleteByQuery', {
+              entity_table: 'civicrm_activity',
+              entity_id: activitiesMockData.get().map(function (activity) {
+                return activity.id;
+              }),
+              tag_id: [TagsMockData.get()[0].id]
+            }]];
           });
 
           it('deletes the selected tags to the selected activities', function () {

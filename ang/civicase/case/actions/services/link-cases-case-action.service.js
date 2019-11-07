@@ -3,18 +3,24 @@
 
   module.service('LinkCasesCaseAction', LinkCasesCaseAction);
 
-  function LinkCasesCaseAction () {
+  /**
+   * Link Cases Case Action service
+   *
+   * @param {object} ActivityType ActivityType
+   */
+  function LinkCasesCaseAction (ActivityType) {
     /**
      * Click event handler for the Action
      *
-     * @param {Array} cases
-     * @param {Object} action
-     * @param {Function} callbackFn
+     * @param {Array} cases cases
+     * @param {object} action action
+     * @param {Function} callbackFn callback function
+     * @returns {string} url
      */
     this.doAction = function (cases, action, callbackFn) {
       var case1 = cases[0];
       var case2 = cases[1];
-      var activityTypes = CRM.civicase.activityTypes;
+      var activityTypes = ActivityType.getAll();
       var link = {
         path: 'civicrm/case/activity',
         query: {

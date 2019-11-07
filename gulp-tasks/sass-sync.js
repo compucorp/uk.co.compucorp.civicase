@@ -5,6 +5,7 @@
 
 var civicrmScssRoot = require('civicrm-scssroot')();
 
-module.exports = function () {
+module.exports = function (done) {
   civicrmScssRoot.updateSync();
+  done();
 };

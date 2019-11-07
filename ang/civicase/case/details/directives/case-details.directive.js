@@ -16,16 +16,38 @@
 
   module.controller('civicaseCaseDetailsController', civicaseCaseDetailsController);
 
+  /**
+   * Case Details Controller
+   *
+   * @param {object} $location $location service
+   * @param {object} $rootScope $rootScope
+   * @param {object} $scope $scope
+   * @param {object} $document $document
+   * @param {object} BulkActions bulk actions service
+   * @param {object} crmApi crm api service
+   * @param {object} formatActivity format activity service
+   * @param {object} formatCase format case service
+   * @param {object} getActivityFeedUrl get activity feed url service
+   * @param {object} getCaseQueryParams get case query params service
+   * @param {object} $route $route service
+   * @param {object} $timeout $timeout service
+   * @param {object} CasesUtils cases utils service
+   * @param {object} PrintMergeCaseAction print merge case action service
+   * @param {object} ts ts service
+   * @param {object} ActivityType activity type service
+   * @param {object} CaseStatus case status service
+   * @param {object} CaseType case type service
+   */
   function civicaseCaseDetailsController ($location, $rootScope, $scope,
     $document, BulkActions, crmApi, formatActivity, formatCase,
     getActivityFeedUrl, getCaseQueryParams, $route, $timeout,
-    CasesUtils, PrintMergeCaseAction, ts) {
+    CasesUtils, PrintMergeCaseAction, ts, ActivityType, CaseStatus, CaseType) {
     // The ts() and hs() functions help load strings for this module.
     // TODO: Move the common logic into a common controller (based on the usage of ContactCaseTabCaseDetails)
     $scope.ts = ts;
-    var caseTypes = CRM.civicase.caseTypes;
-    var caseStatuses = $scope.caseStatuses = CRM.civicase.caseStatuses;
-    var activityTypes = $scope.activityTypes = CRM.civicase.activityTypes;
+    var caseTypes = CaseType.getAll();
+    var caseStatuses = $scope.caseStatuses = CaseStatus.getAll();
+    var activityTypes = $scope.activityTypes = ActivityType.getAll();
     var panelLimit = 5;
 
     $scope.areDetailsLoaded = false;
@@ -35,10 +57,10 @@
     $scope.caseTypesLength = _.size(caseTypes);
     $scope.CRM = CRM;
     $scope.tabs = [
-      {name: 'summary', label: ts('Summary')},
-      {name: 'activities', label: ts('Activities')},
-      {name: 'people', label: ts('People')},
-      {name: 'files', label: ts('Files')}
+      { name: 'summary', label: ts('Summary') },
+      { name: 'activities', label: ts('Activities') },
+      { name: 'people', label: ts('People') },
+      { name: 'files', label: ts('Files') }
     ];
 
     (function init () {
@@ -49,7 +71,7 @@
     }());
 
     $scope.addTimeline = function (name) {
-      $scope.refresh([['Case', 'addtimeline', {case_id: $scope.item.id, 'timeline': name}]]);
+      $scope.refresh([['Case', 'addtimeline', { case_id: $scope.item.id, timeline: name }]]);
     };
 
     $scope.caseGetParams = function () {
@@ -98,16 +120,16 @@
     /**
      * Formats Date in given format
      *
-     * @param {String} date ISO string
-     * @param {String} format Date format
-     * @return {String} the formatted date
+     * @param {string} date ISO string
+     * @param {string} format Date format
+     * @returns {string} the formatted date
      */
     $scope.formatDate = function (date, format) {
       return moment(date).format(format);
     };
 
     $scope.getActivityType = function (name) {
-      return _.findKey(activityTypes, {name: name});
+      return _.findKey(activityTypes, { name: name });
     };
 
     $scope.gotoCase = function (item, $event) {
@@ -118,15 +140,15 @@
         case_type_id: [caseTypes[item.case_type_id].name],
         status_id: [caseStatuses[item.status_id].name]
       };
-      var p = angular.extend({}, $route.current.params, {caseId: item.id, cf: JSON.stringify(cf)});
+      var p = angular.extend({}, $route.current.params, { caseId: item.id, cf: JSON.stringify(cf) });
       $route.updateParams(p);
     };
 
     /**
      * Decide if the sent related case is visible with respect to the pager
      *
-     * @param {int} index
-     * @return {boolean}
+     * @param {number} index index
+     * @returns {boolean} if current related case visible
      */
     $scope.isCurrentRelatedCaseVisible = function (index) {
       $scope.relatedCasesPager.range.from = (($scope.relatedCasesPager.num - 1) * $scope.relatedCasesPager.size) + 1;
@@ -145,7 +167,10 @@
     };
 
     $scope.markCompleted = function (act) {
-      $scope.refresh([['Activity', 'create', {id: act.id, status_id: act.is_completed ? 'Scheduled' : 'Completed'}]]);
+      $scope.refresh([['Activity', 'create', {
+        id: act.id,
+        status_id: act.is_completed ? 'Scheduled' : 'Completed'
+      }]]);
     };
 
     // Create activity when changing case subject
@@ -222,12 +247,12 @@
     /**
      * Get the url to print activities
      *
-     * @param {Array} selectedActivities
-     * @return {String}
+     * @param {Array} selectedActivities selected activities
+     * @returns {string} url
      */
     this.getPrintActivityUrl = function (selectedActivities) {
       selectedActivities = selectedActivities.map(function (item) {
-        return item['id'];
+        return item.id;
       }).join(',');
 
       return CRM.url('civicrm/case/customreport/print', {
@@ -249,6 +274,11 @@
       }
     }
 
+    /**
+     * Get Case parameters
+     *
+     * @returns {string} url
+     */
     function caseGetParams () {
       return getCaseQueryParams($scope.item.id, panelLimit);
     }
@@ -256,7 +286,7 @@
     /**
      * Check if window width has reached set breakpoint
      *
-     * @return {Boolean}
+     * @returns {boolean} if window width has reached set breakpoint
      */
     function checkIfWindowWidthBreakpointIsReached () {
       var WINDOW_WIDTH_BREAKPOINT = 1690;
@@ -264,6 +294,11 @@
       return $document.width() < WINDOW_WIDTH_BREAKPOINT;
     }
 
+    /**
+     *
+     * @param {object} act activity
+     * @returns {object} formatted activity
+     */
     function formatAct (act) {
       return formatActivity(act, $scope.item.id);
     }
@@ -271,8 +306,8 @@
     /**
      * Formats the case detail object in required format
      *
-     * @params {Object} - object params
-     * @return {Object}
+     * @param {object} item case
+     * @returns {object} case
      */
     function formatCaseDetails (item) {
       formatCase(item);
@@ -306,13 +341,13 @@
     /**
      * Prepare Related Cases
      *
-     * @param {Object} caseObj
+     * @param {object} caseObj case object
      */
     function prepareRelatedCases (caseObj) {
       caseObj.relatedCases = _.each(_.cloneDeep(caseObj['api.Case.getcaselist.relatedCasesByContact'].values), formatCase);
       // Add linked cases
       _.each(_.cloneDeep(caseObj['api.Case.getcaselist.linkedCases'].values), function (linkedCase) {
-        var existing = _.find(caseObj.relatedCases, {id: linkedCase.id});
+        var existing = _.find(caseObj.relatedCases, { id: linkedCase.id });
         if (existing) {
           existing.is_linked = true;
         } else {
@@ -332,8 +367,17 @@
       delete (caseObj['api.Case.getcaselist.linkedCases']);
     }
 
+    /**
+     *
+     * @param {object} definition definition
+     * @returns {object} case statuses
+     */
     function getAllowedCaseStatuses (definition) {
       var ret = _.cloneDeep(caseStatuses);
+      ret = _.chain(ret)
+        .sortBy(function (status) { return status.weight; })
+        .indexBy('weight')
+        .value();
       if (definition.statuses && definition.statuses.length) {
         _.each(_.cloneDeep(ret), function (status, id) {
           if (definition.statuses.indexOf(status.name) < 0) {
@@ -348,6 +392,8 @@
      * Watches for case changes. When the case is locked it redirects the user
      * to the case list. Also, If the case is loaded without its definition, it
      * will make a request to get the missing information.
+     *
+     * @returns {object|boolean} params
      */
     function itemWatcher () {
       var isCaseLocked = $scope.item && $scope.item.lock;
@@ -366,6 +412,9 @@
       }
     }
 
+    /**
+     * Watcher for isFocused variable
+     */
     function isFocusedWatcher () {
       $timeout(function () {
         var $actHeader = $('.act-feed-panel .panel-header');
@@ -387,6 +436,8 @@
 
     /**
      * Changes the current route and goes to the list of cases.
+     *
+     * @returns {object} params
      */
     function redirectToCaseList () {
       return $route.updateParams({ caseId: null });

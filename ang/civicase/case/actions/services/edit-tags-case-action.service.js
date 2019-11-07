@@ -3,13 +3,19 @@
 
   module.service('EditTagsCaseAction', EditTagsCaseAction);
 
-  function EditTagsCaseAction (dialogService) {
+  /**
+   *
+   * @param {object} dialogService dialog service
+   * @param {object} Tag tag
+   * @param {object} Tagset tag set
+   */
+  function EditTagsCaseAction (dialogService, Tag, Tagset) {
     /**
      * Click event handler for the Action
      *
-     * @param {Array} cases
-     * @param {Object} action
-     * @param {Function} callbackFn
+     * @param {Array} cases cases
+     * @param {object} action action
+     * @param {Function} callbackFn callback function
      */
     this.doAction = function (cases, action, callbackFn) {
       var ts = CRM.ts('civicase');
@@ -19,7 +25,7 @@
         tags: []
       };
 
-      _.each(CRM.civicase.tagsets, function (tagset) {
+      _.each(Tagset.getAll(), function (tagset) {
         model[tagset.id] = [];
         keys.push(tagset.id);
       });
@@ -33,8 +39,8 @@
         }
       });
 
-      model.tagsets = CRM.civicase.tagsets;
-      model.colorTags = CRM.civicase.tags;
+      model.tagsets = Tagset.getAll();
+      model.colorTags = Tag.getAll();
       model.ts = ts;
 
       dialogService.open('EditTags', '~/civicase/case/actions/directives/edit-tags.html', model, {
@@ -56,6 +62,9 @@
         var calls = [];
         var values = [];
 
+        /**
+         * @param tagIds
+         */
         function tagParams (tagIds) {
           var params = { entity_id: item.id, entity_table: 'civicrm_case' };
 

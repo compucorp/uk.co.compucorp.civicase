@@ -10,10 +10,14 @@
       margin: 3px 0 12px;
     }
 
+    h3::before {
+      box-shadow: none;
+    }
+
     .civicase__pipe {
       color: $crm-grayblue-darker;
       font-weight: normal;
-      margin: 0 5px;   
+      margin: 0 5px;
     }
   }
 

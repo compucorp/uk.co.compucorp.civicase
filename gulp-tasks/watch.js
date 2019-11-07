@@ -8,8 +8,13 @@
 var gulp = require('gulp');
 var civicrmScssRoot = require('civicrm-scssroot')();
 
-module.exports = function () {
-  gulp.watch('scss/**/*.scss', ['sass']);
-  gulp.watch(civicrmScssRoot.getWatchList(), ['sass']);
-  gulp.watch(['ang/**/*.js', '!ang/test/karma.conf.js'], ['test']);
+module.exports = function (done) {
+  gulp.watch('scss/**/*.scss')
+    .on('change', gulp.series('sass'));
+  gulp.watch(civicrmScssRoot.getWatchList())
+    .on('change', gulp.series('sass'));
+  gulp.watch(['ang/**/*.js', '!ang/test/karma.conf.js'])
+    .on('change', gulp.series('test'));
+
+  done();
 };

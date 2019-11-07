@@ -36,49 +36,6 @@
         selectedActivities = _.sample(activities, 2);
       });
 
-      describe('activity limit', function () {
-        var errorMessage;
-
-        beforeEach(function () {
-          spyOn(CRM, 'alert');
-          errorMessage = 'The maximum number of Activities you can select to move/copy is 200. ' +
-          'You have selected 201.' +
-          ' Please select fewer Activities from your search results and try again.';
-        });
-
-        describe('when selecting activities more than the allowed limit', function () {
-          beforeEach(function () {
-            MoveCopyActivityAction.moveCopyActivities(Array(201), 'copy');
-          });
-
-          it('shows a error message to the user', function () {
-            expect(CRM.alert).toHaveBeenCalledWith(
-              errorMessage, 'Maximum Exceeded', 'error'
-            );
-          });
-        });
-
-        describe('when selecting activities exactly same as allowed limit', function () {
-          beforeEach(function () {
-            MoveCopyActivityAction.moveCopyActivities(Array(200), 'copy');
-          });
-
-          it('shows a error message to the user', function () {
-            expect(CRM.alert).not.toHaveBeenCalledWith();
-          });
-        });
-
-        describe('when selecting activities less than the allowed limit', function () {
-          beforeEach(function () {
-            MoveCopyActivityAction.moveCopyActivities(Array(199), 'copy');
-          });
-
-          it('shows a error message to the user', function () {
-            expect(CRM.alert).not.toHaveBeenCalledWith();
-          });
-        });
-      });
-
       describe('when selecting some activities and then copy them to a new case', function () {
         beforeEach(function () {
           MoveCopyActivityAction.moveCopyActivities(selectedActivities, 'copy');
@@ -115,40 +72,25 @@
         });
 
         describe('when saving the copy action modal', function () {
-          var expectedActivitySavingCalls, selectedActivitiesIds;
+          var expectedActivitySavingCalls;
 
           beforeEach(function () {
             var saveMethod = modalOpenCall[3].buttons[0].click;
             model.case_id = _.uniqueId();
-            selectedActivitiesIds = _.map(selectedActivities, 'id');
-            expectedActivitySavingCalls = _.cloneDeep(selectedActivities)
-              .map(function (activity) {
-                delete activity.id;
-
-                activity.case_id = model.case_id;
-
-                return ['Activity', 'create', activity];
-              });
+            model.subject = 'subject';
+            expectedActivitySavingCalls = [['Activity', 'copybyquery', {
+              case_id: model.case_id,
+              subject: model.subject,
+              id: selectedActivities.map(function (activity) {
+                return activity.id;
+              })
+            }]];
 
             spyOn($.fn, 'dialog');
             spyOn($rootScope, '$broadcast');
             crmApiMock.and.returnValue($q.resolve([{ values: selectedActivities }]));
             saveMethod();
             $rootScope.$digest();
-          });
-
-          it('requests the information for the selected activities', function () {
-            expect(crmApiMock).toHaveBeenCalledWith([['Activity', 'get', {
-              sequential: 1,
-              options: {limit: 0},
-              return: [
-                'subject', 'details', 'activity_type_id', 'status_id',
-                'source_contact_name', 'target_contact_name', 'assignee_contact_name',
-                'activity_date_time', 'is_star', 'original_id', 'tag_id.name', 'tag_id.description',
-                'tag_id.color', 'file_id', 'is_overdue', 'case_id', 'priority_id'
-              ],
-              id: { 'IN': selectedActivitiesIds }
-            }]]);
           });
 
           it('saves a new copy of each of the activities and assign them to the selected case', function () {
@@ -236,49 +178,6 @@
         selectedActivities = _.sample(activities, 2);
       });
 
-      describe('activity limit', function () {
-        var errorMessage;
-
-        beforeEach(function () {
-          spyOn(CRM, 'alert');
-          errorMessage = 'The maximum number of Activities you can select to move/copy is 200. ' +
-          'You have selected 201.' +
-          ' Please select fewer Activities from your search results and try again.';
-        });
-
-        describe('when selecting activities more than the allowed limit', function () {
-          beforeEach(function () {
-            MoveCopyActivityAction.moveCopyActivities(Array(201), 'move');
-          });
-
-          it('shows a error message to the user', function () {
-            expect(CRM.alert).toHaveBeenCalledWith(
-              errorMessage, 'Maximum Exceeded', 'error'
-            );
-          });
-        });
-
-        describe('when selecting activities exactly same as allowed limit', function () {
-          beforeEach(function () {
-            MoveCopyActivityAction.moveCopyActivities(Array(200), 'move');
-          });
-
-          it('shows a error message to the user', function () {
-            expect(CRM.alert).not.toHaveBeenCalledWith();
-          });
-        });
-
-        describe('when selecting activities less than the allowed limit', function () {
-          beforeEach(function () {
-            MoveCopyActivityAction.moveCopyActivities(Array(199), 'move');
-          });
-
-          it('shows a error message to the user', function () {
-            expect(CRM.alert).not.toHaveBeenCalledWith();
-          });
-        });
-      });
-
       describe('when selecting some activities and then move them to a new case', function () {
         beforeEach(function () {
           MoveCopyActivityAction.moveCopyActivities(selectedActivities, 'move');
@@ -315,38 +214,25 @@
         });
 
         describe('when saving the move action modal', function () {
-          var expectedActivitySavingCalls, selectedActivitiesIds;
+          var expectedActivitySavingCalls;
 
           beforeEach(function () {
             var saveMethod = modalOpenCall[3].buttons[0].click;
             model.case_id = _.uniqueId();
-            selectedActivitiesIds = _.map(selectedActivities, 'id');
-            expectedActivitySavingCalls = _.cloneDeep(selectedActivities)
-              .map(function (activity) {
-                activity.case_id = model.case_id;
-
-                return ['Activity', 'create', activity];
-              });
+            model.subject = 'subject';
+            expectedActivitySavingCalls = [['Activity', 'movebyquery', {
+              case_id: model.case_id,
+              subject: model.subject,
+              id: selectedActivities.map(function (activity) {
+                return activity.id;
+              })
+            }]];
 
             spyOn($.fn, 'dialog');
             spyOn($rootScope, '$broadcast');
             crmApiMock.and.returnValue($q.resolve([{ values: selectedActivities }]));
             saveMethod();
             $rootScope.$digest();
-          });
-
-          it('requests the information for the selected activities', function () {
-            expect(crmApiMock).toHaveBeenCalledWith([['Activity', 'get', {
-              sequential: 1,
-              options: {limit: 0},
-              return: [
-                'subject', 'details', 'activity_type_id', 'status_id',
-                'source_contact_name', 'target_contact_name', 'assignee_contact_name',
-                'activity_date_time', 'is_star', 'original_id', 'tag_id.name', 'tag_id.description',
-                'tag_id.color', 'file_id', 'is_overdue', 'case_id', 'priority_id'
-              ],
-              id: { 'IN': selectedActivitiesIds }
-            }]]);
           });
 
           it('moves each of the activities and assign them to the selected case', function () {
