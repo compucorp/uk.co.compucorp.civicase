@@ -55,12 +55,20 @@
       function loadActivityForm (event, activity) {
         var context = activity.case_id ? 'case' : 'activity';
 
-        CRM.loadForm(CRM.url('civicrm/activity', {
-          action: 'view',
-          id: activity.id,
-          reset: 1,
-          context: context
-        }), { target: $(element).find('.civicase__activity-panel__core_container') });
+        if (activity.type === 'Applicant Review') {
+          CRM.loadForm(CRM.url('civicrm/awardreview', {
+            action: 'view',
+            id: activity.id,
+            reset: 1
+          }), { target: $(element).find('.civicase__activity-panel__core_container') });
+        } else {
+          CRM.loadForm(CRM.url('civicrm/activity', {
+            action: 'view',
+            id: activity.id,
+            reset: 1,
+            context: context
+          }), { target: $(element).find('.civicase__activity-panel__core_container') });
+        }
 
         element.find('.crm-submit-buttons a.edit').addClass('btn btn-primary');
       }
