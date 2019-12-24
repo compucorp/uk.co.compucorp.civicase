@@ -53,24 +53,36 @@
        * @param {object} activity activity
        */
       function loadActivityForm (event, activity) {
+        CRM.loadForm(getActivityFormURL(activity), {
+          target: $(element).find('.civicase__activity-panel__core_container')
+        });
+
+        element.find('.crm-submit-buttons a.edit').addClass('btn btn-primary');
+      }
+
+      /**
+       * Get the url for the activity form
+       *
+       * @param {object} activity activity object
+       * @returns {string} url
+       */
+      function getActivityFormURL (activity) {
         var context = activity.case_id ? 'case' : 'activity';
 
         if (activity.type === 'Applicant Review') {
-          CRM.loadForm(CRM.url('civicrm/awardreview', {
+          return CRM.url('civicrm/awardreview', {
             action: 'view',
             id: activity.id,
             reset: 1
-          }), { target: $(element).find('.civicase__activity-panel__core_container') });
+          });
         } else {
-          CRM.loadForm(CRM.url('civicrm/activity', {
+          return CRM.url('civicrm/activity', {
             action: 'view',
             id: activity.id,
             reset: 1,
             context: context
-          }), { target: $(element).find('.civicase__activity-panel__core_container') });
+          });
         }
-
-        element.find('.crm-submit-buttons a.edit').addClass('btn btn-primary');
       }
 
       /**

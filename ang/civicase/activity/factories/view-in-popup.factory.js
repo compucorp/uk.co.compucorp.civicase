@@ -30,6 +30,10 @@
         activityFormUrl = 'civicrm/case/activity';
       }
 
+      if (activity.type === 'Applicant Review') {
+        activityFormUrl = 'civicrm/awardreview';
+      }
+
       if (checkIfDraftEmailOrPDFActivity(activity)) {
         activityFormUrl = 'civicrm/activity/email/add';
       }
