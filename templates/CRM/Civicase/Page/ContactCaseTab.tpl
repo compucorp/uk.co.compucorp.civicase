@@ -6,9 +6,11 @@
     (function(angular, $, _) {
       angular.module('civicaseContactTab', ['civicase']);
       angular.module('civicaseContactTab').config(function($routeProvider) {
-        $routeProvider.when('/', {
+        $routeProvider.when('/:caseTypeCategory?', {
           reloadOnSearch: false,
-          template: '<civicase-contact-case-tab></civicase-contact-case-tab>'
+          template: function (params) {
+            return '<civicase-contact-case-tab case-type-category="' + params.caseTypeCategory + '"></civicase-contact-case-tab>';
+          }
         });
       });
     })(angular, CRM.$, CRM._);

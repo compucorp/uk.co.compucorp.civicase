@@ -35,6 +35,7 @@
           jasmine.objectContaining({
             cases: ['Case', 'getcaselist', jasmine.objectContaining({
               'status_id.grouping': 'Opened',
+              'case_type_id.case_type_category': 2,
               contact_id: mockContactId,
               is_deleted: 0
             })]
@@ -47,6 +48,7 @@
           jasmine.objectContaining({
             cases: ['Case', 'getcaselist', jasmine.objectContaining({
               'status_id.grouping': 'Closed',
+              'case_type_id.case_type_category': 2,
               contact_id: mockContactId,
               is_deleted: 0
             })]
@@ -59,6 +61,7 @@
           jasmine.objectContaining({
             cases: ['Case', 'getcaselist', jasmine.objectContaining({
               case_manager: mockContactId,
+              'case_type_id.case_type_category': 2,
               is_deleted: 0
             })]
           })
@@ -71,7 +74,7 @@
      */
     function initController () {
       $scope = $rootScope.$new();
-
+      $scope.caseTypeCategory = 2;
       $controller('CivicaseContactCaseTabController', { $scope: $scope });
     }
   });

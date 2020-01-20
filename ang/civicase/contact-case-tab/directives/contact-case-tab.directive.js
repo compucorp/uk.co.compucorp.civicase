@@ -6,7 +6,9 @@
       restrict: 'EA',
       controller: 'CivicaseContactCaseTabController',
       templateUrl: '~/civicase/contact-case-tab/directives/contact-case-tab.directive.html',
-      scope: {}
+      scope: {
+        caseTypeCategory: '='
+      }
     };
   });
 
@@ -43,6 +45,7 @@
         title: 'Open Cases',
         filterParams: {
           'status_id.grouping': 'Opened',
+          'case_type_id.case_type_category': $scope.caseTypeCategory,
           contact_id: $scope.contactId,
           is_deleted: 0
         },
@@ -52,6 +55,7 @@
         title: 'Resolved cases',
         filterParams: {
           'status_id.grouping': 'Closed',
+          'case_type_id.case_type_category': $scope.caseTypeCategory,
           contact_id: $scope.contactId,
           is_deleted: 0
         },
@@ -61,6 +65,7 @@
         title: 'Other cases for this contact',
         filterParams: {
           case_manager: $scope.contactId,
+          'case_type_id.case_type_category': $scope.caseTypeCategory,
           is_deleted: 0
         },
         showContactRole: true
