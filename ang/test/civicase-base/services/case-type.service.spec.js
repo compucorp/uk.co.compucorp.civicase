@@ -42,7 +42,7 @@
         returnedCaseTypes = CaseType.getAll({ includeInactive: true });
       });
 
-      it('returns all the active case types', () => {
+      it('returns all the case types including inactive ones', () => {
         expect(returnedCaseTypes).toEqual(CaseTypesData);
       });
     });
