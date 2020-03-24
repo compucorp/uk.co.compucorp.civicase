@@ -168,7 +168,7 @@
         sequential: 1,
         case_type_category: $scope.caseFilter['case_type_id.case_type_category'],
         id: $scope.caseFilter.case_type_id,
-        is_active: 1
+        is_active: $scope.caseFilter['case_type_id.is_active'] || '1'
       };
 
       return crmApi('CaseType', 'get', params)

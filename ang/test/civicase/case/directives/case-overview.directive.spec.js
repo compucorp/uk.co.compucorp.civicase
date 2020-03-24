@@ -57,7 +57,7 @@
           sequential: 1,
           case_type_category: 'cases',
           id: [1, 2],
-          is_active: 1
+          is_active: '1'
         });
       });
     });
