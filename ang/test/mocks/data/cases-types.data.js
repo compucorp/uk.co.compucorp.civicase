@@ -196,7 +196,8 @@
       },
       icon: 'icon',
       color: 'color',
-      case_type_category: '1'
+      case_type_category: '1',
+      is_active: '1'
     },
     2: {
       id: '2',
@@ -324,7 +325,8 @@
           }
         ]
       },
-      case_type_category: '2'
+      case_type_category: '2',
+      is_active: '1'
     },
     3: {
       id: '3',
@@ -408,7 +410,16 @@
      * @param {object} newCaseTypes a map of case types indexed by their id.
      */
     this.add = function (newCaseTypes) {
-      caseTypesMock = _.assign({}, caseTypesMock, newCaseTypes);
+      var newCaseTypesMock = _.assign({}, caseTypesMock, newCaseTypes);
+
+      CRM['civicase-base'].caseTypes = _.clone(newCaseTypesMock);
+    };
+
+    /**
+     * Restores the mock case types to the default ones. This avoids different
+     * spec files from overriding values to other files.
+     */
+    this.restore = function () {
       CRM['civicase-base'].caseTypes = _.clone(caseTypesMock);
     };
 
