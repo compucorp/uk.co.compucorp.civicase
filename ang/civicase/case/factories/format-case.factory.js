@@ -2,7 +2,7 @@
   var module = angular.module('civicase');
 
   module.factory('formatCase', function (formatActivity, ContactsCache, CaseStatus, CaseType) {
-    var caseTypes = CaseType.getAll();
+    var caseTypes = CaseType.getAll({ includeInactive: true });
     var caseStatuses = CaseStatus.getAll();
 
     return function (item) {
