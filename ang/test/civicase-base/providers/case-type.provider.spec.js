@@ -2,18 +2,37 @@
 
 ((_) => {
   describe('Case Type', () => {
-    let CaseType, CaseTypesData, CaseTypesMockData;
+    let CaseType, CaseTypesData, CaseTypesMockData, CaseTypesMockDataProvider;
 
-    describe('when getting all case types', () => {
+    afterEach(() => {
+      CaseTypesMockDataProvider.restore();
+    });
+
+    describe('when getting all active case types', () => {
+      let activeCaseTypes, returnedCaseTypes;
+
+      beforeEach(() => initModulesAndServices());
+
+      beforeEach(() => {
+        activeCaseTypes = _.pick(CaseTypesData, (caseType) => caseType.is_active === '1');
+        returnedCaseTypes = CaseType.getAll();
+      });
+
+      it('returns all the active case types', () => {
+        expect(returnedCaseTypes).toEqual(activeCaseTypes);
+      });
+    });
+
+    describe('when getting all case including inactive ones', () => {
       let returnedCaseTypes;
 
       beforeEach(() => initModulesAndServices());
 
       beforeEach(() => {
-        returnedCaseTypes = CaseType.getAll();
+        returnedCaseTypes = CaseType.getAll({ includeInactive: true });
       });
 
-      it('returns all the case types', () => {
+      it('returns all the case types including inactive ones', () => {
         expect(returnedCaseTypes).toEqual(CaseTypesData);
       });
     });
@@ -111,7 +130,14 @@
      * the services required by the spec file.
      */
     function initModulesAndServices () {
-      module('civicase', 'civicase.data');
+      module('civicase', 'civicase.data', (_CaseTypesMockDataProvider_) => {
+        CaseTypesMockDataProvider = _CaseTypesMockDataProvider_;
+
+        CaseTypesMockDataProvider.add({
+          title: 'inactive case type',
+          is_active: '0'
+        });
+      });
 
       inject((_CaseType_, _CaseTypesMockData_) => {
         CaseType = _CaseType_;
