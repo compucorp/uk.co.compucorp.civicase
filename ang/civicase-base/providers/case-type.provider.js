@@ -8,6 +8,9 @@
    */
   function CaseTypeServiceProvider () {
     var caseTypes = CRM['civicase-base'].caseTypes;
+    var DEFAULT_GET_ALL_OPTIONS = {
+      includeInactive: false
+    };
 
     this.$get = $get;
     this.getAll = getAll;
@@ -40,10 +43,23 @@
     }
 
     /**
+     * @param {object} options configuration options to use for filtering
+     *   the case types.
      * @returns {object[]} a list of case types.
      */
-    function getAll () {
-      return caseTypes;
+    function getAll (options) {
+      options = _.defaults({}, options, DEFAULT_GET_ALL_OPTIONS);
+
+      return options.includeInactive
+        ? caseTypes
+        : getAllActive();
+    }
+
+    /**
+     * @returns {object[]} all active case types.
+     */
+    function getAllActive () {
+      return _.pick(caseTypes, _.matches({ is_active: '1' }));
     }
 
     /**
