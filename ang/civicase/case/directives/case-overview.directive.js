@@ -126,7 +126,8 @@
     function getFilteredCaseTypes (caseFilters) {
       return CaseTypeFilterer.filter({
         case_type_category: caseFilters['case_type_id.case_type_category'],
-        id: caseFilters.case_type_id
+        id: caseFilters.case_type_id,
+        is_active: $scope.caseFilter['case_type_id.is_active'] || '1'
       });
     }
 
