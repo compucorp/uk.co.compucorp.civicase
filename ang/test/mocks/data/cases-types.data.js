@@ -391,7 +391,8 @@
           }
         ]
       },
-      case_type_category: '1'
+      case_type_category: '1',
+      is_active: '1'
     }
   };
 
