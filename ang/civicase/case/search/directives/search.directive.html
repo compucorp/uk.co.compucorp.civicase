@@ -110,6 +110,15 @@
           {{ ts('Deleted Cases') }}
         </label>
       </div>
+      <div
+        civicase-checkbox
+        civicase-checkbox-false-value="1"
+        civicase-checkbox-true-value="0"
+        ng-if="checkPerm('administer CiviCase') && isEnabled('case_type_id.is_active')"
+        ng-model="filters['case_type_id.is_active']"
+      >
+        {{ts('Show Cases from disabled Case Types')}}
+      </div>
       <div ng-if="isEnabled('start_date')" class="civicase__case-filter-form-elements">
         <label>{{ ts('Case Start Date') }}</label>
         <civicase-ui-date-range date-range="filters.start_date"></civicase-ui-date-range>
