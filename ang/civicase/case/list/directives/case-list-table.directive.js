@@ -356,6 +356,8 @@
         if (val || typeof val === 'boolean') {
           if (filter === 'case_type_category') {
             params['case_type_id.case_type_category'] = val;
+          } else if (filter === 'case_type_id.is_active') {
+            params[filter] = val;
           } else if (typeof val === 'number' || typeof val === 'boolean') {
             params[filter] = val;
           } else if (typeof val === 'object' && !$.isArray(val)) {
