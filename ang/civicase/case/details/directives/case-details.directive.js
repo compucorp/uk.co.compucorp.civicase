@@ -58,7 +58,7 @@
     // The ts() and hs() functions help load strings for this module.
     // TODO: Move the common logic into a common controller (based on the usage of ContactCaseTabCaseDetails)
     $scope.ts = ts;
-    var caseTypes = CaseType.getAll();
+    var caseTypes = CaseType.getAll({ includeInactive: true });
     var caseStatuses = $scope.caseStatuses = CaseStatus.getAll();
     var activityTypes = $scope.activityTypes = ActivityType.getAll(true);
     var panelLimit = 5;
