@@ -58,7 +58,6 @@
   function caseActivityCardController ($filter, $scope, CaseType,
     CaseTypeCategory, dialogService, civicaseCrmApi, crmBlocker, crmStatus,
     DateHelper, ts, viewInPopup, isTruthy) {
-    var caseTypes = CaseType.getAll();
     var caseTypeCategories = CaseTypeCategory.getAll();
 
     $scope.areFromAndToFieldsVisible = false;
@@ -187,7 +186,7 @@
      */
     function getCaseDetailUrl () {
       var caseTypeId = $scope.activity.case.case_type_id;
-      var caseType = caseTypes[caseTypeId];
+      var caseType = CaseType.getById(caseTypeId);
       var caseTypeCategory = caseTypeCategories[caseType.case_type_category];
       var caseDetailUrl = 'civicrm/case/a/?' +
         $.param({ case_type_category: caseTypeCategory.name }) +

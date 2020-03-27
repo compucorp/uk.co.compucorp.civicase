@@ -77,6 +77,8 @@
     var activityStartingOffset = 0;
     var caseId = $scope.params ? $scope.params.case_id : null;
     var pageNum = { down: 0, up: 0 };
+    var activitySets = $scope.caseTypeId &&
+      CaseType.getById($scope.caseTypeId).definition.activitySets;
 
     $scope.filters = {};
     $scope.isMonthNavVisible = true;
@@ -93,7 +95,7 @@
     $scope.showFullContactNameOnActivityFeed = showFullContactNameOnActivityFeed;
     $scope.showSpinner = { up: false, down: false };
     $scope.caseTimelines = $scope.caseTypeId
-      ? _.sortBy(CaseType.getAll()[$scope.caseTypeId].definition.activitySets, 'label')
+      ? _.sortBy(activitySets, 'label')
       : [];
 
     (function init () {

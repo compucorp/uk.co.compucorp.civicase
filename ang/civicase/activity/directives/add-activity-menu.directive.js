@@ -17,7 +17,8 @@
 
   module.controller('civicaseAddActivityMenuController', function ($scope,
     getCaseQueryParams, CaseType, ActivityType, ActivityForms, isTruthy) {
-    var definition = CaseType.getAll()[$scope.case.case_type_id].definition;
+    var caseType = CaseType.getById($scope.case.case_type_id);
+    var definition = caseType.definition;
 
     (function init () {
       if (_.isEmpty($scope.case.activity_count)) {
