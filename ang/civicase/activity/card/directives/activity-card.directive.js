@@ -191,7 +191,12 @@
       var caseDetailUrl = 'civicrm/case/a/?' +
         $.param({ case_type_category: caseTypeCategory.name }) +
         '#/case/list';
-      var angularParams = $.param({ caseId: $scope.activity.case_id });
+      var angularParams = $.param({
+        caseId: $scope.activity.case_id,
+        cf: JSON.stringify({
+          'case_type_id.is_active': caseType.is_active
+        })
+      });
 
       return $filter('civicaseCrmUrl')(caseDetailUrl) + '?' + angularParams;
     }

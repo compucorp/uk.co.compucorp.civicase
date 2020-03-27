@@ -75,7 +75,8 @@
 
           expectedCaseDetailsUrl = getExpectedCaseDetailsUrl(
             $scope.activity.case_id,
-            caseTypeCategory.name
+            caseTypeCategory.name,
+            caseType.is_active
           );
 
           initDirective();
@@ -88,13 +89,19 @@
         /**
          * @param {number} caseId the case id.
          * @param {number} caseTypeCategoryName the category the case belongs to.
+         * @param {boolean} isCaseTypeActive the active status of the case type.
          * @returns {string} the expected URL to the case details for the given case.
          */
-        function getExpectedCaseDetailsUrl (caseId, caseTypeCategoryName) {
+        function getExpectedCaseDetailsUrl (caseId, caseTypeCategoryName, isCaseTypeActive) {
           const caseDetailUrl = 'civicrm/case/a/?' +
             $.param({ case_type_category: caseTypeCategoryName }) +
             '#/case/list';
-          const angularParams = $.param({ caseId });
+          const angularParams = $.param({
+            caseId,
+            cf: JSON.stringify({
+              'case_type_id.is_active': isCaseTypeActive
+            })
+          });
 
           return $filter('civicaseCrmUrl')(caseDetailUrl) + '?' + angularParams;
         }

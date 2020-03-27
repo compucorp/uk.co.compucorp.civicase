@@ -19,6 +19,7 @@
    * @param {object} $route route object
    * @param {object} $sce sce service
    * @param {object} $scope scope object
+   * @param {object} CaseType Case Type service
    * @param {object} ContactsCache contacts cache service
    * @param {object} civicaseCrmApi crm api service
    * @param {object} formatCase format case service
@@ -27,7 +28,7 @@
    * @param {object} ActivityStatusType activity status type service
    */
   function dashboardTabController ($location, $rootScope, $route, $sce, $scope,
-    ContactsCache, civicaseCrmApi, formatCase, formatActivity, ts, ActivityStatusType) {
+    CaseType, ContactsCache, civicaseCrmApi, formatCase, formatActivity, ts, ActivityStatusType) {
     var ACTIVITIES_QUERY_PARAMS_DEFAULTS = {
       contact_id: 'user_contact_id',
       is_current_revision: 1,
@@ -202,7 +203,14 @@
      * @param {object} caseObj case object
      */
     function casesCustomClick (caseObj) {
-      $location.path('case/list').search('caseId', caseObj.id);
+      var caseType = CaseType.getById(caseObj.case_type_id);
+
+      $location
+        .path('case/list')
+        .search('caseId', caseObj.id)
+        .search('cf', JSON.stringify({
+          'case_type_id.is_active': caseType.is_active
+        }));
     }
 
     /**
