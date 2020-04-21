@@ -14,8 +14,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: install php linter
-      run: cd bin && ./install-php-linter && cd ..
+    - name: run phpcs
+      run: |
+        cd bin && ./install-php-linter && cd ..
+        git 
+        pwd
+        ls -la
+        ./bin/phpcs.phar $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.php')
 
     - name: run phpcs 
-      run: ./bin/phpcs.phar $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.php')
+      run: 
