@@ -7,8 +7,8 @@ on:
     branches: [ master ]
 
 env:
-    BASE_BRANCH: ${{ github.base_ref }}
-    
+    TARGET_BRANCH: ${{ github.base_ref }}
+
 jobs:
   run-inter-phpcs:
 
@@ -21,9 +21,9 @@ jobs:
       run: |
         cd bin && ./install-php-linter && cd ..
         echo $GITHUB_REF
-        echo "Pull request's base branch is: ${BASE_BRANCH}"
+        echo "Pull request's base branch is: ${TARGET_BRANCH}"
         echo "GITHUB_HEAD_REF : ${GITHUB_HEAD_REF}"
         echo "GITHUB_BASE_REF:  ${GITHUB_BASE_REF}""
         echo running on branch ${GITHUB_REF##*/}
-        ./bin/phpcs.phar --help
-       # ./bin/phpcs.phar $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.php')
+        $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
+        ./bin/phpcs.phar $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.php')

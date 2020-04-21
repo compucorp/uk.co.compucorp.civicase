@@ -6,7 +6,7 @@ namespace Civi\CCase;
 class Utils {
 
   /**
-   * Gets a list of case roles (relationship) types foe each case type.
+   * Gets  a list of case roles (relationship) types foe each case type.
    *
    * @param String $type of relationship.
    *
