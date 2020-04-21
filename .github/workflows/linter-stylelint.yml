@@ -15,10 +15,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Run npm Install
+    - name: Run npm install
       run: npm install --save-dev
 
-    - name: Run stylelint
+    - name: Run stylelint linter
       env:
         TARGET_BRANCH: ${{ github.base_ref }}
       run: |
