@@ -32,11 +32,26 @@ jobs:
         cd /compucorp
         ls -la
 
+    - name: show github default enviromment variables
+      run: |
+        echo ${GITHUB_REPOSITORY}
+        echo ${GITHUB_WORKSPACE}
+        echo ${{github.workspace}}
+
     - name: Create compuclient databases 
       run: |
         echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=root --host=mysql
         mysql -u root --password=root --host=mysql compuclient_civicrm < /compucorp/civicrm.sql
         mysql -u root --password=root --host=mysql compuclient_drupal < /compucorp/drupal.sql 
+
+    - name: Prepare CiviCase extension
+      run : |
+        rm -R /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/$CI_PROJECT_NAME
+        cp -R $REPO_DIR /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/$CI_PROJECT_NAME
+        cp /compucorp/civicrm.settings.php /compucorp/build/compuclient/sites/default
+        cp /compucorp/settings.php /compucorp/build/compuclient/sites/default
+        cd /compucorp/build/compuclient && drush cc civicrm
+        cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/$CI_PROJECT_NAME 
 
     - name: Run npm install
       run: npm install 
