@@ -15,6 +15,7 @@ jobs:
         image: mysql:5.7
         env:
           MYSQL_ROOT_PASSWORD: root
+          MYSQL_HOSTNAME: mysql-host
         ports:
         - 3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -40,9 +41,9 @@ jobs:
 
     - name: Create compuclient databases 
       run: |
-        echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=root --host=mysql
-        mysql -u root --password=root --host=mysql compuclient_civicrm < /compucorp/civicrm.sql
-        mysql -u root --password=root --host=mysql compuclient_drupal < /compucorp/drupal.sql 
+        echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=root --host=mysql-host
+        mysql -u root --password=root --host=mysql-host compuclient_civicrm < /compucorp/civicrm.sql
+        mysql -u root --password=root --host=mysql-host compuclient_drupal < /compucorp/drupal.sql 
 
     - name: Prepare CiviCase extension
       run : |
