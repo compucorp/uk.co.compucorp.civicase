@@ -8,9 +8,13 @@ jobs:
   run-karma-test:
 
     runs-on: ubuntu-latest
+    container: erawat/civicrm-extension-test:empty-1.0.2
 
     steps:
     - uses: actions/checkout@v2
 
     - name: Run karma test
-      run: npm install && npx gulp test
+      run: npm install 
+    
+    - nane: Run npx gulp test
+      run: npx gulp test
