@@ -25,4 +25,4 @@ jobs:
         echo "Pull request's target branch is: ${TARGET_BRANCH}"
         git branch
         git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php'
-       ./bin/phpcs.phar $(git diff /origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
+       ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
