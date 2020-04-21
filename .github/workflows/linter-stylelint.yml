@@ -4,8 +4,8 @@ on:
   pull_request:
     branches: 
      - "**"
-    ##paths:
-    ## - "**/*.scss" 
+    paths:
+     - "**/*.scss" 
 
 jobs:
   run-inter-phpcs:
@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Run NPM Install
+    - name: Run npm Install
       run: npm install --save-dev
 
     - name: Run stylelint
