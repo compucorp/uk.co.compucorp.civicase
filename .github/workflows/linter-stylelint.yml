@@ -1,0 +1,26 @@
+name: Linter-stylelint
+
+on:
+  pull_request:
+    branches: 
+     - "**"
+    ##paths:
+    ## - "**/*.scss" 
+
+jobs:
+  run-inter-phpcs:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run NPM Install
+      run: ipm install --save-dev
+
+    - name: Run stylelint
+      env:
+        TARGET_BRANCH: ${{ github.base_ref }}
+      run: |
+        git fetch -n origin ${TARGET_BRANCH}
+        npx stylelint --config .stylelintrc $(git diff diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.scss')
