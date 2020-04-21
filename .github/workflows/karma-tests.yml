@@ -1,4 +1,4 @@
-name: Karma-test
+name: Karma-tests
 
 on:
   pull_request:
@@ -12,5 +12,5 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Run test
+    - name: Run karma test
       run: npm install && npx gulp test
