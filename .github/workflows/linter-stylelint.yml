@@ -8,7 +8,7 @@ on:
      - "**/*.scss" 
 
 jobs:
-  run-inter-phpcs:
+  run-linter-stylelint:
 
     runs-on: ubuntu-latest
 

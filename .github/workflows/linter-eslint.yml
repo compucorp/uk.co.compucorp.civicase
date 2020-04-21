@@ -8,7 +8,7 @@ on:
      - "**/*.js" 
 
 jobs:
-  run-inter-phpcs:
+  run-linter-eslint:
 
     runs-on: ubuntu-latest
 

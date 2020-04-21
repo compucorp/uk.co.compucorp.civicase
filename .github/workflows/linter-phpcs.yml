@@ -8,7 +8,7 @@ on:
      - "**/*.php" 
 
 jobs:
-  run-inter-phpcs:
+  run-linter-phpcs:
 
     runs-on: ubuntu-latest
 
