@@ -21,6 +21,3 @@ jobs:
         pwd
         ls -la
         ./bin/phpcs.phar $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.php')
-
-    - name: run phpcs 
-      run: 
