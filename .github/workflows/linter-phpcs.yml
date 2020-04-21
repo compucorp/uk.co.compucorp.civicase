@@ -1,8 +1,8 @@
 name: Linters
 
 on:
-  push:
-    branches: [ master ]
+  #push:
+  #  branches: [ master ]
   pull_request:
     branches: [ master ]
 
@@ -19,8 +19,6 @@ jobs:
         cd bin && ./install-php-linter && cd ..
         pwd
         ls -la
-        git status
-        git branch
         echo $GITHUB_REF
         echo running on branch ${GITHUB_REF##*/}
         ./bin/phpcs.phar --help
