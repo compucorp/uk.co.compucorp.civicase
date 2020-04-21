@@ -23,5 +23,7 @@ jobs:
         TARGET_BRANCH: ${{ github.base_ref }}
       run: |
         pwd
+        ls -la
+        git status
         echo ${TARGET_BRANCH}
       #  ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
