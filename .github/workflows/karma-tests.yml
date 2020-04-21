@@ -1,4 +1,4 @@
-name: Karmar-test
+name: Karma-test
 
 on:
   pull_request:
