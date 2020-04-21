@@ -23,4 +23,4 @@ jobs:
         TARGET_BRANCH: ${{ github.base_ref }}
       run: |
         git fetch -n origin ${TARGET_BRANCH}
-    - npx eslint --max-warnings=0 -c .eslintrc.json $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.js') 
+        npx eslint --max-warnings=0 -c .eslintrc.json $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.js') 
