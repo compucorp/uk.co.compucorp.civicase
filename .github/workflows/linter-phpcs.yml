@@ -17,12 +17,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: INntall php linter
+    - name: Install php linter
       run: cd bin && ./install-php-linter && cd ..
 
     - name: Run phpcs linter
       run: |
         echo "Pull request's target branch is: ${TARGET_BRANCH}"
-        git branch
        # git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php'
-       # ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
+       ./bin/phpcs.phar --help
+       ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
