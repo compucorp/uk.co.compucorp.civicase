@@ -21,11 +21,6 @@ jobs:
     - name: Run phpcs linter
       env:
         TARGET_BRANCH: ${{ github.base_ref }}
-        MERGE_BRANCH:  ${{ github.head_ref }}
       run: |
-        pwd
-        ls -la
-        git branch
         git fetch -n origin ${TARGET_BRANCH}
-        git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php'
-      #  ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
+        ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
