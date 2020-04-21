@@ -5,7 +5,7 @@ use CRM_Civicase_ExtensionUtil as E;
  * CaseContactLock.create API specification (optional)
  * This is used for documentation and validation.
  *
- * @param array $spec
+ * @param array $spec test
  *   description of fields supported by this API call
  * @return void
  * @see http://wiki.civicrm.org/confluence/display/CRMDOC/API+Architecture+Standards
