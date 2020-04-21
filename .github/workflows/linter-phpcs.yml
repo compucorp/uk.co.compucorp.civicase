@@ -6,8 +6,6 @@ on:
   pull_request:
     branches: [ master ]
 
-env:
-    TARGET_BRANCH: ${{ github.base_ref }}
 
 jobs:
   run-inter-phpcs:
@@ -21,4 +19,6 @@ jobs:
       run: cd bin && ./install-php-linter && cd ..
 
     - name: Run phpcs linter
+      env:
+        TARGET_BRANCH: ${{ github.base_ref }}
       run: ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
