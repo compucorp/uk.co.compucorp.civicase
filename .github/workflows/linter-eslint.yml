@@ -1,0 +1,26 @@
+name: Linter-eslint
+
+on:
+  pull_request:
+    branches: 
+     - "**"
+    #paths:
+    # - "**/*.js" 
+
+jobs:
+  run-inter-phpcs:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run npm Install
+      run: npm install --save-dev
+
+    - name: Run eslint
+      env:
+        TARGET_BRANCH: ${{ github.base_ref }}
+      run: |
+        git fetch -n origin ${TARGET_BRANCH}
+    - npx eslint --max-warnings=0 -c .eslintrc.json $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.js') 
