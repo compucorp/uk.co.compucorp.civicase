@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: INstall php linter
+    - name: INntall php linter
       run: cd bin && ./install-php-linter && cd ..
 
     - name: Run phpcs linter
@@ -25,4 +25,4 @@ jobs:
         echo "Pull request's target branch is: ${TARGET_BRANCH}"
         git branch
         git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php'
-        ./bin/phpcs.phar $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.php')
+       ./bin/phpcs.phar $(git diff /origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
