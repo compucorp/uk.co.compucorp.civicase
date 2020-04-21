@@ -21,4 +21,5 @@ jobs:
         ls -la
         git status
         git branch
-        ./bin/phpcs.phar $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.php')
+        ./bin/phpcs.phar 
+       # ./bin/phpcs.phar $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.php')
