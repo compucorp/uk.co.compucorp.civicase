@@ -20,9 +20,17 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
+
+    - name: Check where we are
+      run: | 
+        pwd
+        ls -la
+
     - name: Create compuclient databases 
       run: |
-        echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=${MYSQL_ROOT_PASSWORD} --host=mysql-host
+        echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=${MYSQL_ROOT_PASSWORD} --host=mysql
+        mysql -u root --password=${MYSQL_ROOT_PASSWORD} --host=mysql compuclient_civicrm < /compucorp/civicrm.sql
+        mysql -u root --password=${MYSQL_ROOT_PASSWORD} --host=mysql compuclient_drupal < /compucorp/drupal.sql 
 
     - uses: actions/checkout@v2
 
