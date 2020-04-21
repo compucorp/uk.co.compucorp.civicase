@@ -21,5 +21,6 @@ jobs:
         ls -la
         git status
         git branch
+        echo $GITHUB_REF
         ./bin/phpcs.phar --help
        # ./bin/phpcs.phar $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.php')
