@@ -5,7 +5,7 @@
 
   /**
    * Configures the list of activity forms services that will be available
-   * when displaying a form for a particular activity.
+   * when displaying a form for a particular activity. Test 
    *
    * @param {object} ActivityFormsProvider the activity forms provider.
    */
