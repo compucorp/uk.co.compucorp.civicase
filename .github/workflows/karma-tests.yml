@@ -1,0 +1,16 @@
+name: Karmar-test
+
+on:
+  pull_request:
+    branches: 
+     - "**"
+jobs:
+  run-karma-test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run test
+      run: npm install && npx gulp test
