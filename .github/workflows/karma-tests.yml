@@ -46,12 +46,15 @@ jobs:
 
     - name: Prepare CiviCase extension
       run : |
-        rm -R /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/$CI_PROJECT_NAME
-        cp -R $REPO_DIR /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/$CI_PROJECT_NAME
+        rm -R /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
+        cp -R ../uk.co.compucorp.civicase /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         cp /compucorp/civicrm.settings.php /compucorp/build/compuclient/sites/default
         cp /compucorp/settings.php /compucorp/build/compuclient/sites/default
         cd /compucorp/build/compuclient && drush cc civicrm
-        cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/$CI_PROJECT_NAME 
+        cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
+
+    - name: check where we are again.
+      run : pwd
 
     - name: Run npm install
       run: npm install 
