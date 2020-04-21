@@ -1,0 +1,19 @@
+name: Linters
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  run-inter-phpcs:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run linter
+      run: cd bin && ./install-php-linter && cd ..
+      run: ./bin/phpcs.phar $(git diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME --no-commit-id --name-only -r -- '*.php')
