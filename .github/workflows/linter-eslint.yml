@@ -4,8 +4,8 @@ on:
   pull_request:
     branches: 
      - "**"
-    #paths:
-    # - "**/*.js" 
+    paths:
+     - "**/*.js" 
 
 jobs:
   run-inter-phpcs:
