@@ -21,4 +21,6 @@ jobs:
     - name: Run phpcs linter
       env:
         TARGET_BRANCH: ${{ github.base_ref }}
-      run: ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
+      run: |
+        pwd
+      #  ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
