@@ -21,6 +21,8 @@ jobs:
 
     steps:
 
+    - uses: actions/checkout@v2
+
     - name: Check where we are
       run: | 
         pwd
@@ -31,8 +33,6 @@ jobs:
         echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=root --host=mysql
         mysql -u root --password=root --host=mysql compuclient_civicrm < /compucorp/civicrm.sql
         mysql -u root --password=root --host=mysql compuclient_drupal < /compucorp/drupal.sql 
-
-    - uses: actions/checkout@v2
 
     - name: Run npm install
       run: npm install 
