@@ -24,6 +24,7 @@ jobs:
       run: |
         pwd
         ls -la
-        git status
+        git branch
         echo ${TARGET_BRANCH}
+        git diff origin/${TARGET_BRANCH} --name-only
       #  ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
