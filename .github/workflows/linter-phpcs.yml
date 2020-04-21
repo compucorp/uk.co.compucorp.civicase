@@ -17,8 +17,6 @@ jobs:
     - name: Run phpcs linter
       run: |
         cd bin && ./install-php-linter && cd ..
-        pwd
-        ls -la
         echo $GITHUB_REF
         echo running on branch ${GITHUB_REF##*/}
         ./bin/phpcs.phar --help
