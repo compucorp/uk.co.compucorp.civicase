@@ -8,7 +8,7 @@ class CRM_Civicase_Activity_ContactActivitiesSelector {
   const API_DEFAULT_LIMIT = 25;
 
   /**
-   * Get Acitivities for a Contact.
+   * Get Acitivities for a Contact. Test
    *
    * Returns all the activities for a given contact. The contact must be
    * either the creator, the client, or be one of the assignees for the
