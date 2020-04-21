@@ -4,8 +4,9 @@ on:
   #push:
   #  branches: [ master ]
   pull_request:
-    branches: [ master ]
-
+    branches: "**"
+    paths:
+     - "**/*.php" 
 
 jobs:
   run-inter-phpcs:
