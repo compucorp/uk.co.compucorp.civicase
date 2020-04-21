@@ -8,8 +8,7 @@ on:
 
 env:
     BASE_BRANCH: ${{ github.base_ref }}
-  if: github.event_name == 'pull_request'
-
+    
 jobs:
   run-inter-phpcs:
 
