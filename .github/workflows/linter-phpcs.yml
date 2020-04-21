@@ -23,7 +23,6 @@ jobs:
     - name: Run phpcs linter
       run: |
         echo "Pull request's target branch is: ${TARGET_BRANCH}"
-       # git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php'
-       pwd
+        pwd
        ./bin/phpcs.phar --help
        ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
