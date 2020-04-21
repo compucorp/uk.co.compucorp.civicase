@@ -26,6 +26,6 @@ jobs:
         pwd
         ls -la
         git branch
-        git checkout ${MERGE_BRANCH}
+        git fetch -n origin ${TARGET_BRANCH}
         git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php'
       #  ./bin/phpcs.phar $(git diff origin/${TARGET_BRANCH} --no-commit-id --name-only -r -- '*.php')
