@@ -24,14 +24,8 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - name: Check where we are
-      run: | 
-        pwd
-        ls -la
-        cd /
-        ls -la
-        cd /compucorp
-        ls -la
+    - name: Run npm install
+      run:  npm install
 
     - name: show github default enviromment variables
       run: |
@@ -45,19 +39,14 @@ jobs:
         mysql -u root --password=root --host=mysql compuclient_civicrm < /compucorp/civicrm.sql
         mysql -u root --password=root --host=mysql compuclient_drupal < /compucorp/drupal.sql 
 
-    - name: Prepare CiviCase extension
+    - name: Prepare CiviCase Extension inside Compuclient
       run : |
         rm -R /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         cp -R ../uk.co.compucorp.civicase /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
-        cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         drush cc all && drush cc civicrm
-        cv vars:show
 
-    - name: check where we are again.
-      run : pwd
-
-    - name: Run npm install
-      run: npm install 
-    
-    - name: Run npx gulp test
-      run: npx gulp test
+    - name: Run npx gulp test inside Compuclient
+      run: | 
+      pwd
+      cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
+      npx gulp test
