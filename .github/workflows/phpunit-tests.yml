@@ -1,0 +1,47 @@
+name: PHPUnit-tests
+
+on:
+  pull_request:
+    branches: 
+     - "**"
+jobs:
+  run-phpunit-test:
+
+    runs-on: ubuntu-latest
+    container: erawat/civicrm-extension-test:empty-1.0.4
+    
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+        ports:
+        - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - name: Run npm install
+      run:  npm install
+
+    - name: Create compuclient databases 
+      run: |
+        echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=root --host=mysql
+        mysql -u root --password=root --host=mysql compuclient_civicrm < /compucorp/civicrm.sql
+        mysql -u root --password=root --host=mysql compuclient_drupal < /compucorp/drupal.sql 
+        cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
+
+    - name: Prepare CiviCase Extension inside Compuclient
+      run : |
+        rm -R /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
+        cp -R ../uk.co.compucorp.civicase /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
+        cd /compucorp/build/compuclient/
+        drush cc all && drush cc civicrm
+
+    - name: Run PHP Unit tests
+      run: | 
+        pwd
+        cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
+        env CIVICRM_UF=UnitTests phpunit5 --coverage-text --colors=never --log-junit  $REPO_DIR/phpunit_report.xml
