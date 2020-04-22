@@ -53,11 +53,11 @@ jobs:
         cp /compucorp/settings.php /compucorp/build/compuclient/sites/default
         cat /compucorp/build/compuclient/sites/default/settings.php
         cd /compucorp/build/compuclient
-        ls -la
         cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
-        ls -la
-        pwd
+        cv var:show
+        drush cc all
         drush cc civicrm
+
 
     - name: check where we are again.
       run : pwd
