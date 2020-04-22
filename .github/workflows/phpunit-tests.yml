@@ -40,4 +40,4 @@ jobs:
     - name: Run PHP Unit tests
       run: | 
         cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
-        env CIVICRM_UF=UnitTests phpunit5 --coverage-text --colors=never --configuration phpunit.xml.dist
+        env CIVICRM_UF=UnitTests phpunit5 
