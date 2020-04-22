@@ -39,8 +39,6 @@ jobs:
         cd profiles/compuclient/modules/contrib/civicrm
         gitify 
     
-    -
-
     - name: Run PHP Unit tests
       run: | 
         cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
