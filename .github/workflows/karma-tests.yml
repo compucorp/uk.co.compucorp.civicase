@@ -27,12 +27,6 @@ jobs:
     - name: Run npm install
       run:  npm install
 
-    - name: show github default enviromment variables
-      run: |
-        echo ${GITHUB_REPOSITORY}
-        echo ${GITHUB_WORKSPACE}
-        echo ${{github.workspace}}
-
     - name: Create compuclient databases 
       run: |
         echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=root --host=mysql
