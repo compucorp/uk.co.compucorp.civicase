@@ -8,7 +8,7 @@ jobs:
   run-karma-test:
 
     runs-on: ubuntu-latest
-    container: erawat/civicrm-extension-test:empty-1.0.2
+    container: erawat/civicrm-extension-test:empty-1.0.3
     
     services:
       mysql:
@@ -41,9 +41,9 @@ jobs:
 
     - name: Create compuclient databases 
       run: |
-        echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=root --host=mysql-host
-        mysql -u root --password=root --host=mysql-host compuclient_civicrm < /compucorp/civicrm.sql
-        mysql -u root --password=root --host=mysql-host compuclient_drupal < /compucorp/drupal.sql 
+        echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=root --host=mysql
+        mysql -u root --password=root --host=mysql compuclient_civicrm < /compucorp/civicrm.sql
+        mysql -u root --password=root --host=mysql compuclient_drupal < /compucorp/drupal.sql 
 
     - name: Prepare CiviCase extension
       run : |
