@@ -49,11 +49,6 @@ jobs:
       run : |
         rm -R /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         cp -R ../uk.co.compucorp.civicase /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
-      #  cp /compucorp/civicrm.settings.php /compucorp/build/compuclient/sites/default
-      #  cp /compucorp/settings.php /compucorp/build/compuclient/sites/default
-      #  cat /compucorp/build/compuclient/sites/default/settings.php
-      #  cd /compucorp/build/compuclient
-      #  cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         drush cc all
         drush cc civicrm
         cv vars:show
