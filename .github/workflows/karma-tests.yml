@@ -54,9 +54,9 @@ jobs:
         cat /compucorp/build/compuclient/sites/default/settings.php
         cd /compucorp/build/compuclient
         cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
-        cv var:show
         drush cc all
         drush cc civicrm
+        cv vars:show
 
 
     - name: check where we are again.
