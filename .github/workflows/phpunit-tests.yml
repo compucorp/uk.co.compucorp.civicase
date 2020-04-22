@@ -23,9 +23,6 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - name: Run npm install
-      run:  npm install
-
     - name: Create compuclient databases 
       run: |
         echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=root --host=mysql
@@ -43,4 +40,4 @@ jobs:
     - name: Run PHP Unit tests
       run: | 
         cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
-        env CIVICRM_UF=UnitTests phpunit5 --coverage-text --colors=never -C phpunit.xml-dist
+        env CIVICRM_UF=UnitTests phpunit5 --coverage-text --colors=never --configuration phpunit.xml-dist
