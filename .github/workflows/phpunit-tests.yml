@@ -38,6 +38,8 @@ jobs:
         drush cc all && drush cc civicrm
         cd profiles/compuclient/modules/contrib/civicrm
         gitify Drupal
+        cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/bin
+        ./setup.sh
     
     - name: Run PHP Unit tests
       run: | 
