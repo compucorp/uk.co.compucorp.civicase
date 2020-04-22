@@ -39,7 +39,9 @@ jobs:
         cd profiles/compuclient/modules/contrib/civicrm
         gitify Drupal
         cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/bin
+        cat setup.conf
         ./setup.sh
+
     
     - name: Run PHP Unit tests
       run: | 
