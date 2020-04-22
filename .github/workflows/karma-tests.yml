@@ -50,4 +50,5 @@ jobs:
     - name: Run npx gulp test inside Compuclient
       run: | 
         pwd
+        cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         npx gulp test
