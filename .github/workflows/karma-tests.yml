@@ -38,15 +38,16 @@ jobs:
         echo "create database compuclient_civicrm; create database compuclient_drupal;" | mysql -u root --password=root --host=mysql
         mysql -u root --password=root --host=mysql compuclient_civicrm < /compucorp/civicrm.sql
         mysql -u root --password=root --host=mysql compuclient_drupal < /compucorp/drupal.sql 
+        cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
 
     - name: Prepare CiviCase Extension inside Compuclient
       run : |
         rm -R /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         cp -R ../uk.co.compucorp.civicase /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
+        cd /compucorp/build/compuclient/
         drush cc all && drush cc civicrm
 
     - name: Run npx gulp test inside Compuclient
       run: | 
         pwd
-        cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         npx gulp test
