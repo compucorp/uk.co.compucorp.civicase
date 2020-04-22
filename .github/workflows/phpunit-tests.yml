@@ -36,6 +36,10 @@ jobs:
         cp -R ../uk.co.compucorp.civicase /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         cd /compucorp/build/compuclient/
         drush cc all && drush cc civicrm
+        cd profiles/compuclient/modules/contrib/civicrm
+        gitify 
+    
+    -
 
     - name: Run PHP Unit tests
       run: | 
