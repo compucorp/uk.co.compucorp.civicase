@@ -42,7 +42,6 @@ jobs:
         cat setup.conf
         ./setup.sh
 
-    
     - name: Run PHP Unit tests
       run: | 
         cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
