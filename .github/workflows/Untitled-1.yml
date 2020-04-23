@@ -1,0 +1,5 @@
+    #  cp /compucorp/civicrm.settings.php /compucorp/build/compuclient/sites/default
+      #  cp /compucorp/settings.php /compucorp/build/compuclient/sites/default
+      #  cat /compucorp/build/compuclient/sites/default/settings.php
+      #  cd /compucorp/build/compuclient
+      #  cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase

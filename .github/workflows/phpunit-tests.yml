@@ -35,7 +35,7 @@ jobs:
         rm -R /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         cp -R ../uk.co.compucorp.civicase /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         cd /compucorp/build/compuclient/
-        drush cc all && drush cc civicrm
+        drush updb -y && drush cvupdb -y && drush cc all && drush cc civicrm
         cd profiles/compuclient/modules/contrib/civicrm
         gitify Drupal
         cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/bin
