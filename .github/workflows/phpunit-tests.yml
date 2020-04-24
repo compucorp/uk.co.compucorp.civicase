@@ -8,7 +8,7 @@ jobs:
   run-phpunit-test:
 
     runs-on: ubuntu-latest
-    container: erawat/civicrm-extension-test:drupal-1.0.0
+    container: erawat/civicrm-extension-test:compuclient-1.0.0
     
     services:
       mysql:
