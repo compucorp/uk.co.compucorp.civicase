@@ -36,7 +36,9 @@ jobs:
         cp -R ../uk.co.compucorp.civicase /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         cd /compucorp/build/compuclient/
         drush updb -y && drush cvupdb -y && drush cc all && drush cc civicrm
-        cd /compucorp/build/profiles/compuclient/modules/contrib/civicrm/bin/ 
+        cd /compucorp/build/profiles/compuclient/modules/contrib/civicrm/ && gitify 
+        cp /compucorp/setup.conf /compucorp/build/profiles/compuclient/modules/contrib/civicrm/bin/setup.conf
+        cd /compucorp/build/profiles/compuclient/modules/contrib/civicrm/bin
         pwd
         ls -la
         cat setup.conf
