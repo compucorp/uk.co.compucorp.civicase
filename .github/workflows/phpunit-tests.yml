@@ -37,8 +37,9 @@ jobs:
         cd /compucorp/build/compuclient/
         drush updb -y && drush cvupdb -y && drush cc all && drush cc civicrm
         cd /compucorp/build/profiles/compuclient/modules/contrib/civicrm/bin/ 
+        pwd
         ls -la
-        cat .setup.conf
+        cat setup.conf
         ./setup.sh
 
     - name: Run PHP Unit tests
