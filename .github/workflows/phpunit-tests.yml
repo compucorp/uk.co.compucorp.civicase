@@ -8,7 +8,7 @@ jobs:
   run-phpunit-test:
 
     runs-on: ubuntu-latest
-    container: erawat/civicrm-extension-test:empty-1.0.4
+    container: erawat/civicrm-extension-test:drupal-1.0.0
     
     services:
       mysql:
@@ -36,13 +36,8 @@ jobs:
         cp -R ../uk.co.compucorp.civicase /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
         cd /compucorp/build/compuclient/
         drush updb -y && drush cvupdb -y && drush cc all && drush cc civicrm
-        cd profiles/compuclient/modules/contrib/civicrm
-        gitify Drupal
-        cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/bin
-        cat setup.conf
-        ./setup.sh
 
     - name: Run PHP Unit tests
       run: | 
         cd /compucorp/build/compuclient/profiles/compuclient/modules/contrib/civicrm/ext/uk.co.compucorp.civicase
-        env CIVICRM_UF=UnitTests phpunit5 
+        phpunit5 
