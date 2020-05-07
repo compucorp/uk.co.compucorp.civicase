@@ -32,19 +32,49 @@ class CRM_Civicase_Page_ContactCaseTab extends CRM_Core_Page {
       return parent::run();
     }
 
-    $angularManager = new Manager(CRM_Core_Resources::singleton());
-    $civicaseModule = $angularManager->getModule('civicase');
-    $translations = $angularManager->getTranslatedStrings('civicase');
+    $translations = $this->getModuleAndDependenciesTranslations('civicase');
 
-    // Adds translated civicase settings and strings to global CRM var:
-    CRM_Core_Resources::singleton()->addSetting([
-      'civicase' => $civicaseModule['settings'],
-    ]);
-    CRM_Core_Resources::singleton()->addSetting([
-      'strings::uk.co.compucorp.civicase' => $translations,
-    ]);
+    CRM_Core_Resources::singleton()->addSetting($translations);
 
     return parent::run();
+  }
+
+  /**
+   * Returns the translation settings for the given module and its dependencies.
+   *
+   * Given a module's name, it will find all the translations for the module and
+   * its dependencies.
+   *
+   * @param string $mainModuleName
+   *   The module's name to fetch translations from.
+   *
+   * @return array
+   *   A list of translation settings.
+   */
+  private function getModuleAndDependenciesTranslations($mainModuleName) {
+    $angularManager = new Manager(CRM_Core_Resources::singleton());
+    $moduleAndDependenciesNames = $angularManager->resolveDependencies([$mainModuleName]);
+
+    foreach ($angularManager->resolveDependencies(['civicase']) as $moduleName) {
+      $module = $angularManager->getModule($moduleName);
+      $translationDomainName = 'strings::' . $module['ext'];
+      $moduleTranslations = $angularManager->getTranslatedStrings($moduleName);
+
+      if (empty($moduleTranslations)) {
+        continue;
+      }
+
+      if (!isset($translations[$translationDomainName])) {
+        $translations[$translationDomainName] = [];
+      }
+
+      $translations[$translationDomainName] = array_merge(
+        $translations[$translationDomainName],
+        $moduleTranslations
+      );
+    }
+
+    return $translations;
   }
 
 }

@@ -7,7 +7,12 @@
           <p crm-editable="item" data-field="subject" data-type="text" data-placeholder="Click to add subject" crm-form-success="onChangeSubject($data)"></p>
         </div>
         <div class="civicase__summary-tab__description">
-          <p crm-editable="item" data-field="details" data-type="textarea" data-placeholder="This case doesn't currently have a description. Click here to add now"></p>
+          <p
+            crm-editable="item"
+            data-field="details"
+            data-type="textarea"
+            data-placeholder="{{ ts('This case doesn\'t currently have a description. Click here to add now.') }}">
+          </p>
         </div>
         <div class="civicase__summary-tab__last-updated">
           <span class="civicase__summary-tab__last-updated__label">{{ts("Case last updated: ")}}</span>
