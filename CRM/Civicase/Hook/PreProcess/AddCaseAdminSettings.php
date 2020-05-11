@@ -21,10 +21,42 @@ class CRM_Civicase_Hook_PreProcess_AddCaseAdminSettings {
     }
 
     $settings = $form->getVar('_settings');
-    $settings['civicaseAllowCaseLocks'] = CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME;
-    $this->setCaseCategoryWebformSettings($form, $settings);
 
+    $this->setCaseCategoryWebformSettings($form, $settings);
+    $this->addCivicaseSettingsToForm($settings);
     $form->setVar('_settings', $settings);
+  }
+
+  /**
+   * Takes civicase setting names and adds them to the admin form.
+   *
+   * The settings are taken from the civicase settings file. This function is
+   * needed to properly display these settings on the form.
+   *
+   * @param array $settings
+   *   Settings array.
+   */
+  private function addCivicaseSettingsToForm(array &$settings) {
+    $civicaseSettings = $this->getCiviCaseSettings();
+    $settingKeys = array_keys($civicaseSettings);
+
+    foreach ($settingKeys as $settingKey) {
+      $settings[$settingKey] = CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME;
+    }
+  }
+
+  /**
+   * Returns the list of settings defined in the civicase settings file.
+   *
+   * @return array
+   *   The civicase settings.
+   */
+  private function getCiviCaseSettings() {
+    $civicasePath = (new CRM_Extension_System())
+      ->getFullContainer()
+      ->getPath('uk.co.compucorp.civicase');
+
+    return require $civicasePath . '/settings/CiviCase.setting.php';
   }
 
   /**
@@ -38,11 +70,6 @@ class CRM_Civicase_Hook_PreProcess_AddCaseAdminSettings {
   private function setCaseCategoryWebformSettings(CRM_Core_Form &$form, array &$settings) {
     $caseSetting = new CaseCategorySetting();
     $caseCategoryWebFormSetting = $caseSetting->getForWebform();
-    $settingKeys = array_keys($caseCategoryWebFormSetting);
-
-    foreach ($settingKeys as $settingKey) {
-      $settings[$settingKey] = CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME;
-    }
 
     $form->assign('caseCategoryWebFormSetting', $caseCategoryWebFormSetting);
   }
