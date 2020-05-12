@@ -51,6 +51,7 @@ expose_settings($options, [
 function expose_settings(array &$options, array $defaults) {
   $options['allowMultipleCaseClients'] = (bool) Civi::settings()->get('civicaseAllowMultipleClients');
   $options['allowCaseLocks'] = (bool) Civi::settings()->get('civicaseAllowCaseLocks');
+  $options['allowLinkedCasesPage'] = (bool) Civi::settings()->get('civicaseAllowLinkedCasesPage');
   $options['caseTypeCategoriesWhereUserCanAccessActivities'] =
     CRM_Civicase_Helper_CaseCategory::getWhereUserCanAccessActivities();
   $options['currentCaseCategory'] = $defaults['caseCategoryName']
