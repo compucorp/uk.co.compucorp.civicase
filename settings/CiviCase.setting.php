@@ -47,7 +47,7 @@ $setting = [
     'title' => 'Allow linked cases page',
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => '',
+    'description' => 'This will allow linked cases to be viewed on a separate tab.',
     'help_text' => '',
   ],
 ];
