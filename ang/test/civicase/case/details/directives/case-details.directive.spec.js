@@ -374,6 +374,41 @@
         .returnValue($q.resolve({ values: CasesData.get() }));
     }));
 
+    describe('linked cases', () => {
+      let caseItem;
+
+      beforeEach(() => {
+        caseItem = _.cloneDeep(CasesData.get().values[0]);
+      });
+      describe('when the linked cases are displayed on a tab', () => {
+        beforeEach(() => {
+          initController(caseItem, {
+            allowLinkedCasesPage: true
+          });
+
+          $scope.pushCaseData(caseItem);
+        });
+
+        it('hides the linked cases panel from the case summary tab', () => {
+          expect($scope.areRelatedCasesVisibleOnSummaryTab).toBe(false);
+        });
+      });
+
+      describe('when the linked cases are not displayed on a tab', () => {
+        beforeEach(() => {
+          initController(caseItem, {
+            allowLinkedCasesPage: false
+          });
+
+          $scope.pushCaseData(caseItem);
+        });
+
+        it('displays the linked cases panel on the case summary tab', () => {
+          expect($scope.areRelatedCasesVisibleOnSummaryTab).toBe(true);
+        });
+      });
+    });
+
     describe('viewing the case', function () {
       describe('when requesting to view a case that is missing its details', function () {
         beforeEach(function () {
@@ -453,13 +488,14 @@
      *
      * @param {object} caseItem a case item to pass to the controller. Defaults to
      * a case from the mock data.
+     * @param {object} dependencies a list of mock dependencies to pass to the controller.
      */
-    function initController (caseItem) {
+    function initController (caseItem, dependencies) {
       $scope = $rootScope.$new();
 
-      $controller('civicaseCaseDetailsController', {
+      $controller('civicaseCaseDetailsController', _.extend({}, {
         $scope: $scope
-      });
+      }, dependencies));
       $scope.item = caseItem || _.cloneDeep(CasesData.get().values[0]);
       $scope.$digest();
     }
