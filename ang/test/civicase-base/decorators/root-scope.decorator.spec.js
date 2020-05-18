@@ -12,6 +12,10 @@
     }));
 
     describe('when the app starts', () => {
+      it('appends the `ts` service to the root scope', () => {
+        expect($rootScope.civicaseTs).toBe(ts);
+      });
+
       it('appends the `ts` service as `civicaseTs` to the root scope', () => {
         expect($rootScope.civicaseTs).toBe(ts);
       });
