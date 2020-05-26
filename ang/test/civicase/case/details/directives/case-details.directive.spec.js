@@ -380,6 +380,7 @@
       beforeEach(() => {
         caseItem = _.cloneDeep(CasesData.get().values[0]);
       });
+
       describe('when the linked cases are displayed on a tab', () => {
         beforeEach(() => {
           initController(caseItem, {
