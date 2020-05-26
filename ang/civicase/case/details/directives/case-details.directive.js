@@ -204,6 +204,9 @@
         $scope.allowedCaseStatuses = getAllowedCaseStatuses($scope.item.definition);
         $scope.areRelatedCasesVisibleOnSummaryTab = !allowLinkedCasesTab &&
           $scope.item.relatedCases.length > 0;
+
+        $scope.$broadcast('updateCaseData');
+        $scope.$emit('civicase::ActivitiesCalendar::reload');
       }
     };
 
