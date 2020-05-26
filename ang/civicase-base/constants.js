@@ -3,7 +3,7 @@
 
   module
     .constant('allowCaseLocks', configuration.allowCaseLocks)
-    .constant('allowLinkedCasesPage', configuration.allowLinkedCasesPage)
+    .constant('allowLinkedCasesTab', configuration.allowLinkedCasesTab)
     .constant('allowMultipleCaseClients', configuration.allowMultipleCaseClients)
     .constant('currentCaseCategory', configuration.currentCaseCategory);
 })(angular, CRM['civicase-base']);

@@ -383,7 +383,7 @@
       describe('when the linked cases are displayed on a tab', () => {
         beforeEach(() => {
           initController(caseItem, {
-            allowLinkedCasesPage: true
+            allowLinkedCasesTab: true
           });
 
           $scope.pushCaseData(caseItem);
@@ -397,7 +397,7 @@
       describe('when the linked cases are not displayed on a tab', () => {
         beforeEach(() => {
           initController(caseItem, {
-            allowLinkedCasesPage: false
+            allowLinkedCasesTab: false
           });
 
           $scope.pushCaseData(caseItem);

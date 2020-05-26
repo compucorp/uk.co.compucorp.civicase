@@ -1,7 +1,7 @@
 (function (angular) {
   var module = angular.module('civicase');
 
-  module.config(function (allowLinkedCasesPage, CaseDetailsTabsProvider, tsProvider) {
+  module.config(function (allowLinkedCasesTab, CaseDetailsTabsProvider, tsProvider) {
     var ts = tsProvider.$get();
     var caseTabsConfig = [
       { name: 'Summary', label: ts('Summary'), weight: 1 },
@@ -10,7 +10,7 @@
       { name: 'Files', label: ts('Files'), weight: 4 }
     ];
 
-    if (allowLinkedCasesPage) {
+    if (allowLinkedCasesTab) {
       caseTabsConfig.push({ name: 'LinkedCases', label: ts('Linked Cases'), weight: 5 });
     }
 

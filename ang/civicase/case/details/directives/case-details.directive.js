@@ -25,7 +25,7 @@
    * @param {object} $rootScope $rootScope
    * @param {object} $scope $scope
    * @param {object} $document $document
-   * @param {boolean} allowLinkedCasesPage allow linked case page setting value
+   * @param {boolean} allowLinkedCasesTab allow linked case page setting value
    * @param {object} BulkActions bulk actions service
    * @param {object[]} CaseDetailsTabs list of case tabs
    * @param {object} civicaseCrmApi civicase crm api service
@@ -45,7 +45,7 @@
    * @param {object} CaseDetailsSummaryBlocks case details summary blocks
    */
   function civicaseCaseDetailsController ($location, $sce, $rootScope, $scope,
-    $document, allowLinkedCasesPage, BulkActions, CaseDetailsTabs, civicaseCrmApi,
+    $document, allowLinkedCasesTab, BulkActions, CaseDetailsTabs, civicaseCrmApi,
     formatActivity, formatCase, getActivityFeedUrl, getCaseQueryParams, $route,
     $timeout, crmStatus, CasesUtils, PrintMergeCaseAction, ts, ActivityType,
     CaseStatus, CaseType, CaseDetailsSummaryBlocks) {
@@ -202,7 +202,7 @@
         delete ($scope.item.tag_id);
         _.assign($scope.item, formatCaseDetails(data));
         $scope.allowedCaseStatuses = getAllowedCaseStatuses($scope.item.definition);
-        $scope.areRelatedCasesVisibleOnSummaryTab = !allowLinkedCasesPage &&
+        $scope.areRelatedCasesVisibleOnSummaryTab = !allowLinkedCasesTab &&
           $scope.item.relatedCases.length > 0;
       }
     };

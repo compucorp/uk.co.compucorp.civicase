@@ -27,7 +27,7 @@
 
       describe('when the linked cases tab is enabled', () => {
         beforeEach(module('civicase-base', ($provide) => {
-          $provide.constant('allowLinkedCasesPage', true);
+          $provide.constant('allowLinkedCasesTab', true);
         }));
 
         beforeEach(module(spyOnCaseDetailsProvider, 'civicase'));
@@ -44,7 +44,7 @@
 
       describe('when the linked cases tab is not enabled', () => {
         beforeEach(module('civicase-base', ($provide) => {
-          $provide.constant('allowLinkedCasesPage', false);
+          $provide.constant('allowLinkedCasesTab', false);
         }));
 
         beforeEach(module(spyOnCaseDetailsProvider, 'civicase'));
