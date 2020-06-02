@@ -56,6 +56,10 @@ class CRM_Civicase_Hook_PageRun_CaseCategoryCustomGroupListing {
   /**
    * Determines if the hook will run.
    *
+   * Runs when listing the custom field groups. Since the create and update
+   * form use the same page we check that the action URL parameter is not
+   * defined so we avoid running the hook for those forms.
+   *
    * @param object $page
    *   Page Object.
    *
@@ -63,7 +67,9 @@ class CRM_Civicase_Hook_PageRun_CaseCategoryCustomGroupListing {
    *   returns a boolean to determine if hook will run or not.
    */
   private function shouldRun($page) {
-    return $page instanceof CRM_Custom_Page_Group;
+    $hasNoAction = empty(CRM_Utils_Request::retrieve('action', 'String'));
+
+    return $page instanceof CRM_Custom_Page_Group && $hasNoAction;
   }
 
 }
