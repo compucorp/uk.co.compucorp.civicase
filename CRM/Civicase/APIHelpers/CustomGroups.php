@@ -6,15 +6,18 @@
 class CRM_Civicase_APIHelpers_CustomGroups {
 
   /**
-   * Returns a list of all active custom groups.
+   * Returns a list of active custom groups for the given entity.
+   *
+   * @param string $entityName
+   *   The name of the entity to get active groups for.
    *
    * @return array
    *   Custom Group Api response.
    */
-  public static function getAllActiveGroups() {
+  public static function getAllActiveGroupsForEntity($entityName) {
     return civicrm_api3('CustomGroup', 'get', [
-      'extends' => $params['entity_type'],
-      'options' => $params['options'],
+      'extends' => $entityName,
+      'options' => ['limit' => 0],
       'is_active' => 1,
     ]);
   }
