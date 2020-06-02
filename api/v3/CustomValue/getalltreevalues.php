@@ -11,7 +11,7 @@
  * @param array $spec
  *   Description of fields supported by this API call.
  */
-function _civicrm_api3_custom_value_getallgroupstreevalues_spec(array &$spec) {
+function _civicrm_api3_custom_value_getalltreevalues_spec(array &$spec) {
   CRM_Civicase_APIHelpers_CustomValues::getTreeValuesSpecs($spec);
 }
 
@@ -24,7 +24,7 @@ function _civicrm_api3_custom_value_getallgroupstreevalues_spec(array &$spec) {
  * @return array
  *   API results.
  */
-function civicrm_api3_custom_value_getallgroupstreevalues(array $params) {
+function civicrm_api3_custom_value_getalltreevalues(array $params) {
   $result = [];
   $treeParams = CRM_Civicase_APIHelpers_CustomValues::getTreeParams($params);
   $allGroups = CRM_Civicase_APIHelpers_CustomGroups::getAllActiveGroupsForEntity(
