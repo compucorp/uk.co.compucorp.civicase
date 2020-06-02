@@ -35,20 +35,20 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplay {
    */
   private function setDefaultFormValueForCaseCategory(CRM_Core_Form &$form) {
     $defaults = $form->getVar('_defaults');
-    $extends = $defaults['extends'][0];
     $extendsId = $defaults['extends_entity_column_id'];
     $caseTypeCategories = (CRM_Case_BAO_CaseType::buildOptions('case_type_category', 'validate'));
-    if ($extends === 'Case' && !empty($extendsId)) {
-      $defaults['extends'][0] = $caseTypeCategories[$extendsId];
-      $hierSelect = $form->getElement('extends');
-      $hierSelectElements = $hierSelect->getElements();
-      $hierSelectElements[1]->_options = [];
-      $hierSelect->setValue([$caseTypeCategories[$extendsId]]);
-    }
+    $defaults['extends'][0] = $caseTypeCategories[$extendsId];
+    $hierSelect = $form->getElement('extends');
+    $hierSelectElements = $hierSelect->getElements();
+    $hierSelectElements[1]->_options = [];
+
+    $hierSelect->setValue([$caseTypeCategories[$extendsId]]);
   }
 
   /**
    * Determines if the hook will run.
+   *
+   * Runs when extending case entities.
    *
    * @param string $formName
    *   Form name.
@@ -59,7 +59,13 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplay {
    *   returns a boolean to determine if hook will run or not.
    */
   private function shouldRun($formName, CRM_Core_Form $form) {
-    return $formName == CRM_Custom_Form_Group::class && $form->getVar('_action') != CRM_Core_Action::ADD;
+    $defaults = $form->getVar('_defaults');
+    $extends = $defaults['extends'][0];
+
+    return $formName == CRM_Custom_Form_Group::class &&
+      $form->getVar('_action') != CRM_Core_Action::ADD &&
+      $extends === 'Case' &&
+      !empty($defaults['extends_entity_column_id']);
   }
 
 }
