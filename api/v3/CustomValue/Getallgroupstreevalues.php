@@ -27,7 +27,9 @@ function _civicrm_api3_custom_value_getallgroupstreevalues_spec(array &$spec) {
 function civicrm_api3_custom_value_getallgroupstreevalues(array $params) {
   $result = [];
   $treeParams = CRM_Civicase_APIHelpers_CustomValues::getTreeParams($params);
-  $allGroups = CRM_Civicase_APIHelpers_CustomGroups::getAllActiveGroups();
+  $allGroups = CRM_Civicase_APIHelpers_CustomGroups::getAllActiveGroupsForEntity(
+    $params['entity_type']
+  );
 
   foreach ($allGroups['values'] as $customGroup) {
     $tree = CRM_Core_BAO_CustomGroup::getTree(
