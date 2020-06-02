@@ -8,7 +8,7 @@
 class CRM_Civicase_Hook_BuildForm_AddStyleFieldToCaseCustomGroups {
 
   /**
-   * Includes "Case" in the list of entities that suppport the "style" field.
+   * Includes Case entities to the list of that suppport the "style" field.
    *
    * For core these entities are exclusively related to contacts, hence we need
    * to override the `contactTypes` template var.
@@ -27,10 +27,15 @@ class CRM_Civicase_Hook_BuildForm_AddStyleFieldToCaseCustomGroups {
     }
 
     $contactTypes = json_decode($form->get_template_vars('contactTypes'));
-    $contactTypes[] = 'Case';
+    $caseCategories = CRM_Civicase_Helper_CaseCategory::getCaseCategories();
+    $caseEntityNames = array_column($caseCategories, 'name');
+    $caseEntityNames[] = 'Case';
+    $contactTypes = array_merge($contactTypes, $caseEntityNames);
 
     $form->assign('contactTypes', json_encode($contactTypes));
-
+    CRM_Core_Resources::singleton()->addSetting([
+      'caseEntityNames' => $caseEntityNames,
+    ]);
     CRM_Core_Resources::singleton()
       ->addScriptFile('uk.co.compucorp.civicase', 'js/custom-group-form.js');
   }
