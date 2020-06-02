@@ -22,24 +22,24 @@ class CRM_Civicase_APIHelpers_CustomGroups {
   /**
    * Returns the custom group ID for the given custom group name.
    *
-   * Does not support multiple custom group names. Returns NULL if no group
-   * was found.
+   * Returns NULL if no group was found.
+   *
+   * @param string $customGroupName
+   *   A custom group name.
    *
    * @return int|null
    *   A custom group id or NULL.
    */
-  public static function getGroupIdFromSingleGroupName($params) {
-    if (!empty($params['custom_group.name']) && !is_array($params['custom_group.name'])) {
-      try {
-        $result = civicrm_api3('CustomGroup', 'getsingle', [
-          'return' => ['id'],
-          'name' => $params['custom_group.name'],
-        ]);
+  public static function getIdForGroupName($customGroupName) {
+    try {
+      $result = civicrm_api3('CustomGroup', 'getsingle', [
+        'return' => ['id'],
+        'name' => $customGroupName,
+      ]);
 
-        return !empty($result['id']) ? $result['id'] : NULL;
-      }
-      catch (CiviCRM_API3_Exception $e) {
-      }
+      return !empty($result['id']) ? $result['id'] : NULL;
+    }
+    catch (CiviCRM_API3_Exception $e) {
     }
 
     return NULL;

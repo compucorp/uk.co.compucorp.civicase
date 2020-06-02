@@ -28,7 +28,11 @@ function _civicrm_api3_custom_value_gettreevalues_spec(array &$spec) {
  */
 function civicrm_api3_custom_value_gettreevalues(array $params) {
   $result = [];
-  $groupID = CRM_Civicase_APIHelpers_CustomGroups::getGroupIdFromSingleGroupName($params);
+  $isRequestingSingleGroupId = !empty($params['custom_group.name']) &&
+    !is_array($params['custom_group.name']);
+  $groupID = $isRequestingSingleGroupId
+    ? CRM_Civicase_APIHelpers_CustomGroups::getIdForGroupName($params['custom_group.name'])
+    : NULL;
   $treeParams = CRM_Civicase_APIHelpers_CustomValues::getTreeParams($params);
   $tree = CRM_Core_BAO_CustomGroup::getTree(
     $treeParams['filters']['entityType'],
