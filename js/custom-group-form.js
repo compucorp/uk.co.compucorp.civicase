@@ -1,4 +1,4 @@
-(function ($) {
+(function ($, _, caseEntityNames) {
   $(document).on('crmLoad', function () {
     var $multipleRecordsCheckboxRow = $('#is_multiple_row');
     var $styleSelectTabWithTableOption = $('select[name="style"] option[value="Tab with table"]');
@@ -11,7 +11,7 @@
 
     /**
      * This function will hide or show elements that are not relevant when extending
-     * the Case entity. The elements we hide or show are:
+     * the Case entities. The elements we hide or show are:
      *
      * - Multiple Records Checkbox.
      * - Style Select's "Tab with table" option.
@@ -24,7 +24,7 @@
      */
     function hideShowElementsNotRelevantWhenExtendingCases () {
       setTimeout(function () {
-        if ($extendSelect.val() === 'Case') {
+        if (_.includes(caseEntityNames, $extendSelect.val())) {
           $multipleRecordsCheckboxRow.css('display', 'none');
           $styleSelectTabWithTableOption.hide();
         } else {
@@ -33,4 +33,4 @@
       }, 0);
     }
   });
-})(CRM.$);
+})(CRM.$, CRM._, CRM.caseEntityNames);
