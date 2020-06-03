@@ -6,7 +6,7 @@
  */
 
 /**
- * CustomValue.getallgroupstreevalues API specifications.
+ * CustomValue.getalltreevalues API specifications.
  *
  * @param array $spec
  *   Description of fields supported by this API call.
