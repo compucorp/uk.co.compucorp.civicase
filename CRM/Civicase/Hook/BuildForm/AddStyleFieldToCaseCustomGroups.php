@@ -1,5 +1,7 @@
 <?php
 
+use CRM_Case_BAO_CaseType as CaseType;
+
 /**
  * Allows selecting the display style for custom fields targeting cases.
  *
@@ -27,8 +29,7 @@ class CRM_Civicase_Hook_BuildForm_AddStyleFieldToCaseCustomGroups {
     }
 
     $contactTypes = json_decode($form->get_template_vars('contactTypes'));
-    $caseCategories = CRM_Civicase_Helper_CaseCategory::getCaseCategories();
-    $caseEntityNames = array_column($caseCategories, 'name');
+    $caseEntityNames = CaseType::buildOptions('case_type_category', 'validate');
 
     // This is the generic entity for all cases.
     $caseEntityNames[] = 'Case';

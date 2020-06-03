@@ -8,23 +8,7 @@ use CRM_Civicase_Service_CaseCategoryPermission as CaseCategoryPermission;
  */
 class CRM_Civicase_Helper_CaseCategory {
 
-  const CASE_TYPE_CATEGORY_GROUP_NAME = 'case_type_categories';
   const CASE_TYPE_CATEGORY_NAME = 'Cases';
-
-  /**
-   * Returns the full list of case type categories.
-   *
-   * @return array
-   *   a list of case categories as returned by the option value API.
-   */
-  public static function getCaseCategories() {
-    $result = civicrm_api3('OptionValue', 'get', [
-      'sequential' => 1,
-      'option_group_id' => self::CASE_TYPE_CATEGORY_GROUP_NAME,
-    ]);
-
-    return $result['values'];
-  }
 
   /**
    * Returns the case category name for the case Id.
