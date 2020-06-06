@@ -8,6 +8,9 @@
       link: function (scope, elem, attrs) {
         var form;
 
+        /**
+         * Closes the custom data edit form.
+         */
         function close () {
           form.remove();
           elem.show();
@@ -42,7 +45,7 @@
                     close();
                   });
                 });
-              CRM.loadForm(url, {target: form});
+              CRM.loadForm(url, { target: form });
             }
           });
       }
