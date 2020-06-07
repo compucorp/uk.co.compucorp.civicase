@@ -38,6 +38,7 @@ var FILES = {
 };
 var RECORD_IDENTIFIERS = {
   activeContactDisplayName: 'Arnold Backstop',
+  caseTag: 'Backstop Case Tag',
   emptyCaseSubject: 'Backstop Empty Case',
   emptyCaseTypeName: 'backstop_empty_case_type',
   emptyContactDisplayName: 'Emil Backstop',
@@ -67,6 +68,8 @@ var createUniqueCaseType = createUniqueRecordFactory('CaseType', ['name']);
 var createUniqueContact = createUniqueRecordFactory('Contact', ['display_name']);
 var createUniqueCustomField = createUniqueRecordFactory('CustomField', ['label']);
 var createUniqueCustomGroup = createUniqueRecordFactory('CustomGroup', ['title']);
+var createUniqueTag = createUniqueRecordFactory('Tag', ['name', 'used_for']);
+var createUniqueEntityTag = createUniqueRecordFactory('EntityTag', ['entity_id', 'entity_table', 'tag_id']);
 
 /**
  * Returns the list of the scenarios from
@@ -454,6 +457,16 @@ function setupData () {
     label: RECORD_IDENTIFIERS.customGroups.tab.fieldLabel,
     data_type: 'String',
     html_type: 'Text'
+  });
+  createUniqueTag({
+    is_selectable: 1,
+    name: RECORD_IDENTIFIERS.caseTag,
+    used_for: 'Cases'
+  });
+  createUniqueEntityTag({
+    entity_id: activeCaseId,
+    entity_table: 'civicrm_case',
+    tag_id: RECORD_IDENTIFIERS.caseTag
   });
 
   return Promise.resolve();
