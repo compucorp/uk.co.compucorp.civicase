@@ -70,6 +70,10 @@
       "url": "{url}/civicrm/case/a/#/case/list?caseId={caseId}&tab=Details"
     },
     {
+      "label": "Manage Cases - Case Overview - People tab",
+      "url": "{url}/civicrm/case/a/#/case/list?caseId={caseId}&tab=People"
+    },
+    {
       "label": "Manage Cases - Case Overview - People tab - Loading",
       "url": "{url}/civicrm/case/a/#/case/list?caseId={caseId}&tab=People",
       "captureLoadingScreen": true
