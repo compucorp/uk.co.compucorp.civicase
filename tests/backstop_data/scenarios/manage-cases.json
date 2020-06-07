@@ -197,6 +197,18 @@
         ".civicase__people-tab__table-body tr:first-child .btn",
         ".civicase__people-tab__table-body tr:first-child .dropdown-menu li:nth-child(3) a"
       ]
+    },
+    {
+      "label": "manage Cases - Cases Overview - Actions Menu - Edit Tags",
+      "url": "{url}/civicrm/case/a/#/case/list?caseId={caseId}",
+      "clickSelectors": [
+        ".civicase__case-header__action-icon",
+        ".civicase__case-header__action-icon + ul .fa-tags"
+      ],
+      "selectors": [
+        ".ui-dialog"
+      ],
+      "waitForAjaxComplete": true
     }
   ]
 }
