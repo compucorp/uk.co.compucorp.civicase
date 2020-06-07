@@ -5,6 +5,7 @@
   module.directive('civicaseEditCustomData', function ($timeout) {
     return {
       restrict: 'A',
+      require: ['^civicaseCaseDetails'],
       link: civicaseEditCustomDataLink
     };
 
@@ -14,9 +15,12 @@
      * @param {object} scope directive's scope.
      * @param {object} element directive's element reference.
      * @param {object} attrs element attributes.
+     * @param {object[]} controllers list of required controllers.
      */
-    function civicaseEditCustomDataLink (scope, element, attrs) {
+    function civicaseEditCustomDataLink (scope, element, attrs, controllers) {
       var form;
+      var caseDetails = controllers[0].$scope;
+      scope.trustAsHtml = caseDetails.trustAsHtml;
 
       (function init () {
         element
@@ -46,11 +50,11 @@
           action: 'update',
           reset: 1,
           type: 'Case',
-          entityID: scope.item.id,
+          entityID: caseDetails.item.id,
           groupID: scope.customGroup.id,
-          cid: scope.item.client[0].contact_id,
-          subType: scope.item.case_type_id,
-          civicase_reload: scope.caseGetParams()
+          cid: caseDetails.item.client[0].contact_id,
+          subType: caseDetails.item.case_type_id,
+          civicase_reload: caseDetails.caseGetParams()
         });
         form = $('<div></div>').html(element.hide().html());
         form.insertAfter(element)
@@ -61,7 +65,7 @@
           })
           .on('crmFormSuccess', function (event, data) {
             scope.$apply(function () {
-              scope.pushCaseData(data.civicase_reload[0]);
+              caseDetails.pushCaseData(data.civicase_reload[0]);
               closeEditForm();
             });
           });
