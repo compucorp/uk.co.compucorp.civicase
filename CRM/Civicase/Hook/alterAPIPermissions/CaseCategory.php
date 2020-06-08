@@ -66,7 +66,9 @@ class CRM_Civicase_Hook_alterAPIPermissions_CaseCategory {
       'access uploaded files',
     ];
 
-    $permissions['case']['get'] = $permissions['custom_value']['gettreevalues'] = [$basicCasePermissions];
+    $permissions['case']['get'] = [$basicCasePermissions];
+    $permissions['custom_value']['gettreevalues'] = [$basicCasePermissions];
+    $permissions['custom_value']['getalltreevalues'] = [$basicCasePermissions];
     $permissions['case']['update'] = [$basicCasePermissions];
     $locationTypePermissions = array_merge($permissions['default']['default'], ['access CiviCRM']);
     $permissions['location_type']['get'] = [$locationTypePermissions];
