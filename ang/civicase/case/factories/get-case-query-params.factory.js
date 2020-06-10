@@ -24,7 +24,8 @@
       var caseListReturnParams = ['case_type_id', 'start_date', 'end_date', 'status_id', 'contacts', 'subject'];
       var customValuesReturnParams = [
         'custom_group.id', 'custom_group.name', 'custom_group.title',
-        'custom_field.name', 'custom_field.label', 'custom_value.display'
+        'custom_field.name', 'custom_field.label', 'custom_value.display',
+        'custom_group.style'
       ];
       var relationshipReturnParams = ['id', 'relationship_type_id', 'contact_id_a', 'contact_id_b', 'description', 'start_date'];
 
@@ -96,7 +97,7 @@
           status_id: 'Scheduled'
         },
         // Custom data
-        'api.CustomValue.gettreevalues': {
+        'api.CustomValue.getalltreevalues': {
           entity_id: '$value.id',
           entity_type: 'Case',
           return: customValuesReturnParams
