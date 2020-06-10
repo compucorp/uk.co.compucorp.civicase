@@ -38,12 +38,21 @@ var FILES = {
 };
 var RECORD_IDENTIFIERS = {
   activeContactDisplayName: 'Arnold Backstop',
-  customGroupTitle: 'Backstop Case Custom Group',
-  customFieldLabel: 'Backstop Case Custom Field',
+  caseTag: 'Backstop Case Tag',
   emptyCaseSubject: 'Backstop Empty Case',
   emptyCaseTypeName: 'backstop_empty_case_type',
   emptyContactDisplayName: 'Emil Backstop',
-  fileUploadActivitySubject: 'Backstop File Upload'
+  fileUploadActivitySubject: 'Backstop File Upload',
+  customGroups: {
+    inline: {
+      fieldLabel: 'Backstop Case Inline Custom Field',
+      groupTitle: 'Backstop Case Inline Custom Group'
+    },
+    tab: {
+      fieldLabel: 'Backstop Case Tab Custom Field',
+      groupTitle: 'Backstop Case Tab Custom Group'
+    }
+  }
 };
 var URL_VAR_REPLACERS = [
   replaceCaseIdVar,
@@ -59,6 +68,8 @@ var createUniqueCaseType = createUniqueRecordFactory('CaseType', ['name']);
 var createUniqueContact = createUniqueRecordFactory('Contact', ['display_name']);
 var createUniqueCustomField = createUniqueRecordFactory('CustomField', ['label']);
 var createUniqueCustomGroup = createUniqueRecordFactory('CustomGroup', ['title']);
+var createUniqueTag = createUniqueRecordFactory('Tag', ['name', 'used_for']);
+var createUniqueEntityTag = createUniqueRecordFactory('EntityTag', ['entity_id', 'entity_table', 'tag_id']);
 
 /**
  * Returns the list of the scenarios from
@@ -411,9 +422,15 @@ function setupData () {
     source_contact_id: activeContact.id,
     subject: RECORD_IDENTIFIERS.fileUploadActivitySubject
   });
-  var customGroup = createUniqueCustomGroup({
-    title: RECORD_IDENTIFIERS.customGroupTitle,
-    extends: 'Case'
+  var inlineCustomGroup = createUniqueCustomGroup({
+    extends: 'Case',
+    style: 'Inline',
+    title: RECORD_IDENTIFIERS.customGroups.inline.groupTitle
+  });
+  var tabCustomGroup = createUniqueCustomGroup({
+    extends: 'Case',
+    style: 'Tab',
+    title: RECORD_IDENTIFIERS.customGroups.tab.groupTitle
   });
 
   createUniqueAttachment({
@@ -430,10 +447,26 @@ function setupData () {
     subject: RECORD_IDENTIFIERS.emptyCaseSubject
   });
   createUniqueCustomField({
-    custom_group_id: customGroup.id,
-    label: RECORD_IDENTIFIERS.customFieldLabel,
+    custom_group_id: inlineCustomGroup.id,
+    label: RECORD_IDENTIFIERS.customGroups.inline.fieldLabel,
     data_type: 'String',
     html_type: 'Text'
+  });
+  createUniqueCustomField({
+    custom_group_id: tabCustomGroup.id,
+    label: RECORD_IDENTIFIERS.customGroups.tab.fieldLabel,
+    data_type: 'String',
+    html_type: 'Text'
+  });
+  createUniqueTag({
+    is_selectable: 1,
+    name: RECORD_IDENTIFIERS.caseTag,
+    used_for: 'Cases'
+  });
+  createUniqueEntityTag({
+    entity_id: activeCaseId,
+    entity_table: 'civicrm_case',
+    tag_id: RECORD_IDENTIFIERS.caseTag
   });
 
   return Promise.resolve();
