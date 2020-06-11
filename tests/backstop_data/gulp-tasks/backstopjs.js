@@ -364,6 +364,7 @@ function runBackstopJS (command) {
       .on('end', async () => {
         try {
           (typeof argv.skipCookies === 'undefined') && await writeCookies();
+
           await backstopjs(command, { configPath: FILES.temp, filter: argv.filter });
 
           success = true;
@@ -499,9 +500,11 @@ async function writeCookies () {
   var config = siteConfig();
   var command = `drush ${config.drush_alias} uli --name=admin --uri=${config.url} --browser=0`;
   var loginUrl = execSync(command, { encoding: 'utf8', cwd: config.root });
-  var browser = await puppeteer.launch();
+  var browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox']
+  });
   var page = await browser.newPage();
-
   await page.goto(loginUrl);
 
   var cookies = await page.cookies();

@@ -1,9 +1,9 @@
-name: Tests
+name: Backstop Tests
 
 on: pull_request
 
 jobs:
-  run-unit-tests:
+  run-backstop-tests:
 
     runs-on: ubuntu-latest
     container: compucorp/civicrm-buildkit:1.0.0-chrome
@@ -21,12 +21,27 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
+      - name: Install apache
+        run: |
+          apt-get update
+          apt-get install apache2 libapache2-mod-php7.2 php7.2-mysql php7.2-curl php7.2-simplexml -y
+          a2enmod rewrite
+          apache2ctl restart
 
       - name: Config mysql database as per CiviCRM requirement
         run: echo "SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));" | mysql -u root --password=root --host=mysql
 
       - name: Config amp
-        run : amp config:set --mysql_dsn=mysql://root:root@mysql:3306
+        run : |
+          amp config:set --db_type=mysql_dsn --mysql_dsn='mysql://root:root@mysql:3306' --httpd_type=apache24 --httpd_restart_command='sudo /usr/sbin/apache2ctl graceful' --perm_type=worldWritable --hosts_type=file
+
+          echo "IncludeOptional /github/home/.amp/apache.d/*.conf" >> /etc/apache2/apache2.conf
+
+          chmod -R 777 /buildkit
+          chmod -R 777 /github/home/.amp
+          /usr/sbin/apache2ctl restart
+
+          amp test
 
       - name: Build Drupal site
         run: civibuild create drupal-clean --civi-ver 5.24.6 --web-root $GITHUB_WORKSPACE/site
@@ -41,13 +56,9 @@ jobs:
           git clone --depth 1 https://github.com/civicrm/org.civicrm.shoreditch.git
           cv en shoreditch civicase
 
-      - name: Run JS unit tests
+      - name: Run Backstop tests
         working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}/uk.co.compucorp.civicase
         run: |
+          cd tests/backstop_data
           npm install
-          npx gulp test
-
-      - name: Run phpunit tests
-        if: ${{ always() }}
-        working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}/uk.co.compucorp.civicase
-        run: phpunit5
+          npx gulp backstopjs:reference
