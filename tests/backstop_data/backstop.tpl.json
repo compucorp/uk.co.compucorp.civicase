@@ -18,7 +18,9 @@
   "engine": "puppeteer",
   "engineOptions": {
     "waitTimeout": 120000,
-    "args": ["--no-sandbox"]
+    "args": [
+      "--no-sandbox"
+    ]
   },
   "asyncCaptureLimit": 1,
   "asyncCompareLimit": 50,

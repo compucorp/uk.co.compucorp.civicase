@@ -1,12 +1,14 @@
 name: Backstop Tests
 
-on: pull_request
+on: pull_request_review_comment:
+  types: [opened]
 
 jobs:
   run-backstop-tests:
-
     runs-on: ubuntu-latest
-    container: compucorp/civicrm-buildkit:1.0.0-chrome
+    container:
+      image: compucorp/civicrm-buildkit:1.0.0-chrome
+      options: --shm-size=2gb --cap-add=SYS_ADMIN
 
     env:
       CIVICRM_EXTENSIONS_DIR: site/web/sites/all/modules/civicrm/tools/extensions
@@ -21,6 +23,14 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
+      - uses: khan/pull-request-comment-trigger@master
+        id: check
+        with:
+          trigger: '/run backstop'
+          reaction: rocket
+      - run: 'echo Running Backstop JS!'
+        if: steps.check.outputs.triggered == 'true'
+
       - name: Install dependencies to run the server
         run: |
           apt-get update
@@ -38,10 +48,11 @@ jobs:
           chmod -R 777 /buildkit
           chmod -R 777 /github/home/.amp
           /usr/sbin/apache2ctl restart
-          amp test
 
       - name: Build Drupal site
-        run: civibuild create drupal-clean --civi-ver 5.24.6 --web-root $GITHUB_WORKSPACE/site
+        run: |
+          civibuild create drupal-clean --civi-ver 5.24.6 --web-root $GITHUB_WORKSPACE/site
+          chmod -R 777 /__w/uk.co.compucorp.civicase/uk.co.compucorp.civicase
 
       - uses: actions/checkout@v2
         with:
@@ -52,6 +63,9 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/civicrm/org.civicrm.shoreditch.git
           cv en shoreditch civicase
+          drush cc all && drush cc civicrm
+          drush cvapi Extension.upgrade
+          drush cc all && drush cc civicrm
 
       - name: Create site-config.json for Backstop tests
         working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}/uk.co.compucorp.civicase
@@ -64,11 +78,15 @@ jobs:
           echo '"root": "/__w/uk.co.compucorp.civicase/uk.co.compucorp.civicase/site/web"' >> site-config.json
           echo "}" >> site-config.json
 
-          cat site-config.json
-
       - name: Run Backstop tests
         working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}/uk.co.compucorp.civicase
         run: |
           cd tests/backstop_data
           npm install
           npx gulp backstopjs:reference
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ always() }}
+        with:
+          name: my-artifact
+          path: ${{ env.CIVICRM_EXTENSIONS_DIR }}/uk.co.compucorp.civicase/tests/backstop_data/screenshots/**/*
