@@ -1,7 +1,8 @@
 name: Backstop Tests
 
-on: issue_comment:
-  types: [created, edited]
+on:
+  pull_request_review_comment:
+    types: [created, edited]
 
 jobs:
   run-backstop-tests:
