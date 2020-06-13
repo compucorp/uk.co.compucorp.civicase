@@ -1,8 +1,10 @@
 name: Backstop Tests
 
 on:
+  pull_request:
+    types: [opened]
   issue_comment:
-    types: [created, edited]
+    types: [created]
 
 jobs:
   run-backstop-tests:
@@ -24,6 +26,16 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
+      - uses: khan/pull-request-comment-trigger@master
+        id: check
+        with:
+          trigger: '@deploy'
+          reaction: rocket
+        env:
+          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+      - run: 'echo Found it!'
+        if: steps.check.outputs.triggered == 'true'
+
       - name: Install dependencies to run the server
         run: |
           apt-get update
