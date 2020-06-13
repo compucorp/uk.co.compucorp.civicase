@@ -23,14 +23,6 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - uses: khan/pull-request-comment-trigger@master
-        id: check
-        with:
-          trigger: '/run backstop'
-          reaction: rocket
-      - run: 'echo Running Backstop JS!'
-        if: steps.check.outputs.triggered == 'true'
-
       - name: Install dependencies to run the server
         run: |
           apt-get update
