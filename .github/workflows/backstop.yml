@@ -21,7 +21,7 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
-      - name: Install apache
+      - name: Install dependencies to run the server
         run: |
           apt-get update
           apt-get install apache2 libapache2-mod-php7.2 php7.2-mysql php7.2-curl php7.2-simplexml -y
@@ -34,13 +34,10 @@ jobs:
       - name: Config amp
         run : |
           amp config:set --db_type=mysql_dsn --mysql_dsn='mysql://root:root@mysql:3306' --httpd_type=apache24 --httpd_restart_command='sudo /usr/sbin/apache2ctl graceful' --perm_type=worldWritable --hosts_type=file
-
           echo "IncludeOptional /github/home/.amp/apache.d/*.conf" >> /etc/apache2/apache2.conf
-
           chmod -R 777 /buildkit
           chmod -R 777 /github/home/.amp
           /usr/sbin/apache2ctl restart
-
           amp test
 
       - name: Build Drupal site
@@ -55,6 +52,19 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/civicrm/org.civicrm.shoreditch.git
           cv en shoreditch civicase
+
+      - name: Create site-config.json for Backstop tests
+        working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}/uk.co.compucorp.civicase
+        run: |
+          cd tests/backstop_data
+          touch site-config.json
+          echo "{" >> site-config.json
+          echo '"url": "http://localhost:7979",' >> site-config.json
+          echo '"drush_alias": "",' >> site-config.json
+          echo '"root": "/__w/uk.co.compucorp.civicase/uk.co.compucorp.civicase/site/web"' >> site-config.json
+          echo "}" >> site-config.json
+
+          cat site-config.json
 
       - name: Run Backstop tests
         working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}/uk.co.compucorp.civicase
