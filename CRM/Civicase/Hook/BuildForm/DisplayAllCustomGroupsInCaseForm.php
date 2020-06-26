@@ -6,6 +6,11 @@
 class CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm {
 
   /**
+   * The name for the Case entity.
+   */
+  const CASE_ENTITY_NAME = 'Case';
+
+  /**
    * Adds all custom groups (inline/tabs) to the case form.
    *
    * @param CRM_Core_Form $form
@@ -16,15 +21,17 @@ class CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm {
       return;
     }
 
-    $caseCategory = $form->getVar('_type');
     $caseId = CRM_Utils_Request::retrieve('entityID', 'Positive');
     $caseType = CRM_Utils_Request::retrieve('subType', 'Positive');
-    $customGroups = CRM_Civicase_APIHelpers_CustomGroups::getAllActiveGroupsForEntity($caseCategory);
+    $customGroups = CRM_Civicase_APIHelpers_CustomGroups::getAllActiveGroupsForEntity(
+      self::CASE_ENTITY_NAME
+    );
     $formattedCustomGroups = [];
 
     foreach ($customGroups['values'] as $customGroup) {
+      // Will return the right custom fields for the given case type:
       $customGroupsTree = CRM_Core_BAO_CustomGroup::getTree(
-        $caseCategory,
+        self::CASE_ENTITY_NAME,
         NULL,
         $caseId,
         $customGroup['id'],
@@ -51,7 +58,7 @@ class CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm {
    *   True when updating the case form's custom groups.
    */
   private function shouldRun(CRM_Core_Form $form) {
-    $isCaseEntity = CRM_Utils_Request::retrieve('type', 'String') === 'Case';
+    $isCaseEntity = $form->getVar('_type') === self::CASE_ENTITY_NAME;
     $isCustomDataForm = get_class($form) === CRM_Custom_Form_CustomDataByType::class;
 
     return $isCaseEntity && $isCustomDataForm;
