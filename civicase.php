@@ -188,6 +188,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
     new CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplay(),
     new CRM_Civicase_Hook_BuildForm_ModifyCaseTypesForAdvancedSearch(),
     new CRM_Civicase_Hook_BuildForm_AddStyleFieldToCaseCustomGroups(),
+    new CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm(),
   ];
 
   foreach ($hooks as $hook) {
