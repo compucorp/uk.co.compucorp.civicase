@@ -8,10 +8,10 @@ class CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm {
   /**
    * Adds all custom groups (inline/tabs) to the case form.
    *
-   * @param CRM_Core_Form $from
-   *   CiviCRM Form
+   * @param CRM_Core_Form $form
+   *   CiviCRM Form.
    */
-  public function run ($form) {
+  public function run(CRM_Core_Form $form) {
     if (!$this->shouldRun($form)) {
       return;
     }
@@ -44,16 +44,17 @@ class CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm {
   /**
    * Determines if the hook should run.
    *
-   * @param CRM_Core_Form $from
-   *   CiviCRM Form
+   * @param CRM_Core_Form $form
+   *   CiviCRM Form.
    *
    * @return bool
    *   True when updating the case form's custom groups.
    */
-  private function shouldRun ($form) {
+  private function shouldRun(CRM_Core_Form $form) {
     $isCaseEntity = CRM_Utils_Request::retrieve('type', 'String') === 'Case';
     $isCustomDataForm = get_class($form) === CRM_Custom_Form_CustomDataByType::class;
 
     return $isCaseEntity && $isCustomDataForm;
   }
+
 }
