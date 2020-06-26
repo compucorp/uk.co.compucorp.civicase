@@ -51,6 +51,9 @@ class CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm {
    *   True when updating the case form's custom groups.
    */
   private function shouldRun ($form) {
-    return get_class($form) === CRM_Custom_Form_CustomDataByType::class;
+    $isCaseEntity = CRM_Utils_Request::retrieve('type', 'String') === 'Case';
+    $isCustomDataForm = get_class($form) === CRM_Custom_Form_CustomDataByType::class;
+
+    return $isCaseEntity && $isCustomDataForm;
   }
 }
