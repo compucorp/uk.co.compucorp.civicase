@@ -29,17 +29,21 @@ class CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm {
     $formattedCustomGroups = [];
 
     foreach ($customGroups['values'] as $customGroup) {
-      // Will return the right custom fields for the given case type:
-      $customGroupsTree = CRM_Core_BAO_CustomGroup::getTree(
+      // Will return the right custom fields for the given case type.
+      // Fields belonging to other case types are removed.
+      $customGroupTree = CRM_Core_BAO_CustomGroup::getTree(
         self::CASE_ENTITY_NAME,
         NULL,
         $caseId,
         $customGroup['id'],
         $caseType
       );
-      $customGroupsTree = CRM_Core_BAO_CustomGroup::formatGroupTree($customGroupsTree);
-      unset($customGroupsTree['info']);
-      $formattedCustomGroups = array_merge($formattedCustomGroups, $customGroupsTree);
+
+      // Removes extra data not used for displaying the custom fields:
+      $customGroupTree = CRM_Core_BAO_CustomGroup::formatGroupTree($customGroupTree);
+      unset($customGroupTree['info']);
+
+      $formattedCustomGroups = array_merge($formattedCustomGroups, $customGroupTree);
     }
 
     // Adds the actual field element to each custom field:
