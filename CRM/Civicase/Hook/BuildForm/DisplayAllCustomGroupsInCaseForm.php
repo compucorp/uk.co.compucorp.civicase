@@ -21,8 +21,8 @@ class CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm {
       return;
     }
 
-    $caseId = CRM_Utils_Request::retrieve('entityID', 'Positive');
-    $caseType = CRM_Utils_Request::retrieve('subType', 'Positive');
+    $caseId = $form->getVar('_entityId');
+    $caseType = $form->getVar('_subType');
     $customGroups = CRM_Civicase_APIHelpers_CustomGroups::getAllActiveGroupsForEntity(
       self::CASE_ENTITY_NAME
     );
@@ -55,17 +55,23 @@ class CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm {
   /**
    * Determines if the hook should run.
    *
+   * The Case Form is targeted to support validation for custom fields. The
+   * Custom Data form is targeted to add the actual fields.
+   *
    * @param CRM_Core_Form $form
    *   CiviCRM Form.
    *
    * @return bool
-   *   True when updating the case form's custom groups.
+   *   True when updating the case form or case form's custom groups.
    */
   private function shouldRun(CRM_Core_Form $form) {
     $isCaseEntity = $form->getVar('_type') === self::CASE_ENTITY_NAME;
     $isCustomDataForm = get_class($form) === CRM_Custom_Form_CustomDataByType::class;
+    $isCaseForm = get_class($form) === CRM_Case_Form_Case::class;
 
-    return $isCaseEntity && $isCustomDataForm;
+    return $isCaseEntity && (
+      $isCustomDataForm || $isCaseForm
+    );
   }
 
 }
