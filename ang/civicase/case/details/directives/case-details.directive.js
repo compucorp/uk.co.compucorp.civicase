@@ -69,7 +69,7 @@
     $scope.caseDetailsSummaryBlocks = CaseDetailsSummaryBlocks;
     $scope.caseTypesLength = _.size(caseTypes);
     $scope.CRM = CRM;
-    $scope.tabs = CaseDetailsTabs;
+    $scope.tabs = _.cloneDeep(CaseDetailsTabs);
     $scope.trustAsHtml = $sce.trustAsHtml;
     $scope.isMainContentVisible = isMainContentVisible;
     $scope.isPlaceHolderVisible = isPlaceHolderVisible;
