@@ -540,6 +540,39 @@
           });
         });
 
+        describe('when there are data custom blocks and the case details are updated', () => {
+          let detailsTabsCount;
+
+          beforeEach(() => {
+            customDataBlocks = [
+              generateCustomDataBlock({ style: 'Inline' }),
+              generateCustomDataBlock({ style: 'Tab' }),
+              generateCustomDataBlock({ style: 'Inline' })
+            ];
+            caseItem['api.CustomValue.getalltreevalues'] = {
+              values: customDataBlocks
+            };
+            initController(caseItem);
+
+            // refresh case details:
+            caseItem['api.Case.getcaselist.relatedCasesByContact'] = { values: [] };
+            caseItem['api.Case.getcaselist.linkedCases'] = { values: [] };
+            caseItem['api.Activity.get.recentCommunication'] = { values: [] };
+            caseItem['api.Activity.get.tasks'] = { values: [] };
+            caseItem['api.Activity.get.nextActivitiesWhichIsNotMileStone'] = { values: [] };
+            caseItem['api.CustomValue.getalltreevalues'] = {
+              values: customDataBlocks
+            };
+            $scope.pushCaseData(caseItem);
+
+            detailsTabsCount = _.where($scope.tabs, { name: 'Details' }).length;
+          });
+
+          it('does not add the case details tab multiple times', () => {
+            expect(detailsTabsCount).toBe(1);
+          });
+        });
+
         /**
          * @param {object} defaultValues default values to use when generating the
          *   custom data block.

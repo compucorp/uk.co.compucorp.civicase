@@ -60,7 +60,6 @@
     var caseStatuses = $scope.caseStatuses = CaseStatus.getAll();
     var activityTypes = $scope.activityTypes = ActivityType.getAll(true);
     var panelLimit = 5;
-    var isDetailsTabIncluded = false;
 
     $scope.areDetailsLoaded = false;
     $scope.areRelatedCasesVisibleOnSummaryTab = false;
@@ -378,12 +377,11 @@
      */
     function includeDetailsTab () {
       var shouldAddDetailsTab = !_.isEmpty($scope.item.customData.Tab);
+      var isDetailsTabIncluded = !!_.find($scope.tabs, { name: 'Details' });
 
       if (!shouldAddDetailsTab || isDetailsTabIncluded) {
         return;
       }
-
-      isDetailsTabIncluded = true;
 
       $scope.tabs.splice(1, 0, {
         name: 'Details',
