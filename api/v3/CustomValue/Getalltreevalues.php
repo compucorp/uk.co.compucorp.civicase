@@ -52,5 +52,5 @@ function civicrm_api3_custom_value_getalltreevalues(array $params) {
     );
   }
 
-  return civicrm_api3_create_success($result, $params, 'CustomValue', 'getallgroupstreevalues');
+  return civicrm_api3_create_success($result, $params, 'CustomValue', 'getalltreevalues');
 }
