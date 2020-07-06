@@ -145,7 +145,7 @@ class CRM_Civicase_Hook_alterAPIPermissions_CaseCategory {
       return $this->getCaseCategoryNameFromCaseTypeCategory($params, 'case_type_category');
     }
 
-    if ($entity == 'custom_value' && $action == 'gettreevalues') {
+    if ($entity == 'custom_value' && ($action == 'gettreevalues' || $action == 'getalltreevalues')) {
       return $this->getCaseCategoryNameFromCaseId($params, 'entity_id');
     }
   }
