@@ -2,7 +2,11 @@
   <div ng-if="isMainContentVisible()" class="panel-body">
     <div class="civicase__summary-tab__subject-container">
       <div class="civicase__summary-tab__subject">
-        <p crm-editable="item" data-field="subject" data-type="text" data-placeholder="Click to add subject" crm-form-success="onChangeSubject($data)"></p>
+        <p
+          crm-editable="item" data-field="subject" data-type="text"
+          data-placeholder="Click to add subject" data-truncate-after="100"
+          crm-form-success="onChangeSubject($data)">
+        </p>
       </div>
       <div class="civicase__summary-tab__description">
         <p
