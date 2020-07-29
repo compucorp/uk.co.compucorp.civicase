@@ -12,6 +12,7 @@
         data: '=contacts',
         isAvatar: '=avatar',
         noIcon: '=',
+        displayMoreFields: '=',
         showFullNameOnHover: '<'
       }
     };

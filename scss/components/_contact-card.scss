@@ -159,3 +159,41 @@ $contact-avatar-size: 30px;
     z-index: 0;
   }
 }
+
+.civicase__contact-card__with-more-fields {
+  flex-wrap: wrap;
+
+  .civicase__contact__more-fields {
+    color: $gray-darker;
+  }
+
+  .civicase__contact__break {
+    flex-basis: 100%;
+    height: 0;
+  }
+
+  .civicase__contact-name {
+    max-width: initial;
+  }
+}
+
+.civicase__contact-additional__list__with-more-fields {
+  max-height: 300px;
+  overflow-y: auto;
+
+  li {
+    height: auto;
+
+    &:not(:first-of-type) {
+      border-top: 1px solid $gray-light;
+    }
+  }
+
+  .civicase__contact-name-additional {
+    max-width: initial;
+  }
+
+  .civicase__contact__more-fields {
+    margin-top: 5px;
+  }
+}
