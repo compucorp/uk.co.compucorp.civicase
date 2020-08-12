@@ -240,10 +240,11 @@
         title: ts('Remove %1', { 1: role.role }),
         message: ts('Remove %1 as %2?', { 1: role.display_name, 2: role.role })
       }).on('crmConfirm:yes', function () {
-        var apiCalls = [unassignRoleCall(role)];
+        var apiCalls = [];
 
         // when client
         if (!role.relationship_type_id) {
+          apiCalls = [unassignClientCall(role)];
           getApiParamsToSetRelationshipsAsInactiveWhenClientIsRemoved(role, apiCalls);
         }
 
@@ -277,9 +278,10 @@
      * clients related to the case.
      *
      * @param {ContactPromptResult} contactPromptResult the contact returned by the confirm dialog
+     * @param {boolean} replacePreviousRelationship whether to replace previous relationship
      * @returns {Array[]} a list of api calls.
      */
-    function getCreateCaseRoleApiCalls (contactPromptResult) {
+    function getCreateCaseRoleApiCalls (contactPromptResult, replacePreviousRelationship) {
       var params = {
         relationship_type_id: contactPromptResult.role.relationship_type_id,
         start_date: 'now',
@@ -288,6 +290,10 @@
         case_id: item.id,
         description: contactPromptResult.description
       };
+
+      if (replacePreviousRelationship) {
+        params.reassign_rel_id = contactPromptResult.role.contact_id;
+      }
 
       return _.map(item.client, function (client) {
         return ['Relationship', 'create', _.extend({ contact_id_a: client.contact_id }, params)];
@@ -442,21 +448,14 @@
      * @returns {Array} the list of api calls to replace the case role.
      */
     function getReplaceRoleApiCalls (contactPromptResult) {
-      var activitySubject = getActivitySubjectForReplaceCaseContact(contactPromptResult);
-      var apiCalls = [
-        unassignRoleCall(contactPromptResult.role),
-        getCreateRoleActivityApiCall({
-          activity_type_id: 'Assign Case Role',
-          subject: activitySubject,
-          target_contact_id: [
-            contactPromptResult.contact.id,
-            contactPromptResult.role.contact_id
-          ]
-        })
-      ];
+      var apiCalls = [];
+
+      if (!contactPromptResult.role.relationship_type_id) {
+        apiCalls = [unassignClientCall(contactPromptResult.role)];
+      }
 
       return apiCalls.concat(
-        getCreateCaseRoleApiCalls(contactPromptResult)
+        getCreateCaseRoleApiCalls(contactPromptResult, true)
       );
     }
 
@@ -495,19 +494,7 @@
      * @param {ContactPromptResult} contactPromptResult the contact returned by the confirm dialog
      */
     function handleAssignRole (contactPromptResult) {
-      var activitySubject = ts('%1 added as %2', {
-        1: contactPromptResult.contact.extra.display_name,
-        2: contactPromptResult.role.role
-      });
-      var apiCalls = [
-        getCreateRoleActivityApiCall({
-          activity_type_id: 'Assign Case Role',
-          subject: activitySubject,
-          target_contact_id: contactPromptResult.contact.id
-        })
-      ].concat(
-        getCreateCaseRoleApiCalls(contactPromptResult)
-      );
+      var apiCalls = getCreateCaseRoleApiCalls(contactPromptResult);
 
       $scope.refresh(apiCalls);
     }
@@ -621,28 +608,17 @@ included in the confirmation dialog.
     }
 
     /**
-     * Unassign role
+     * Unassign client
      *
      * @param {object} role role
      * @returns {Array} API call
      */
-    function unassignRoleCall (role) {
-      // Case Role
-      if (role.relationship_type_id) {
-        return ['Relationship', 'get', {
-          relationship_type_id: role.relationship_type_id,
-          contact_id_b: role.contact_id,
-          case_id: item.id,
-          is_active: 1,
-          'api.Relationship.create': { is_active: 0, end_date: 'now' }
-        }];
-      } else { // Case Client
-        return ['CaseContact', 'get', {
-          case_id: item.id,
-          contact_id: role.contact_id,
-          'api.CaseContact.delete': {}
-        }];
-      }
+    function unassignClientCall (role) {
+      return ['CaseContact', 'get', {
+        case_id: item.id,
+        contact_id: role.contact_id,
+        'api.CaseContact.delete': {}
+      }];
     }
 
     /**
