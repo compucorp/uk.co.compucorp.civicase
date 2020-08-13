@@ -91,18 +91,6 @@ describe('Case Details People Tab', () => {
         ]));
       });
 
-      it('creates a new completed activity to record the contact being assigned a role to the case', () => {
-        expect($scope.refresh).toHaveBeenCalledWith(jasmine.arrayContaining([
-          ['Activity', 'create', {
-            case_id: $scope.item.id,
-            target_contact_id: contact.contact_id,
-            status_id: 'Completed',
-            activity_type_id: 'Assign Case Role',
-            subject: `${contact.display_name} added as ${roleName}`
-          }]
-        ]));
-      });
-
       it('closes the contact selection dialog', () => {
         expect(crmConfirmYesEvent.preventDefault).not.toHaveBeenCalled();
       });
@@ -124,20 +112,6 @@ describe('Case Details People Tab', () => {
         $rootScope.$digest();
       });
 
-      it('marks the current role relationship as finished', () => {
-        expect($scope.refresh).toHaveBeenCalledWith(jasmine.arrayContaining([
-          ['Relationship', 'get', {
-            relationship_type_id: relationshipTypeId,
-            contact_id_b: previousContact.contact_id,
-            case_id: $scope.item.id,
-            is_active: 1,
-            'api.Relationship.create': {
-              is_active: 0, end_date: 'now'
-            }
-          }]
-        ]));
-      });
-
       it('creates a new relationship between the case client and the selected contact using the given role', () => {
         expect($scope.refresh).toHaveBeenCalledWith(jasmine.arrayContaining([
           ['Relationship', 'create', {
@@ -147,22 +121,8 @@ describe('Case Details People Tab', () => {
             contact_id_b: contact.contact_id,
             case_id: $scope.item.id,
             description: roleDescription,
-            contact_id_a: $scope.item.client[0].contact_id
-          }]
-        ]));
-      });
-
-      it('creates a new completed activity to record the case role has been reassigned', () => {
-        expect($scope.refresh).toHaveBeenCalledWith(jasmine.arrayContaining([
-          ['Activity', 'create', {
-            case_id: $scope.item.id,
-            target_contact_id: jasmine.arrayContaining([
-              previousContact.contact_id,
-              contact.contact_id
-            ]),
-            status_id: 'Completed',
-            activity_type_id: 'Assign Case Role',
-            subject: `${contact.display_name} replaced ${previousContact.display_name} as ${roleName}`
+            contact_id_a: $scope.item.client[0].contact_id,
+            reassign_rel_id: previousContact.contact_id
           }]
         ]));
       });
