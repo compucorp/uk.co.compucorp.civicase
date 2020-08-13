@@ -13,5 +13,8 @@
 
     <!-- this was was added in drupal, but in civicrm we ignore this rule -->
     <exclude name="Drupal.Classes.UseGlobalClass.RedundantUseStatement"/>
+    <!-- These files are mainly auto generated and has some rules we want to exclude -->
+    <exclude-pattern>tests/phpunit/bootstrap.php</exclude-pattern>
+    <exclude-pattern>civicase.civix.php</exclude-pattern>
   </rule>
 </ruleset>
