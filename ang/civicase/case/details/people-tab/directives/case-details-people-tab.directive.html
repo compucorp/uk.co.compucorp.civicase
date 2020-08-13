@@ -17,8 +17,12 @@
           <li ng-if="allowMultipleCaseClients">
             <a href ng-click="assignRoleOrClient()">{{ ts('Client') }}</a>
           </li>
-          <li ng-repeat="role in allRoles">
-            <a href ng-click="assignRoleOrClient(role)">{{ role.role }}</a>
+          <li ng-repeat="role in allRoles" class="civicase__people-tab__add-role-dropdown">
+            <a href
+              ng-disabled="checkIfRoleIsDisabled(role)"
+              ng-click="!checkIfRoleIsDisabled(role) && assignRoleOrClient(role)">
+              {{ role.role }}
+            </a>
           </li>
         </ul>
       </div>
@@ -136,7 +140,7 @@
                 <li>
                   <a href ng-click="replaceRoleOrClient(role)">{{ ts('Reassign %1', {1: role.role}) }}</a>
                 </li>
-                <li ng-if="role.relationship_type_id || allowMultipleCaseClients">
+                <li ng-if="(role.relationship_type_id && !civicaseSingleCaseRolePerType) || (!role.relationship_type_id && allowMultipleCaseClients)">
                   <a href ng-click="assignRoleOrClient(role)">{{ ts('Add Another %1', {1: role.role}) }}</a>
                 </li>
                 <li ng-if="role.relationship_type_id || item.client.length > 1">

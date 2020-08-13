@@ -8,6 +8,7 @@
     .constant('currentCaseCategory', configuration.currentCaseCategory)
     .constant('showFullContactNameOnActivityFeed', configuration.showFullContactNameOnActivityFeed)
     .constant('includeActivitiesForInvolvedContact', configuration.includeActivitiesForInvolvedContact)
+    .constant('civicaseSingleCaseRolePerType', configuration.civicaseSingleCaseRolePerType)
     .constant('webformsList', {
       isVisible: configuration.showWebformsListSeparately,
       buttonLabel: configuration.webformsDropdownButtonLabel
