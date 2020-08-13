@@ -47,8 +47,29 @@ function civicase_civicrm_config(&$config) {
   }
   Civi::$statics[__FUNCTION__] = 1;
 
-  Civi::dispatcher()->addListener('civi.api.prepare', ['CRM_Civicase_Event_Listener_ActivityFilter', 'onPrepare'], 10);
-  Civi::dispatcher()->addListener('civi.api.respond', ['CRM_Civicase_Event_Listener_CaseTypeCategoryIsActiveToggler', 'onRespond'], 10);
+  Civi::dispatcher()->addListener(
+    'civi.api.prepare',
+    ['CRM_Civicase_Event_Listener_ActivityFilter', 'onPrepare'],
+    10
+  );
+  Civi::dispatcher()->addListener(
+    'civi.api.respond',
+    [
+      'CRM_Civicase_Event_Listener_CaseTypeCategoryIsActiveToggler',
+      'onRespond',
+    ],
+    10
+  );
+  Civi::dispatcher()->addListener(
+    'civi.api.respond',
+    ['CRM_Civicase_Event_Listener_CaseRoleCreation', 'onRespond'],
+    10
+  );
+  Civi::dispatcher()->addListener(
+    'civi.api.prepare',
+    ['CRM_Civicase_Event_Listener_CaseRoleCreation', 'onPrepare'],
+    10
+  );
 }
 
 /**
@@ -197,7 +218,11 @@ function civicase_civicrm_buildForm($formName, &$form) {
   }
 
   // Display category option for activity types and activity statuses.
-  if ($formName == 'CRM_Admin_Form_Options' && in_array($form->getVar('_gName'), ['activity_type', 'activity_status'])) {
+  if ($formName == 'CRM_Admin_Form_Options'
+    && in_array($form->getVar('_gName'), [
+      'activity_type',
+      'activity_status',
+    ])) {
     $options = civicrm_api3('optionValue', 'get', [
       'option_group_id' => 'activity_category',
       'is_active' => 1,
@@ -274,7 +299,10 @@ function civicase_civicrm_buildForm($formName, &$form) {
     $id = $form->getVar('_activityId');
     $status = NULL;
     if ($id) {
-      $status = civicrm_api3('Activity', 'getsingle', ['id' => $id, 'return' => 'status_id.name']);
+      $status = civicrm_api3('Activity', 'getsingle', [
+        'id' => $id,
+        'return' => 'status_id.name',
+      ]);
       $status = $status['status_id.name'];
     }
     $checkParams = [
@@ -297,7 +325,10 @@ function civicase_civicrm_buildForm($formName, &$form) {
       if ($status == 'Draft' && ($form->_action & CRM_Core_Action::VIEW)) {
         if (in_array($activityType, $specialTypes)) {
           $atype = $activityType == 'Email' ? 'email' : 'pdf';
-          $caseId = civicrm_api3('Activity', 'getsingle', ['id' => $id, 'return' => 'case_id']);
+          $caseId = civicrm_api3('Activity', 'getsingle', [
+            'id' => $id,
+            'return' => 'case_id',
+          ]);
           $composeUrl = CRM_Utils_System::url("civicrm/activity/$atype/add", [
             'action' => 'add',
             'reset' => 1,
@@ -329,7 +360,10 @@ function civicase_civicrm_buildForm($formName, &$form) {
         }
         // Set defaults for to email addresses.
         if ($formName == 'CRM_Contact_Form_Task_Email') {
-          $cids = CRM_Utils_Array::value('target_contact_id', civicrm_api3('Activity', 'getsingle', ['id' => $draft['id'], 'return' => 'target_contact_id']));
+          $cids = CRM_Utils_Array::value('target_contact_id', civicrm_api3('Activity', 'getsingle', [
+            'id' => $draft['id'],
+            'return' => 'target_contact_id',
+          ]));
           if ($cids) {
             $toContacts = civicrm_api3('Contact', 'get', [
               'id' => ['IN' => $cids],

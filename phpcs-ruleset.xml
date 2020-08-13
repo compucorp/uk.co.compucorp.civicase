@@ -13,5 +13,11 @@
 
     <!-- this was was added in drupal, but in civicrm we ignore this rule -->
     <exclude name="Drupal.Classes.UseGlobalClass.RedundantUseStatement"/>
+    <!-- These files are mainly auto generated and has some rules we want to exclude -->
+    <exclude-pattern>tests/phpunit/bootstrap.php</exclude-pattern>
+    <exclude-pattern>civicase.civix.php</exclude-pattern>
+    <!-- Civicrm APi tests classes do have names beginning with lower case -->
+    <!-- Hence the following rule is excluded -->
+    <exclude name="Drupal.NamingConventions.ValidClassName.StartWithCaptial"/>
   </rule>
 </ruleset>
