@@ -6,7 +6,7 @@ use CRM_Civicase_Service_CaseRoleCreationPostProcess as CaseRoleCreationPostProc
 use CRM_Civicase_Service_CaseRoleCreationPreProcess as CaseRoleCreationPreProcess;
 
 /**
- * Class CRM_Civicase_Event_Listener_CaseRoleCreation.
+ * Case role creation listener class.
  */
 class CRM_Civicase_Event_Listener_CaseRoleCreation {
 

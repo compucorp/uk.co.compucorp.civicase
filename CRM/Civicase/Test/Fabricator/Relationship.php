@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class CRM_Civicase_Test_Fabricator_Relationship.
+ * Relationship Fabricator class.
  */
 class CRM_Civicase_Test_Fabricator_Relationship {
 

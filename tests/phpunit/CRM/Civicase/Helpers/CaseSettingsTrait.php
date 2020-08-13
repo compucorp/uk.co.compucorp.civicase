@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Trait CRM_Civicase_Helpers_CaseSettingsTrait.
+ * Case setting helper trait.
  */
 trait CRM_Civicase_Helpers_CaseSettingsTrait {
 

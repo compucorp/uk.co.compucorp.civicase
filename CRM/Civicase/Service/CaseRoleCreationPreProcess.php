@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class CRM_Civicase_Service_CaseRoleCreationPreProcess.
+ * Case role creation pre-process class.
  */
 class CRM_Civicase_Service_CaseRoleCreationPreProcess extends CRM_Civicase_Service_CaseRoleCreationBase {
 

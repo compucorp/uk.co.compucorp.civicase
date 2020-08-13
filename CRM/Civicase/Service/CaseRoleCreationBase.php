@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class CRM_Civicase_Service_CaseRoleCreationBase.
+ * Case role creation base class.
  */
 class CRM_Civicase_Service_CaseRoleCreationBase {
 

@@ -210,12 +210,17 @@ class CRM_Civicase_Service_CaseRoleCreationPostProcessTest extends BaseHeadlessT
 
     $contactADetails = ['first_name' => 'First B', 'last_name' => 'Last B'];
     $contactCDetails = ['first_name' => 'First C', 'last_name' => 'Last C'];
-    $relationshipTypeAParams = ['name_a_b' => 'Manager is', 'name_b_a' => 'Manager'];
+    $relationshipTypeAParams = [
+      'name_a_b' => 'Manager is',
+      'name_b_a' => 'Manager',
+    ];
     $relationshipTypeA = RelationshipTypeFabricator::fabricate($relationshipTypeAParams);
-    $relationshipTypeBParams = ['name_a_b' => 'Regulator is', 'name_b_a' => 'Regulator'];
+    $relationshipTypeBParams = [
+      'name_a_b' => 'Regulator is',
+      'name_b_a' => 'Regulator',
+    ];
     $relationshipTypeB = RelationshipTypeFabricator::fabricate($relationshipTypeBParams);
     $contactA = ContactFabricator::fabricate($contactADetails);
-    $contactB = ContactFabricator::fabricate();
     $contactC = ContactFabricator::fabricate($contactCDetails);
 
     // Contact A is Manager to Client.
@@ -264,7 +269,10 @@ class CRM_Civicase_Service_CaseRoleCreationPostProcessTest extends BaseHeadlessT
       ]
     );
 
-    $relationshipTypeBParams = ['name_a_b' => 'Regulator is', 'name_b_a' => 'Regulator'];
+    $relationshipTypeBParams = [
+      'name_a_b' => 'Regulator is',
+      'name_b_a' => 'Regulator',
+    ];
     $contactCDetails = ['first_name' => 'First C', 'last_name' => 'Last C'];
     $relationshipTypeB = RelationshipTypeFabricator::fabricate($relationshipTypeBParams);
     $contactC = ContactFabricator::fabricate($contactCDetails);

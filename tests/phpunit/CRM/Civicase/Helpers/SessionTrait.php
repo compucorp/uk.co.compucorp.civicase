@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Trait CRM_Civicase_Helpers_SessionTrait.
+ * Session Helper trait.
  */
 trait CRM_Civicase_Helpers_SessionTrait {
 
