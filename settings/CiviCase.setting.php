@@ -119,6 +119,21 @@ $setting = [
     'description' => "Cases I'm involved in filter will include 'activities created by me' and 'activities assigned to me'.",
     'help_text' => '',
   ],
+  'civicaseSingleCaseRolePerType' => [
+    'group_name' => 'CiviCRM Preferences',
+    'group' => 'core',
+    'name' => 'civicaseSingleCaseRolePerType',
+    'type' => 'Boolean',
+    'quick_form_type' => 'Element',
+    'default' => 0,
+    'html_type' => 'checkbox',
+    'add' => '4.7',
+    'title' => ts('One active case role'),
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => ts('This setting will only allow one active instance of each case role for all case types.'),
+    'help_text' => '',
+  ],
 ];
 
 $caseSetting = new CRM_Civicase_Service_CaseCategorySetting();
