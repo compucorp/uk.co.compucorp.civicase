@@ -49,6 +49,8 @@ function civicase_civicrm_config(&$config) {
 
   Civi::dispatcher()->addListener('civi.api.prepare', ['CRM_Civicase_Event_Listener_ActivityFilter', 'onPrepare'], 10);
   Civi::dispatcher()->addListener('civi.api.respond', ['CRM_Civicase_Event_Listener_CaseTypeCategoryIsActiveToggler', 'onRespond'], 10);
+  Civi::dispatcher()->addListener('civi.api.respond', ['CRM_Civicase_Event_Listener_CaseRoleCreation', 'onRespond'], 10);
+  Civi::dispatcher()->addListener('civi.api.prepare', ['CRM_Civicase_Event_Listener_CaseRoleCreation', 'onPrepare'], 10);
 }
 
 /**
