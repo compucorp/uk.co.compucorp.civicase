@@ -54,9 +54,10 @@
    * @param {object} ts ts
    * @param {object} RelationshipType RelationshipType
    * @param {Function} isTruthy service to check if value is truthy
+   * @param {boolean} civicaseSingleCaseRolePerType if a single case role can be assigned per type
    */
   function civicaseViewPeopleController ($q, $scope, allowMultipleCaseClients,
-    civicaseCrmApi, DateHelper, ts, RelationshipType, isTruthy) {
+    civicaseCrmApi, DateHelper, ts, RelationshipType, isTruthy, civicaseSingleCaseRolePerType) {
     // The ts() and hs() functions help load strings for this module.
     var CONTACT_CANT_HAVE_ROLE_MESSAGE = ts('Case clients cannot be selected for a case role. Please select another contact.');
     var clients = _.indexBy($scope.item.client, 'contact_id');
@@ -65,6 +66,7 @@
 
     $scope.ts = ts;
     $scope.allowMultipleCaseClients = allowMultipleCaseClients;
+    $scope.civicaseSingleCaseRolePerType = civicaseSingleCaseRolePerType;
     $scope.roles = [];
     $scope.rolesFilter = '';
     $scope.rolesPage = 1;
@@ -85,6 +87,7 @@
 
     $scope.formatDate = DateHelper.formatDate;
     $scope.getRelations = getRelations;
+    $scope.checkIfRoleIsDisabled = checkIfRoleIsDisabled;
 
     (function init () {
       $scope.$bindToRoute({ expr: 'tab', param: 'peopleTab', format: 'raw', default: 'roles' });
@@ -259,6 +262,16 @@
         $scope.refresh(apiCalls);
       });
     };
+
+    /**
+     * Check if the sent role should be disabled
+     *
+     * @param {object} role role
+     * @returns {boolean} if the sent role should be disabled
+     */
+    function checkIfRoleIsDisabled (role) {
+      return $scope.civicaseSingleCaseRolePerType ? role.count === 1 : false;
+    }
 
     /**
      * Returns the parameters needed to create a completed activity related to the case.
@@ -706,6 +719,19 @@ included in the confirmation dialog.
         $scope.rolesPage = 1;
       }
       $scope.roles = _.slice(caseRoles, (25 * ($scope.rolesPage - 1)), 25 * $scope.rolesPage);
+
+      assignCountOfRolesPerType();
+    }
+
+    /**
+     * Assign number of roles present per type of relationship
+     */
+    function assignCountOfRolesPerType () {
+      _.each($scope.allRoles, function (role) {
+        role.count = _.filter($scope.roles, function (roleObj) {
+          return roleObj.display_name && roleObj.name === role.name;
+        }).length;
+      });
     }
 
     /**
