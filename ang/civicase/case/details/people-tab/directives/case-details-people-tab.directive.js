@@ -292,6 +292,9 @@
      * Returns all the calls needed to create relationships between the selected contact and all the
      * clients related to the case.
      *
+     * If it needs to replace the previous relationship it first makes a call to retrieve the
+     * previous relationship ID, which is needed when passing the `reassign_rel_id` parameter.
+     *
      * @param {ContactPromptResult} contactPromptResult the contact returned by the confirm dialog
      * @param {boolean} replacePreviousRelationship whether to replace previous relationship
      * @returns {Array[]} a list of api calls.
@@ -306,13 +309,24 @@
         description: contactPromptResult.description
       };
 
-      if (replacePreviousRelationship) {
-        params.reassign_rel_id = contactPromptResult.role.contact_id;
+      if (!replacePreviousRelationship) {
+        return _.map(item.client, function (client) {
+          return ['Relationship', 'create', _.extend({ contact_id_a: client.contact_id }, params)];
+        });
+      } else {
+        return _.map(item.client, function (client) {
+          return ['Relationship', 'get', {
+            case_id: item.id,
+            contact_id_b: contactPromptResult.role.contact_id,
+            is_active: 1,
+            relationship_type_id: contactPromptResult.role.relationship_type_id,
+            'api.Relationship.create': _.extend({}, params, {
+              contact_id_a: client.contact_id,
+              reassign_rel_id: '$value.id'
+            })
+          }];
+        });
       }
-
-      return _.map(item.client, function (client) {
-        return ['Relationship', 'create', _.extend({ contact_id_a: client.contact_id }, params)];
-      });
     }
 
     /**
