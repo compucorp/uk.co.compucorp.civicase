@@ -344,6 +344,39 @@ describe('Case Details People Tab', () => {
         }]]));
       });
     });
+
+    describe('when unassigning a role', () => {
+      let sampleContact, relationshipTypeId;
+
+      beforeEach(() => {
+        sampleContact = CRM._.sample(ContactsData.values);
+        relationshipTypeId = CRM._.uniqueId();
+
+        $scope.unassignRole({
+          contact_id: sampleContact.contact_id,
+          display_name: sampleContact.display_name,
+          relationship_type_id: relationshipTypeId,
+          role: 'Role'
+        });
+
+        crmConfirmDialog.trigger(crmConfirmYesEvent);
+        $rootScope.$digest();
+      });
+
+      it('marks the current role relationship as finished', () => {
+        expect($scope.refresh).toHaveBeenCalledWith(jasmine.arrayContaining([
+          ['Relationship', 'get', {
+            relationship_type_id: relationshipTypeId,
+            contact_id_b: sampleContact.contact_id,
+            case_id: $scope.item.id,
+            is_active: 1,
+            'api.Relationship.create': {
+              is_active: 0, end_date: 'now'
+            }
+          }]
+        ]));
+      });
+    });
   });
 
   describe('bulk action', () => {

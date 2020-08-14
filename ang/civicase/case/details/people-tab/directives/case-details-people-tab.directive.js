@@ -249,6 +249,8 @@
         if (!role.relationship_type_id) {
           apiCalls = [unassignClientCall(role)];
           getApiParamsToSetRelationshipsAsInactiveWhenClientIsRemoved(role, apiCalls);
+        } else {
+          apiCalls = [unassignRoleCall(role)];
         }
 
         apiCalls.push(['Activity', 'create', {
@@ -631,6 +633,22 @@ included in the confirmation dialog.
         case_id: item.id,
         contact_id: role.contact_id,
         'api.CaseContact.delete': {}
+      }];
+    }
+
+    /**
+     * Unassign role
+     *
+     * @param {object} role role
+     * @returns {Array} API call
+     */
+    function unassignRoleCall (role) {
+      return ['Relationship', 'get', {
+        relationship_type_id: role.relationship_type_id,
+        contact_id_b: role.contact_id,
+        case_id: item.id,
+        is_active: 1,
+        'api.Relationship.create': { is_active: 0, end_date: 'now' }
       }];
     }
 
