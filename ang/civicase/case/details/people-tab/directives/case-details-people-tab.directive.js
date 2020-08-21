@@ -55,9 +55,12 @@
    * @param {object} RelationshipType RelationshipType
    * @param {Function} isTruthy service to check if value is truthy
    * @param {boolean} civicaseSingleCaseRolePerType if a single case role can be assigned per type
+   * @param {object} dialogService A reference to the dialog service
+   * @param {Function} removeDatePickerHrefs Removes date picker href attributes
    */
   function civicaseViewPeopleController ($q, $scope, allowMultipleCaseClients,
-    civicaseCrmApi, DateHelper, ts, RelationshipType, isTruthy, civicaseSingleCaseRolePerType) {
+    civicaseCrmApi, DateHelper, ts, RelationshipType, isTruthy, civicaseSingleCaseRolePerType,
+    dialogService, removeDatePickerHrefs) {
     // The ts() and hs() functions help load strings for this module.
     var CONTACT_CANT_HAVE_ROLE_MESSAGE = ts('Case clients cannot be selected for a case role. Please select another contact.');
     var clients = _.indexBy($scope.item.client, 'contact_id');
@@ -553,45 +556,55 @@ included in the confirmation dialog.
      */
     function promptForContact (options, onConfirmCallback) {
       options = _.assign({ roles: {} }, options);
+      var model = {
+        beforeShow: removeDatePickerHrefs,
+        contact: { id: null },
+        contactSelectionErrorMessage: null,
+        description: null,
+        role: options.role
+      };
 
-      var modalBody = '<input name="caseRoleSelector" placeholder="' + ts('Select Contact') + '" />';
-
-      if (options.showDescriptionField) {
-        modalBody += '<br/><textarea rows="3" cols="35" name="description" class="crm-form-textarea" style="margin-top: 10px;padding-left: 10px;border-color: #C2CFDE;color: #9494A4;" placeholder="Description"></textarea>';
-      }
-
-      var dialogElement = CRM.confirm({
-        title: options.title,
-        message: modalBody,
-        open: function () {
-          $('[name=caseRoleSelector]', this).crmEntityRef({
-            create: true,
-            api: {
-              extra: ['display_name'],
-              params: {
-                contact_type: options.role.contact_type,
-                contact_sub_type: options.role.contact_sub_type
-              }
+      dialogService.open(
+        'PromptForContactDialog',
+        '~/civicase/case/details/people-tab/directives/contact-prompt-dialog.html',
+        model,
+        {
+          title: options.title,
+          width: '450px',
+          buttons: [
+            {
+              text: ts('Continue'),
+              icon: 'fa-check',
+              click: handleContactSubmit
             }
-          });
+          ]
         }
-      })
-        .on('crmConfirm:yes', function (event) {
-          if (!onConfirmCallback) {
-            return;
-          }
+      );
 
-          var contact = $('[name=caseRoleSelector]', this).select2('data');
-          var description = $('[name=description]', this).val();
+      /**
+       * Executes the confirmation callback function, if provided and closes
+       * the contact prompt modal if no error messages are displayed.
+       */
+      function handleContactSubmit () {
+        // CRM's Entity Ref directive only returns the contact ID, this returns
+        // the full contact data.
+        var contact = $('[ng-model="model.contact.id"]').select2('data');
 
-          onConfirmCallback({
-            contact: contact,
-            description: description,
-            event: event,
-            role: options.role,
-            showContactSelectionError: showContactSelectionError
-          });
+        if (!onConfirmCallback) {
+          return;
+        }
+
+        onConfirmCallback({
+          contact: contact,
+          description: model.description,
+          role: options.role,
+          showContactSelectionError: showContactSelectionError
         });
+
+        if (!model.contactSelectionErrorMessage) {
+          dialogService.close('PromptForContactDialog');
+        }
+      }
 
       /**
        * Displays the given error message under the contact selection input.
@@ -599,19 +612,7 @@ included in the confirmation dialog.
        * @param {string} message the error message to display under the contact selection.
        */
       function showContactSelectionError (message) {
-        var contactSelector = $('[name=caseRoleSelector]', dialogElement).select2('container');
-        var hasError = dialogElement.find('.contact-selection-error').length > 0;
-
-        if (hasError) {
-          return;
-        }
-
-        contactSelector.addClass('crm-error');
-        $('<div class="contact-selection-error crm-error crm-error-label"></div>')
-          .text(message)
-          .prepend('<i class="fa fa-times"></i>')
-          .css('max-width', contactSelector.width())
-          .insertAfter(contactSelector);
+        model.contactSelectionErrorMessage = message;
       }
     }
 
@@ -625,7 +626,6 @@ included in the confirmation dialog.
     function promptForContactThatIsNotCaseClient (promptOptions, contactSelectedHandler) {
       promptForContact(promptOptions, function (contactPromptResult) {
         if (checkContactIsClient(contactPromptResult.contact.id)) {
-          contactPromptResult.event.preventDefault();
           contactPromptResult
             .showContactSelectionError(CONTACT_CANT_HAVE_ROLE_MESSAGE);
 

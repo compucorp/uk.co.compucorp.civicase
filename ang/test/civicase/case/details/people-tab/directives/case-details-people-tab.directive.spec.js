@@ -2,11 +2,14 @@
 
 describe('Case Details People Tab', () => {
   let $controller, $rootScope, $scope, CasesData, caseRoleSelectorContact,
-    ContactsData, crmConfirmDialog, crmConfirmYesEvent, originalCrmConfirm,
-    originalSelect2;
+    ContactsData, crmConfirmDialog, crmConfirmYesEvent, originalCrmConfirm, originalSelect2, dialogServiceMock;
   const CONTACT_CANT_HAVE_ROLE_MESSAGE = 'Case clients cannot be selected for a case role. Please select another contact.';
 
-  beforeEach(module('civicase', 'civicase.data'));
+  beforeEach(module('civicase', 'civicase.data', ($provide) => {
+    dialogServiceMock = jasmine.createSpyObj('dialogService', ['open', 'close']);
+
+    $provide.value('dialogService', dialogServiceMock);
+  }));
 
   beforeEach(inject(function (_$controller_, _$q_, _$rootScope_, _CasesData_, _ContactsData_) {
     $controller = _$controller_;
@@ -34,8 +37,6 @@ describe('Case Details People Tab', () => {
     CRM.$.fn.select2 = jasmine.createSpy('select2').and.callFake(function (option) {
       if (option === 'data') {
         return caseRoleSelectorContact;
-      } else if (option === 'container') {
-        return crmConfirmDialog.find('[name=caseRoleSelector]');
       }
     });
   }));
@@ -71,9 +72,11 @@ describe('Case Details People Tab', () => {
           relationship_type_id: relationshipTypeId,
           role: roleName
         });
-        setRoleContact(contact);
-        setRoleDescription(roleDescription);
-        crmConfirmDialog.trigger(crmConfirmYesEvent);
+        selectDialogContact(contact);
+        updateDialogModel({
+          description: roleDescription
+        });
+        submitDialog();
         $rootScope.$digest();
       });
 
@@ -92,7 +95,7 @@ describe('Case Details People Tab', () => {
       });
 
       it('closes the contact selection dialog', () => {
-        expect(crmConfirmYesEvent.preventDefault).not.toHaveBeenCalled();
+        expect(dialogServiceMock.close).toHaveBeenCalled();
       });
     });
 
@@ -106,9 +109,11 @@ describe('Case Details People Tab', () => {
           relationship_type_id: relationshipTypeId,
           role: roleName
         });
-        setRoleContact(contact);
-        setRoleDescription(roleDescription);
-        crmConfirmDialog.trigger(crmConfirmYesEvent);
+        selectDialogContact(contact);
+        updateDialogModel({
+          description: roleDescription
+        });
+        submitDialog();
         $rootScope.$digest();
       });
 
@@ -134,7 +139,7 @@ describe('Case Details People Tab', () => {
       });
 
       it('closes the contact selection dialog', () => {
-        expect(crmConfirmYesEvent.preventDefault).not.toHaveBeenCalled();
+        expect(dialogServiceMock.close).toHaveBeenCalled();
       });
     });
 
@@ -145,16 +150,19 @@ describe('Case Details People Tab', () => {
           relationship_type_id: relationshipTypeId,
           role: roleName
         });
-        setRoleContact(CRM._.assign({}, client, {
+        selectDialogContact(CRM._.assign({}, client, {
           id: client.contact_id
         }));
-        setRoleDescription(roleDescription);
-        crmConfirmDialog.trigger(crmConfirmYesEvent);
+        updateDialogModel({
+          description: roleDescription
+        });
+        submitDialog();
         $rootScope.$digest();
       });
 
       it('displays an error message', () => {
-        expect(crmConfirmDialog.text()).toContain(CONTACT_CANT_HAVE_ROLE_MESSAGE);
+        expect(getDialogModel().contactSelectionErrorMessage)
+          .toBe(CONTACT_CANT_HAVE_ROLE_MESSAGE);
       });
 
       it('does not make api requests', () => {
@@ -162,7 +170,7 @@ describe('Case Details People Tab', () => {
       });
 
       it('does not close the contact selection dialog', () => {
-        expect(crmConfirmYesEvent.preventDefault).toHaveBeenCalled();
+        expect(dialogServiceMock.close).not.toHaveBeenCalled();
       });
     });
 
@@ -173,16 +181,19 @@ describe('Case Details People Tab', () => {
           relationship_type_id: relationshipTypeId,
           role: roleName
         });
-        setRoleContact(CRM._.assign({}, client, {
+        selectDialogContact(CRM._.assign({}, client, {
           id: client.contact_id
         }));
-        setRoleDescription(roleDescription);
-        crmConfirmDialog.trigger(crmConfirmYesEvent);
+        updateDialogModel({
+          description: roleDescription
+        });
+        submitDialog();
         $rootScope.$digest();
       });
 
       it('displays an error message', () => {
-        expect(crmConfirmDialog.text()).toContain(CONTACT_CANT_HAVE_ROLE_MESSAGE);
+        expect(getDialogModel().contactSelectionErrorMessage)
+          .toBe(CONTACT_CANT_HAVE_ROLE_MESSAGE);
       });
 
       it('does not make api requests', () => {
@@ -190,7 +201,7 @@ describe('Case Details People Tab', () => {
       });
 
       it('does not close the contact selection dialog', () => {
-        expect(crmConfirmYesEvent.preventDefault).toHaveBeenCalled();
+        expect(dialogServiceMock.close).not.toHaveBeenCalled();
       });
     });
 
@@ -199,8 +210,8 @@ describe('Case Details People Tab', () => {
         $scope.assignRoleOrClient({
           role: 'Client'
         });
-        setRoleContact(contact);
-        crmConfirmDialog.trigger(crmConfirmYesEvent);
+        selectDialogContact(contact);
+        submitDialog();
         $rootScope.$digest();
       });
 
@@ -245,7 +256,7 @@ describe('Case Details People Tab', () => {
       });
 
       it('closes the contact selection dialog', () => {
-        expect(crmConfirmYesEvent.preventDefault).not.toHaveBeenCalled();
+        expect(dialogServiceMock.close).toHaveBeenCalled();
       });
     });
 
@@ -258,8 +269,8 @@ describe('Case Details People Tab', () => {
           display_name: previousContact.display_name,
           role: 'Client'
         }, true);
-        setRoleContact(contact);
-        crmConfirmDialog.trigger(crmConfirmYesEvent);
+        selectDialogContact(contact);
+        submitDialog();
         $rootScope.$digest();
       });
 
@@ -303,7 +314,7 @@ describe('Case Details People Tab', () => {
       });
 
       it('closes the contact selection dialog', () => {
-        expect(crmConfirmYesEvent.preventDefault).not.toHaveBeenCalled();
+        expect(dialogServiceMock.close).toHaveBeenCalled();
       });
     });
 
@@ -397,6 +408,14 @@ describe('Case Details People Tab', () => {
       expect($scope.doContactTask).toHaveBeenCalledWith('roles');
     });
   });
+
+  /**
+   * @returns {object} The dialog's model object data.
+   */
+  function getDialogModel () {
+    return dialogServiceMock.open.calls.mostRecent().args[2];
+  }
+
   /**
    * Initializes the controller.
    *
@@ -407,25 +426,37 @@ describe('Case Details People Tab', () => {
   }
 
   /**
-   * Sets the given contact as the selected value of the case role selector dropdown.
+   * Makes the select2 function return the information for the given object.
    *
-   * @param {object} contact a contact.
+   * @param {object} contact contact's data.
    */
-  function setRoleContact (contact) {
-    CRM.$('[name=caseRoleSelector]', crmConfirmDialog).val(contact.id);
-    caseRoleSelectorContact = {
+  function selectDialogContact (contact) {
+    CRM.$.fn.select2.and.returnValue({
       id: contact.id,
-      text: contact.display_name,
-      extra: contact
-    };
+      label: contact.sort_name,
+      icon_class: contact.contact_type,
+      description: [contact.email],
+      extra: {
+        display_name: contact.display_name
+      }
+    });
   }
 
   /**
-   * Sets the description for the role being created using the confirm dialog.
-   *
-   * @param {string} description a description for the role.
+   * Submits the active modal dialog by clicking on the first configured button.
    */
-  function setRoleDescription (description) {
-    CRM.$('[name=description]', crmConfirmDialog).val(description);
+  function submitDialog () {
+    dialogServiceMock.open.calls.mostRecent().args[3].buttons[0].click();
+  }
+
+  /**
+   * Updates the dialog's model with the given data.
+   *
+   * @param {object} newModelData new data to append to the model.
+   */
+  function updateDialogModel (newModelData) {
+    var currentModelData = getDialogModel();
+
+    Object.assign(currentModelData, newModelData);
   }
 });

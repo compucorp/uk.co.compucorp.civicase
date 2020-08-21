@@ -1,0 +1,43 @@
+<div id="bootstrap-theme">
+  <div class="civicase__form">
+    <div
+      class="form-group"
+      ng-class="{
+        'crm-error': !!model.contactSelectionErrorMessage,
+        'select2-container': !!model.contactSelectionErrorMessage
+      }"
+    >
+      <input
+        ng-model="model.contact.id"
+        ng-change="model.contactSelectionErrorMessage = null"
+        crm-entityref="{
+          create: true,
+          entity: 'Contact',
+          select: { width: '100%', placeholder: ts('Select Contact') },
+          api: {
+            extra: ['display_name'],
+            params: {
+              contact_type: model.role.contact_type,
+              contact_sub_type: model.role.contact_sub_type
+            }
+          }
+        }"
+      />
+      <div
+        class="contact-selection-error crm-error crm-error-label"
+        ng-if="!!model.contactSelectionErrorMessage"
+      >
+        <i class="fa fa-times"></i>
+        {{model.contactSelectionErrorMessage}}
+      </div>
+    </div>
+    <div class="form-group">
+      <textarea
+        rows="3"
+        cols="35"
+        ng-model="model.description"
+        ng-attr-placeholder="{{ts('Description')}}"
+      ></textarea>
+    </div>
+  </div>
+</div>
