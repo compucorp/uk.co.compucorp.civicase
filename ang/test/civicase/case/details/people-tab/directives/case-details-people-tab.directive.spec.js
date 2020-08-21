@@ -4,6 +4,7 @@ describe('Case Details People Tab', () => {
   let $controller, $rootScope, $scope, CasesData, caseRoleSelectorContact,
     ContactsData, crmConfirmDialog, crmConfirmYesEvent, originalCrmConfirm, originalSelect2, dialogServiceMock;
   const CONTACT_CANT_HAVE_ROLE_MESSAGE = 'Case clients cannot be selected for a case role. Please select another contact.';
+  const CONTACT_NOT_SELECTED_MESSAGE = 'Please select a contact.';
 
   beforeEach(module('civicase', 'civicase.data', ($provide) => {
     dialogServiceMock = jasmine.createSpyObj('dialogService', ['open', 'close']);
@@ -194,6 +195,34 @@ describe('Case Details People Tab', () => {
       it('displays an error message', () => {
         expect(getDialogModel().contactSelectionErrorMessage)
           .toBe(CONTACT_CANT_HAVE_ROLE_MESSAGE);
+      });
+
+      it('does not make api requests', () => {
+        expect($scope.refresh).not.toHaveBeenCalled();
+      });
+
+      it('does not close the contact selection dialog', () => {
+        expect(dialogServiceMock.close).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when not selecting a contact', () => {
+      beforeEach(() => {
+        $scope.assignRoleOrClient({
+          relationship_type_id: relationshipTypeId,
+          role: roleName
+        });
+        CRM.$.fn.select2.and.returnValue();
+        updateDialogModel({
+          description: roleDescription
+        });
+        submitDialog();
+        $rootScope.$digest();
+      });
+
+      it('displays an error message', () => {
+        expect(getDialogModel().contactSelectionErrorMessage)
+          .toBe(CONTACT_NOT_SELECTED_MESSAGE);
       });
 
       it('does not make api requests', () => {

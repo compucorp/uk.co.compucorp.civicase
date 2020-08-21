@@ -63,6 +63,7 @@
     dialogService, removeDatePickerHrefs) {
     // The ts() and hs() functions help load strings for this module.
     var CONTACT_CANT_HAVE_ROLE_MESSAGE = ts('Case clients cannot be selected for a case role. Please select another contact.');
+    var CONTACT_NOT_SELECTED_MESSAGE = ts('Please select a contact.');
     var clients = _.indexBy($scope.item.client, 'contact_id');
     var item = $scope.item;
     var relTypes = RelationshipType.getAll();
@@ -629,7 +630,11 @@ included in the confirmation dialog.
      */
     function promptForContactThatIsNotCaseClient (promptOptions, contactSelectedHandler) {
       promptForContact(promptOptions, function (contactPromptResult) {
-        if (checkContactIsClient(contactPromptResult.contact.id)) {
+        if (!contactPromptResult.contact) {
+          contactPromptResult
+            .showContactSelectionError(CONTACT_NOT_SELECTED_MESSAGE);
+          return;
+        } else if (checkContactIsClient(contactPromptResult.contact.id)) {
           contactPromptResult
             .showContactSelectionError(CONTACT_CANT_HAVE_ROLE_MESSAGE);
 
