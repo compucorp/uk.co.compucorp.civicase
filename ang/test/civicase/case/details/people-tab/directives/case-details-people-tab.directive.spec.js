@@ -84,7 +84,7 @@ describe('Case Details People Tab', () => {
         expect($scope.refresh).toHaveBeenCalledWith(jasmine.arrayContaining([
           ['Relationship', 'create', {
             relationship_type_id: relationshipTypeId,
-            start_date: 'now',
+            start_date: getDialogModel().startDate,
             end_date: null,
             contact_id_b: contact.contact_id,
             case_id: $scope.item.id,

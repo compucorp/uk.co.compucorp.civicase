@@ -305,7 +305,7 @@
     function getCreateCaseRoleApiCalls (contactPromptResult, replacePreviousRelationship) {
       var params = {
         relationship_type_id: contactPromptResult.role.relationship_type_id,
-        start_date: 'now',
+        start_date: contactPromptResult.startDate || 'now',
         end_date: null,
         contact_id_b: contactPromptResult.contact.id,
         case_id: item.id,
@@ -601,7 +601,8 @@ included in the confirmation dialog.
           contact: contact,
           description: model.description,
           role: options.role,
-          showContactSelectionError: showContactSelectionError
+          showContactSelectionError: showContactSelectionError,
+          startDate: model.startDate
         });
 
         if (!model.contactSelectionErrorMessage) {
