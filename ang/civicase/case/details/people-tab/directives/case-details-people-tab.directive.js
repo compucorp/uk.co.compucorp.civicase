@@ -362,7 +362,8 @@
         {
           title: ts('Add %1', { 1: role.role }),
           showDescriptionField: true,
-          role: role
+          role: role,
+          startDate: moment().format('YYYY-MM-DD')
         },
         handleAssignRole
       );
@@ -557,11 +558,13 @@ included in the confirmation dialog.
     function promptForContact (options, onConfirmCallback) {
       options = _.assign({ roles: {} }, options);
       var model = {
-        beforeShow: removeDatePickerHrefs,
         contact: { id: null },
         contactSelectionErrorMessage: null,
         description: null,
-        role: options.role
+        removeDatePickerHrefs: removeDatePickerHrefs,
+        role: options.role,
+        showStartDate: !!options.startDate,
+        startDate: options.startDate
       };
 
       dialogService.open(

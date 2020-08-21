@@ -31,6 +31,18 @@
         {{model.contactSelectionErrorMessage}}
       </div>
     </div>
+    <div class="row form-group" ng-if="model.showStartDate">
+      <div class="col-md-6">
+        <input
+          ng-model="model.startDate"
+          placeholder="Start Date"
+          crm-ui-datepicker="{
+            time: false,
+            beforeShow: model.removeDatePickerHrefs,
+            onChangeMonthYear: model.removeDatePickerHrefs
+          }" />
+      </div>
+    </div>
     <div class="form-group">
       <textarea
         rows="3"
