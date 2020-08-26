@@ -564,6 +564,7 @@ included in the confirmation dialog.
         description: null,
         removeDatePickerHrefs: removeDatePickerHrefs,
         role: options.role,
+        showDescriptionField: options.showDescriptionField,
         showStartDate: !!options.startDate,
         startDate: options.startDate
       };
