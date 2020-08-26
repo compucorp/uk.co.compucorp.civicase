@@ -32,7 +32,7 @@
       </div>
     </div>
     <div class="row form-group" ng-if="model.showStartDate">
-      <div class="col-md-6">
+      <div class="col-md-12">
         <input
           ng-model="model.startDate"
           placeholder="Start Date"
@@ -43,13 +43,15 @@
           }" />
       </div>
     </div>
-    <div class="form-group">
-      <textarea
-        rows="3"
-        cols="35"
-        ng-model="model.description"
-        ng-attr-placeholder="{{ts('Description')}}"
-      ></textarea>
+    <div class="row form-group">
+      <div class="col-md-12">
+        <textarea
+          rows="3"
+          cols="35"
+          ng-model="model.description"
+          ng-attr-placeholder="{{ts('Description')}}"
+        ></textarea>
+      </div>
     </div>
   </div>
 </div>

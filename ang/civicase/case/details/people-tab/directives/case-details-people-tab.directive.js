@@ -574,7 +574,7 @@ included in the confirmation dialog.
         model,
         {
           title: options.title,
-          width: '450px',
+          width: '350px',
           buttons: [
             {
               text: ts('Continue'),
