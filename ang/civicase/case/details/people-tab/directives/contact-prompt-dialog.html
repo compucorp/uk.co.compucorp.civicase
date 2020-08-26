@@ -1,38 +1,10 @@
 <div id="bootstrap-theme">
-  <div class="civicase__form">
-    <div
-      class="form-group"
-      ng-class="{
-        'crm-error': !!model.contactSelectionErrorMessage,
-        'select2-container': !!model.contactSelectionErrorMessage
-      }"
-    >
-      <input
-        ng-model="model.contact.id"
-        ng-change="model.contactSelectionErrorMessage = null"
-        crm-entityref="{
-          create: true,
-          entity: 'Contact',
-          select: { width: '100%', placeholder: ts('Select Contact') },
-          api: {
-            extra: ['display_name'],
-            params: {
-              contact_type: model.role.contact_type,
-              contact_sub_type: model.role.contact_sub_type
-            }
-          }
-        }"
-      />
-      <div
-        class="contact-selection-error crm-error crm-error-label"
-        ng-if="!!model.contactSelectionErrorMessage"
-      >
-        <i class="fa fa-times"></i>
-        {{model.contactSelectionErrorMessage}}
-      </div>
-    </div>
+  <div class="civicrm__contact-prompt-dialog form-horizontal">
     <div class="row form-group" ng-if="model.showStartDate">
-      <div class="col-md-12">
+      <label class="col-sm-12">
+        Relationship Start Date
+      </label>
+      <div class="col-sm-12">
         <input
           ng-model="model.startDate"
           placeholder="Start Date"
@@ -41,6 +13,57 @@
             beforeShow: model.removeDatePickerHrefs,
             onChangeMonthYear: model.removeDatePickerHrefs
           }" />
+      </div>
+    </div>
+    <div class="row form-group" ng-if="model.endDate.show">
+      <label class="col-sm-12">
+        Relationship End Date
+      </label>
+      <div class="col-md-12">
+        <input
+          ng-model="model.endDate.value"
+          placeholder="End Date"
+          crm-ui-datepicker="{
+            time: false,
+            minDate: model.endDate.minDate,
+            beforeShow: model.removeDatePickerHrefs,
+            onChangeMonthYear: model.removeDatePickerHrefs
+          }" />
+      </div>
+    </div>
+    <div
+      ng-if="!model.hideContactField"
+      class="row form-group"
+      ng-class="{
+        'crm-error': !!model.contactSelectionErrorMessage,
+        'select2-container': !!model.contactSelectionErrorMessage
+      }"
+    >
+      <div class="col-md-12">
+        <input
+          class="form-control"
+          ng-model="model.contact.id"
+          ng-change="model.contactSelectionErrorMessage = null"
+          crm-entityref="{
+            create: true,
+            entity: 'Contact',
+            select: { width: '100%', placeholder: ts('Select Contact') },
+            api: {
+              extra: ['display_name'],
+              params: {
+                contact_type: model.role.contact_type,
+                contact_sub_type: model.role.contact_sub_type
+              }
+            }
+          }"
+        />
+      </div>
+      <div
+        class="contact-selection-error crm-error crm-error-label"
+        ng-if="!!model.contactSelectionErrorMessage"
+      >
+        <i class="fa fa-times"></i>
+        {{model.contactSelectionErrorMessage}}
       </div>
     </div>
     <div class="row form-group" ng-if="model.showDescriptionField">
