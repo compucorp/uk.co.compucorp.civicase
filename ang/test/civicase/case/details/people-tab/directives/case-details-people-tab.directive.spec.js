@@ -405,7 +405,11 @@ describe('Case Details People Tab', () => {
           role: 'Role'
         });
 
-        crmConfirmDialog.trigger(crmConfirmYesEvent);
+        updateDialogModel({
+          description: roleDescription
+        });
+        submitDialog();
+
         $rootScope.$digest();
       });
 
@@ -417,7 +421,7 @@ describe('Case Details People Tab', () => {
             case_id: $scope.item.id,
             is_active: 1,
             'api.Relationship.create': {
-              is_active: 0, end_date: 'now'
+              is_active: 0, end_date: getDialogModel().endDate.value
             }
           }]
         ]));
