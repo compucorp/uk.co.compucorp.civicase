@@ -257,7 +257,7 @@
       } else {
         promptForContact(
           {
-            title: ts('Remove %1', { 1: role.role }),
+            title: ts('Remove %1 as %2?', { 1: role.display_name, 2: role.role }),
             showDescriptionField: false,
             hideContactField: true,
             role: role,
@@ -281,13 +281,11 @@
      * @param {object} role role object
      */
     function makeAPICalltoUnassignRole (apiCalls, activityType, role) {
-      apiCalls.push(['Activity', 'create', {
-        case_id: item.id,
-        target_contact_id: role.contact_id,
-        status_id: 'Completed',
+      apiCalls.push(getActivityApiCallRelatedToRole({
         activity_type_id: activityType,
-        subject: ts('%1 removed as %2', { 1: role.display_name, 2: role.role })
-      }]);
+        subject: ts('%1 removed as %2', { 1: role.display_name, 2: role.role }),
+        target_contact_id: role.contact_id
+      }));
 
       $scope.refresh(apiCalls);
     }
@@ -308,7 +306,7 @@
      * @param {object} extraParams extra parameters to pass to the activity creation call.
      * @returns {[string, string, object]} the create activity api call params.
      */
-    function getCreateRoleActivityApiCall (extraParams) {
+    function getActivityApiCallRelatedToRole (extraParams) {
       return ['Activity', 'create', _.extend({}, {
         case_id: item.id,
         status_id: 'Completed'
@@ -475,7 +473,7 @@
     function getReplaceClientApiCalls (contactPromptResult) {
       var activitySubject = getActivitySubjectForReplaceCaseContact(contactPromptResult);
       var apiCalls = [
-        getCreateRoleActivityApiCall({
+        getActivityApiCallRelatedToRole({
           activity_type_id: 'Reassigned Case',
           subject: activitySubject,
           target_contact_id: [
@@ -528,7 +526,7 @@
         1: contactPromptResult.contact.extra.display_name
       });
       var apiCalls = [
-        getCreateRoleActivityApiCall({
+        getActivityApiCallRelatedToRole({
           activity_type_id: 'Add Client To Case',
           subject: activitySubject,
           target_contact_id: contactPromptResult.contact.id
