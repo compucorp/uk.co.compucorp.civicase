@@ -231,7 +231,11 @@
         {
           title: ts('Replace %1', { 1: role.role }),
           showDescriptionField: !isReplacingClient,
-          role: role
+          role: role,
+          reassignmentDate: {
+            minDate: role.start_date,
+            value: moment().format('YYYY-MM-DD')
+          }
         },
         handleReplaceRoleOrClient
       );
@@ -327,31 +331,20 @@
     function getCreateCaseRoleApiCalls (contactPromptResult, replacePreviousRelationship) {
       var params = {
         relationship_type_id: contactPromptResult.role.relationship_type_id,
-        start_date: contactPromptResult.startDate || 'now',
+        start_date: contactPromptResult.startDate || contactPromptResult.reassignmentDate,
         end_date: null,
         contact_id_b: contactPromptResult.contact.id,
         case_id: item.id,
         description: contactPromptResult.description
       };
 
-      if (!replacePreviousRelationship) {
-        return _.map(item.client, function (client) {
-          return ['Relationship', 'create', _.extend({ contact_id_a: client.contact_id }, params)];
-        });
-      } else {
-        return _.map(item.client, function (client) {
-          return ['Relationship', 'get', {
-            case_id: item.id,
-            contact_id_b: contactPromptResult.role.contact_id,
-            is_active: 1,
-            relationship_type_id: contactPromptResult.role.relationship_type_id,
-            'api.Relationship.create': _.extend({}, params, {
-              contact_id_a: client.contact_id,
-              reassign_rel_id: '$value.id'
-            })
-          }];
-        });
+      if (replacePreviousRelationship) {
+        params.reassign_rel_id = contactPromptResult.role.id;
       }
+
+      return _.map(item.client, function (client) {
+        return ['Relationship', 'create', _.extend({ contact_id_a: client.contact_id }, params)];
+      });
     }
 
     /**
@@ -580,6 +573,7 @@
     function promptForContact (options, onConfirmCallback) {
       options = _.assign({ roles: {} }, options);
       options.endDate = options.endDate || {};
+      options.reassignmentDate = options.reassignmentDate || {};
 
       var model = {
         contact: { id: null },
@@ -595,6 +589,11 @@
           value: options.endDate.value,
           show: !!options.endDate.value,
           minDate: options.endDate.minDate
+        },
+        reassignmentDate: {
+          value: options.reassignmentDate.value,
+          show: !!options.reassignmentDate.value,
+          minDate: options.reassignmentDate.minDate
         }
       };
 
@@ -634,7 +633,8 @@
           role: options.role,
           showContactSelectionError: showContactSelectionError,
           startDate: model.startDate,
-          endDate: model.endDate.value
+          endDate: model.endDate.value,
+          reassignmentDate: model.reassignmentDate.value
         });
 
         if (!model.contactSelectionErrorMessage) {
@@ -749,6 +749,7 @@
         _.each(item['api.Relationship.get'].values, function (relationship) {
           relDesc[relationship.contact_id_b + '_' + relationship.relationship_type_id] = relationship.description ? relationship.description : '';
           relDesc[relationship.contact_id_b + '_' + relationship.relationship_type_id + '_date'] = relationship.start_date;
+          relDesc[relationship.contact_id_b + '_' + relationship.relationship_type_id + '_id'] = relationship.id;
         });
       }
       // get clients from the contacts
@@ -783,6 +784,7 @@
         if (role && role.role !== 'Client' && (role.contact_id + '_' + role.relationship_type_id in relDesc)) {
           caseRoles[index].desc = relDesc[role.contact_id + '_' + role.relationship_type_id];
           caseRoles[index].start_date = relDesc[role.contact_id + '_' + role.relationship_type_id + '_date'];
+          caseRoles[index].id = relDesc[role.contact_id + '_' + role.relationship_type_id + '_id'];
         }
       });
       $scope.rolesCount = caseRoles.length;

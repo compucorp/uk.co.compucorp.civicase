@@ -45,7 +45,7 @@ class CRM_Civicase_Service_CaseRoleCreationPostProcess extends CRM_Civicase_Serv
     }
 
     if (!empty($existingRelationship)) {
-      $this->setRelationshipsInactive(array_column($existingRelationship, 'id'));
+      $this->setRelationshipsInactive(array_column($existingRelationship, 'id'), $requestParams['params']);
     }
     $activitySubject = $this->getActivitySubjectOnCreate($currentRelContactName, $relTypeDetails, $previousRelContactName);
     $this->createCaseActivity($requestParams['params']['case_id'], 'Assign Case Role', $activitySubject);
@@ -156,13 +156,15 @@ class CRM_Civicase_Service_CaseRoleCreationPostProcess extends CRM_Civicase_Serv
    *
    * @param array $relIds
    *   Relationship Ids.
+   * @param array $params
+   *   API request parameters.
    */
-  private function setRelationshipsInactive(array $relIds) {
+  private function setRelationshipsInactive(array $relIds, array $params) {
     foreach ($relIds as $relId) {
       civicrm_api3('Relationship', 'create', [
         'id' => $relId,
         'is_active' => 0,
-        'end_date' => date('Y-m-d'),
+        'end_date' => !empty($params['start_date']) ? $params['start_date'] : date('Y-m-d'),
         'skip_post_processing' => 1,
       ]);
     }

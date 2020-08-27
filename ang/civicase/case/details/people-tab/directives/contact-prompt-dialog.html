@@ -1,5 +1,6 @@
 <div id="bootstrap-theme">
   <div class="civicrm__contact-prompt-dialog form-horizontal">
+    <!-- start date -->
     <div class="row form-group" ng-if="model.showStartDate">
       <label class="col-sm-12">
         Relationship Start Date
@@ -15,6 +16,9 @@
           }" />
       </div>
     </div>
+    <!-- end - start date -->
+
+    <!-- end date -->
     <div class="row form-group" ng-if="model.endDate.show">
       <label class="col-sm-12">
         Relationship End Date
@@ -31,6 +35,28 @@
           }" />
       </div>
     </div>
+    <!-- end - end date -->
+
+    <!-- reassign date -->
+    <div class="row form-group" ng-if="model.reassignmentDate.show">
+      <label class="col-sm-12">
+        Relationship Reassignment Date
+      </label>
+      <div class="col-md-12">
+        <input
+          ng-model="model.reassignmentDate.value"
+          placeholder="Reassignment Date"
+          crm-ui-datepicker="{
+            time: false,
+            minDate: model.reassignmentDate.minDate,
+            beforeShow: model.removeDatePickerHrefs,
+            onChangeMonthYear: model.removeDatePickerHrefs
+          }" />
+      </div>
+    </div>
+    <!-- end - reassign date -->
+
+    <!-- contact selection dropdown -->
     <div
       ng-if="!model.hideContactField"
       class="row form-group"
@@ -66,6 +92,9 @@
         {{model.contactSelectionErrorMessage}}
       </div>
     </div>
+    <!-- end - contact selection dropdown -->
+
+    <!-- description field -->
     <div class="row form-group" ng-if="model.showDescriptionField">
       <div class="col-md-12">
         <textarea
@@ -76,5 +105,6 @@
         ></textarea>
       </div>
     </div>
+    <!-- end - description field -->
   </div>
 </div>
