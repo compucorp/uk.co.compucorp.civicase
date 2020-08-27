@@ -240,34 +240,55 @@
     /**
      * Unassign the role to a contact
      *
-     * @param {string} role role
+     * @param {object} role role
      */
     $scope.unassignRole = function (role) {
-      CRM.confirm({
-        title: ts('Remove %1', { 1: role.role }),
-        message: ts('Remove %1 as %2?', { 1: role.display_name, 2: role.role })
-      }).on('crmConfirm:yes', function () {
-        var apiCalls = [];
-
-        // when client
-        if (!role.relationship_type_id) {
-          apiCalls = [unassignClientCall(role)];
+      // when client
+      if (!role.relationship_type_id) {
+        CRM.confirm({
+          title: ts('Remove %1', { 1: role.role }),
+          message: ts('Remove %1 as %2?', { 1: role.display_name, 2: role.role })
+        }).on('crmConfirm:yes', function () {
+          var apiCalls = [unassignClientCall(role)];
           getApiParamsToSetRelationshipsAsInactiveWhenClientIsRemoved(role, apiCalls);
-        } else {
-          apiCalls = [unassignRoleCall(role)];
-        }
 
-        apiCalls.push(['Activity', 'create', {
-          case_id: item.id,
-          target_contact_id: role.contact_id,
-          status_id: 'Completed',
-          activity_type_id: role.relationship_type_id ? 'Remove Case Role' : 'Remove Client From Case',
-          subject: ts('%1 removed as %2', { 1: role.display_name, 2: role.role })
-        }]);
+          makeAPICalltoUnassignRole(apiCalls, 'Remove Client From Case', role);
+        });
+      } else {
+        promptForContact(
+          {
+            title: ts('Remove %1 as %2?', { 1: role.display_name, 2: role.role }),
+            showDescriptionField: false,
+            hideContactField: true,
+            role: role,
+            endDate: {
+              minDate: role.start_date,
+              value: moment().format('YYYY-MM-DD')
+            }
+          },
+          function (contactPromptResult) {
+            var apiCalls = [unassignRoleCall(role, contactPromptResult.endDate)];
 
-        $scope.refresh(apiCalls);
-      });
+            makeAPICalltoUnassignRole(apiCalls, 'Remove Case Role', role);
+          }
+        );
+      }
     };
+
+    /**
+     * @param {object[]} apiCalls list of api calls
+     * @param {string} activityType activity type
+     * @param {object} role role object
+     */
+    function makeAPICalltoUnassignRole (apiCalls, activityType, role) {
+      apiCalls.push(getActivityApiCallRelatedToRole({
+        activity_type_id: activityType,
+        subject: ts('%1 removed as %2', { 1: role.display_name, 2: role.role }),
+        target_contact_id: role.contact_id
+      }));
+
+      $scope.refresh(apiCalls);
+    }
 
     /**
      * Check if the sent role should be disabled
@@ -285,7 +306,7 @@
      * @param {object} extraParams extra parameters to pass to the activity creation call.
      * @returns {[string, string, object]} the create activity api call params.
      */
-    function getCreateRoleActivityApiCall (extraParams) {
+    function getActivityApiCallRelatedToRole (extraParams) {
       return ['Activity', 'create', _.extend({}, {
         case_id: item.id,
         status_id: 'Completed'
@@ -452,7 +473,7 @@
     function getReplaceClientApiCalls (contactPromptResult) {
       var activitySubject = getActivitySubjectForReplaceCaseContact(contactPromptResult);
       var apiCalls = [
-        getCreateRoleActivityApiCall({
+        getActivityApiCallRelatedToRole({
           activity_type_id: 'Reassigned Case',
           subject: activitySubject,
           target_contact_id: [
@@ -505,7 +526,7 @@
         1: contactPromptResult.contact.extra.display_name
       });
       var apiCalls = [
-        getCreateRoleActivityApiCall({
+        getActivityApiCallRelatedToRole({
           activity_type_id: 'Add Client To Case',
           subject: activitySubject,
           target_contact_id: contactPromptResult.contact.id
@@ -549,8 +570,8 @@
     }
 
     /**
-     * Displays a confirmation dialog used to select a contact. An optional description input can also be
-included in the confirmation dialog.
+     * Displays a confirmation dialog used to select a contact.
+     * An optional description input can also be included in the confirmation dialog.
      *
      * @param {ContactPromptOptions} options the prompt options
      * @param {(contactPromptResult: ContactPromptResult) => void} onConfirmCallback a callback executed after confirming
@@ -558,6 +579,8 @@ included in the confirmation dialog.
      */
     function promptForContact (options, onConfirmCallback) {
       options = _.assign({ roles: {} }, options);
+      options.endDate = options.endDate || {};
+
       var model = {
         contact: { id: null },
         contactSelectionErrorMessage: null,
@@ -565,8 +588,14 @@ included in the confirmation dialog.
         removeDatePickerHrefs: removeDatePickerHrefs,
         role: options.role,
         showDescriptionField: options.showDescriptionField,
+        hideContactField: options.hideContactField,
         showStartDate: !!options.startDate,
-        startDate: options.startDate
+        startDate: options.startDate,
+        endDate: {
+          value: options.endDate.value,
+          show: !!options.endDate.value,
+          minDate: options.endDate.minDate
+        }
       };
 
       dialogService.open(
@@ -575,7 +604,7 @@ included in the confirmation dialog.
         model,
         {
           title: options.title,
-          width: '350px',
+          width: '450px',
           buttons: [
             {
               text: ts('Continue'),
@@ -604,7 +633,8 @@ included in the confirmation dialog.
           description: model.description,
           role: options.role,
           showContactSelectionError: showContactSelectionError,
-          startDate: model.startDate
+          startDate: model.startDate,
+          endDate: model.endDate.value
         });
 
         if (!model.contactSelectionErrorMessage) {
@@ -664,15 +694,16 @@ included in the confirmation dialog.
      * Unassign role
      *
      * @param {object} role role
+     * @param {object} endDate end date for the relationship
      * @returns {Array} API call
      */
-    function unassignRoleCall (role) {
+    function unassignRoleCall (role, endDate) {
       return ['Relationship', 'get', {
         relationship_type_id: role.relationship_type_id,
         contact_id_b: role.contact_id,
         case_id: item.id,
         is_active: 1,
-        'api.Relationship.create': { is_active: 0, end_date: 'now' }
+        'api.Relationship.create': { is_active: 0, end_date: endDate }
       }];
     }
 
