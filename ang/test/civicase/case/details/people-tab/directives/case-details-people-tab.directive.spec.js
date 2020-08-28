@@ -108,7 +108,8 @@ describe('Case Details People Tab', () => {
           contact_id: previousContact.contact_id,
           display_name: previousContact.display_name,
           relationship_type_id: relationshipTypeId,
-          role: roleName
+          role: roleName,
+          id: '101'
         });
         selectDialogContact(contact);
         updateDialogModel({
@@ -119,24 +120,18 @@ describe('Case Details People Tab', () => {
       });
 
       it('creates a new relationship between the case client and the selected contact using the given role', () => {
-        expect($scope.refresh).toHaveBeenCalledWith(jasmine.arrayContaining([
-          ['Relationship', 'get', {
-            case_id: $scope.item.id,
-            contact_id_b: previousContact.contact_id,
-            is_active: 1,
+        expect($scope.refresh).toHaveBeenCalledWith([
+          ['Relationship', 'create', {
+            contact_id_a: $scope.item.client[0].contact_id,
             relationship_type_id: relationshipTypeId,
-            'api.Relationship.create': {
-              relationship_type_id: relationshipTypeId,
-              start_date: 'now',
-              end_date: null,
-              contact_id_b: contact.contact_id,
-              case_id: $scope.item.id,
-              description: roleDescription,
-              contact_id_a: $scope.item.client[0].contact_id,
-              reassign_rel_id: '$value.id'
-            }
+            start_date: getDialogModel().reassignmentDate.value,
+            end_date: null,
+            contact_id_b: contact.id,
+            case_id: $scope.item.id,
+            description: roleDescription,
+            reassign_rel_id: '101'
           }]
-        ]));
+        ]);
       });
 
       it('closes the contact selection dialog', () => {
