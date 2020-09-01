@@ -94,6 +94,16 @@
     $scope.formatDate = DateHelper.formatDate;
     $scope.getRelations = getRelations;
     $scope.checkIfRoleIsDisabled = checkIfRoleIsDisabled;
+    $scope.getSelectedContacts = getSelectedContacts;
+    $scope.getCountOfRolesWithContacts = getCountOfRolesWithContacts;
+    $scope.setSelectionMode = setSelectionMode;
+    $scope.setTab = setTab;
+    $scope.setLetterFilter = setLetterFilter;
+    $scope.doBulkAction = doBulkAction;
+    $scope.doContactTask = doContactTask;
+    $scope.assignRoleOrClient = assignRoleOrClient;
+    $scope.replaceRoleOrClient = replaceRoleOrClient;
+    $scope.unassignRole = unassignRole;
 
     (function init () {
       $scope.$bindToRoute({ expr: 'tab', param: 'peopleTab', format: 'raw', default: 'roles' });
@@ -118,7 +128,7 @@
      * @param {boolean} onlyChecked onlyChecked
      * @returns {Array} selected contact
      */
-    $scope.getSelectedContacts = function (tab, onlyChecked) {
+    function getSelectedContacts (tab, onlyChecked) {
       var idField = (tab === 'roles' ? 'contact_id' : 'id');
       if (onlyChecked || $scope[tab + 'SelectionMode'] === 'checked') {
         return _.collect(_.filter($scope[tab], { checked: true }), idField);
@@ -128,7 +138,7 @@
         }), idField);
       }
       return [];
-    };
+    }
 
     /**
      * On the contact tab all the records don't have some contact assigned
@@ -137,11 +147,11 @@
      * @param {Array} roles roles
      * @returns {number} count of roles
      */
-    $scope.getCountOfRolesWithContacts = function (roles) {
+    function getCountOfRolesWithContacts (roles) {
       return _.filter(roles, function (role) {
         return role.contact_id;
       }).length;
-    };
+    }
 
     /**
      * Sets selection mode
@@ -149,18 +159,18 @@
      * @param {string} mode mode
      * @param {string} tab tab
      */
-    $scope.setSelectionMode = function (mode, tab) {
+    function setSelectionMode (mode, tab) {
       $scope[tab + 'SelectionMode'] = mode;
-    };
+    }
 
     /**
      * Sets selected tab
      *
      * @param {string} tab tab
      */
-    $scope.setTab = function (tab) {
+    function setTab (tab) {
       $scope.tab = tab;
-    };
+    }
 
     /**
      * Filters result on the basis of letter clicked
@@ -168,7 +178,7 @@
      * @param {string} letter letter
      * @param {string} tab tab
      */
-    $scope.setLetterFilter = function (letter, tab) {
+    function setLetterFilter (letter, tab) {
       if ($scope[tab + 'AlphaFilter'] === letter) {
         $scope[tab + 'AlphaFilter'] = '';
       } else {
@@ -180,22 +190,22 @@
       } else {
         $scope.getRelations();
       }
-    };
+    }
 
     /**
      * @param {string} key key of the bulk action
      */
-    $scope.doBulkAction = function (key) {
+    function doBulkAction (key) {
       $scope.rolesSelectedTask = key;
       $scope.doContactTask('roles');
-    };
+    }
 
     /**
      * Update the contacts with the task
      *
      * @param {string} tab tab
      */
-    $scope.doContactTask = function (tab) {
+    function doContactTask (tab) {
       var task = $scope.contactTasks[$scope[tab + 'SelectedTask']];
       $scope[tab + 'SelectedTask'] = '';
       CRM.loadForm(CRM.url(task.url, { cids: $scope.getSelectedContacts(tab).join(',') }))
@@ -206,27 +216,27 @@
             $scope.getRelations();
           }
         });
-    };
+    }
 
     /**
      * Prompts the user to create either a new role or client related to the case.
      *
      * @param {Role} role the role to assign to the case.
      */
-    $scope.assignRoleOrClient = function (role) {
+    function assignRoleOrClient (role) {
       var isAssigningRole = role && !!role.relationship_type_id;
 
       isAssigningRole
         ? assignRole(role)
         : assignClient();
-    };
+    }
 
     /**
      * Replaces the given role or client with another one selected by the user.
      *
      * @param {Role} role the role to replace.
      */
-    $scope.replaceRoleOrClient = function (role) {
+    function replaceRoleOrClient (role) {
       var isReplacingClient = !role.relationship_type_id;
 
       var promptForContactParams = {
@@ -248,14 +258,14 @@
         promptForContactParams,
         handleReplaceRoleOrClient
       );
-    };
+    }
 
     /**
      * Unassign the role to a contact
      *
      * @param {object} role role
      */
-    $scope.unassignRole = function (role) {
+    function unassignRole (role) {
       // when client
       if (!role.relationship_type_id) {
         CRM.confirm({
@@ -292,7 +302,7 @@
           }
         );
       }
-    };
+    }
 
     /**
      * @param {string} date1 first date
