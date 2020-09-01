@@ -74,9 +74,33 @@
       >
       </paging>
       <div>
-        <a ng-repeat="letter in letters" class="civicase__people-tab__filter-alpha-pager" ng-class="{active: letter === rolesAlphaFilter}" ng-click="setLetterFilter(letter, 'roles')">{{ letter }}</a>
+        <a
+          ng-repeat="letter in letters"
+          class="civicase__people-tab__filter-alpha-pager"
+          ng-class="{active: letter === rolesAlphaFilter}"
+          ng-click="setLetterFilter(letter, 'roles')">
+          {{ letter }}
+        </a>
         <a href class="all" ng-click="setLetterFilter('', 'roles')">All</a>
       </div>
+      <div class="civicase__people-tab__inactive-filter">
+        <span
+          class="civicase__checkbox" role="checkbox" tabindex="0"
+          aria-checked="{{}}" aria-labelledby="Deleted Cases"
+          ng-click="toggleInactiveRoles($event)" ng-keydown="toggleInactiveRoles($event)">
+          <i
+            ng-if="showInactiveRoles"
+            class="civicase__checkbox--checked material-icons">
+            check_box
+          </i>
+        </span>
+        <label
+          ng-click="toggleInactiveRoles($event)" for="case_search_field_is_deleted"
+          class="control-label">
+          {{ ts('Display previous case role assignments') }}
+        </label>
+      </div>
+
       <div class="civicase__people-tab__filter-role">
         <select class="form-control" ng-model="rolesFilter" crm-ui-select>
           <option value="">{{ ts('All Roles') }}</option>

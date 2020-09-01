@@ -188,6 +188,14 @@
   }
 }
 
+.civicase__people-tab__inactive-filter {
+  .civicase__checkbox {
+    display: inline-block;
+    margin-right: 5px;
+    top: 4px;
+  }
+}
+
 .civicase__people-tab__table-assign-icon {
   cursor: pointer;
 

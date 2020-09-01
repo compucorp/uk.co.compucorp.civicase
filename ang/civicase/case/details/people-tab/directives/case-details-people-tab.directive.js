@@ -44,7 +44,7 @@
    */
 
   /**
-   * ViewPeople Controller
+   * civicaseViewPeopleController Controller
    *
    * @param {object} $q $q
    * @param {object} $scope $scope
@@ -84,6 +84,7 @@
     $scope.relationsAlphaFilter = '';
     $scope.relationsSelectionMode = '';
     $scope.relationsSelectedTask = '';
+    $scope.showInactiveRoles = false;
     $scope.letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     $scope.contactTasks = CRM.civicase.contactTasks;
     $scope.ceil = Math.ceil;
@@ -104,6 +105,7 @@
     $scope.assignRoleOrClient = assignRoleOrClient;
     $scope.replaceRoleOrClient = replaceRoleOrClient;
     $scope.unassignRole = unassignRole;
+    $scope.toggleInactiveRoles = toggleInactiveRoles;
 
     (function init () {
       $scope.$bindToRoute({ expr: 'tab', param: 'peopleTab', format: 'raw', default: 'roles' });
@@ -120,6 +122,13 @@
         }
       });
     }());
+
+    /**
+     * Toggle displaying inactive roles in the UI
+     */
+    function toggleInactiveRoles () {
+      $scope.showInactiveRoles = !$scope.showInactiveRoles;
+    }
 
     /**
      * Get selected contacts from the selection bar
