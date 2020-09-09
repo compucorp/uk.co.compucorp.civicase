@@ -189,10 +189,13 @@
 }
 
 .civicase__people-tab__inactive-filter {
+  margin-left: auto;
+  margin-right: $case-gutter-width;
+
   .civicase__checkbox {
     display: inline-block;
-    margin-right: 5px;
-    top: 4px;
+    margin-right: $basic-gutter;
+    top: $basic-gutter;
   }
 }
 
