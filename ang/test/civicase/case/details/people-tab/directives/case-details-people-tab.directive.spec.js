@@ -2,7 +2,8 @@
 
 describe('Case Details People Tab', () => {
   let $controller, $rootScope, $scope, CasesData, caseRoleSelectorContact,
-    ContactsData, crmConfirmDialog, crmConfirmYesEvent, originalCrmConfirm, originalSelect2, dialogServiceMock;
+    ContactsData, crmConfirmDialog, crmConfirmYesEvent, originalCrmConfirm,
+    originalSelect2, dialogServiceMock, CaseTypesMockData;
   const CONTACT_CANT_HAVE_ROLE_MESSAGE = 'Case clients cannot be selected for a case role. Please select another contact.';
   const CONTACT_NOT_SELECTED_MESSAGE = 'Please select a contact.';
 
@@ -12,11 +13,13 @@ describe('Case Details People Tab', () => {
     $provide.value('dialogService', dialogServiceMock);
   }));
 
-  beforeEach(inject(function (_$controller_, _$q_, _$rootScope_, _CasesData_, _ContactsData_) {
+  beforeEach(inject(function (_$controller_, _$q_, _$rootScope_, _CasesData_,
+    _ContactsData_, _CaseTypesMockData_) {
     $controller = _$controller_;
     $rootScope = _$rootScope_;
     CasesData = _CasesData_;
     ContactsData = _ContactsData_;
+    CaseTypesMockData = _CaseTypesMockData_;
 
     $scope = $rootScope.$new();
     $scope.$bindToRoute = jasmine.createSpy('$bindToRoute');
@@ -50,7 +53,9 @@ describe('Case Details People Tab', () => {
   });
 
   beforeEach(() => {
+    const caseType = CaseTypesMockData.get()[1];
     $scope.item = CasesData.get().values[0];
+    $scope.item.definition = caseType.definition;
 
     initController({
       $scope: $scope

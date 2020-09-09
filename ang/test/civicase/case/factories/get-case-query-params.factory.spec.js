@@ -121,10 +121,12 @@
           // Relationship description field
           'api.Relationship.get': {
             case_id: '11',
-            is_active: 1,
+            'api.Contact.get': {
+              contact_id: '$value.contact_id_b'
+            },
             return: [
               'id', 'relationship_type_id', 'contact_id_a', 'contact_id_b',
-              'description', 'start_date'
+              'description', 'end_date', 'is_active', 'start_date'
             ]
           },
           sequential: 1
