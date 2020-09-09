@@ -48,14 +48,11 @@
    *
    * @param {object} $q $q
    * @param {object} $scope $scope
-   * @param {string} CONTACT_CANT_HAVE_ROLE_MESSAGE error message label
-   * @param {string} CONTACT_NOT_SELECTED_MESSAGE error message label
-   * @param {string} RELATIONSHIP_END_DATE_MESSAGE error message label
-   * @param {string} RELATIONSHIP_REASSIGNMENT_DATE_MESSAGE error message label
    * @param {object} allowMultipleCaseClients allow multiple clients configuration value
    * @param {object} civicaseCrmApi service to interact with civicrm api
    * @param {object} civicasePeopleTabRoles People's tab roles list service
    * @param {object} DateHelper DateHelper
+   * @param {object} PeoplesTabMessageConstants Error message strings
    * @param {object} ts ts
    * @param {object} RelationshipType RelationshipType
    * @param {boolean} civicaseSingleCaseRolePerType if a single case role can be assigned per type
@@ -63,10 +60,9 @@
    * @param {Function} removeDatePickerHrefs Removes date picker href attributes
    */
   function civicaseViewPeopleController ($q, $scope,
-    CONTACT_CANT_HAVE_ROLE_MESSAGE, CONTACT_NOT_SELECTED_MESSAGE,
-    RELATIONSHIP_END_DATE_MESSAGE, RELATIONSHIP_REASSIGNMENT_DATE_MESSAGE,
     allowMultipleCaseClients,
-    civicaseCrmApi, civicasePeopleTabRoles, DateHelper, ts, RelationshipType,
+    civicaseCrmApi, civicasePeopleTabRoles, DateHelper,
+    PeoplesTabMessageConstants, ts, RelationshipType,
     civicaseSingleCaseRolePerType, dialogService, removeDatePickerHrefs) {
     // The ts() and hs() functions help load strings for this module.
     var clients = _.indexBy($scope.item.client, 'contact_id');
@@ -305,7 +301,7 @@
             if (!isSameOrAfter(contactPromptResult.endDate, contactPromptResult.role.start_date)) {
               contactPromptResult.showErrorMessageFor(
                 'endDate',
-                RELATIONSHIP_END_DATE_MESSAGE
+                PeoplesTabMessageConstants.RELATIONSHIP_END_DATE_MESSAGE
               );
 
               return;
@@ -730,12 +726,16 @@
         var isError = false;
 
         if (!contactPromptResult.contact) {
-          contactPromptResult
-            .showErrorMessageFor('contactSelection', CONTACT_NOT_SELECTED_MESSAGE);
+          contactPromptResult.showErrorMessageFor(
+            'contactSelection',
+            PeoplesTabMessageConstants.CONTACT_NOT_SELECTED_MESSAGE
+          );
           isError = true;
         } else if (checkContactIsClient(contactPromptResult.contact.id)) {
-          contactPromptResult
-            .showErrorMessageFor('contactSelection', CONTACT_CANT_HAVE_ROLE_MESSAGE);
+          contactPromptResult.showErrorMessageFor(
+            'contactSelection',
+            PeoplesTabMessageConstants.CONTACT_CANT_HAVE_ROLE_MESSAGE
+          );
 
           isError = true;
         }
@@ -744,7 +744,7 @@
           !isSameOrAfter(contactPromptResult.reassignmentDate, contactPromptResult.role.start_date)) {
           contactPromptResult.showErrorMessageFor(
             'reassignmentDate',
-            RELATIONSHIP_REASSIGNMENT_DATE_MESSAGE
+            PeoplesTabMessageConstants.RELATIONSHIP_REASSIGNMENT_DATE_MESSAGE
           );
           isError = true;
         }
