@@ -115,6 +115,7 @@
         <th class="civicase__people-tab__table-column">{{ ts('Role') }}</th>
         <th class="civicase__people-tab__table-column">{{ ts('Name') }}</th>
         <th class="civicase__people-tab__table-column">{{ ts('Start date') }}</th>
+        <th class="civicase__people-tab__table-column">{{ ts('End date') }}</th>
         <th class="civicase__people-tab__table-column">{{ ts('Phone') }}</th>
         <th class="civicase__people-tab__table-column">{{ ts('Email') }}</th>
         <th class="civicase__people-tab__table-column civicase__people-tab__table-column--last"></th>
@@ -143,6 +144,7 @@
           <span ng-if="!role.contact_id">{{ ts('Unassigned')  }}</span>
         </td>
         <td class="civicase__people-tab__table-column">{{ role.start_date ? formatDate(role.start_date) : '' }}</td>
+        <td class="civicase__people-tab__table-column">{{ role.end_date ? formatDate(role.end_date) : '' }}</td>
         <td class="civicase__people-tab__table-column">{{ role.phone }}</td>
         <td class="civicase__people-tab__table-column">
           <a
