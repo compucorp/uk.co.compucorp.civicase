@@ -48,6 +48,10 @@
    *
    * @param {object} $q $q
    * @param {object} $scope $scope
+   * @param {string} CONTACT_CANT_HAVE_ROLE_MESSAGE error message label
+   * @param {string} CONTACT_NOT_SELECTED_MESSAGE error message label
+   * @param {string} RELATIONSHIP_END_DATE_MESSAGE error message label
+   * @param {string} RELATIONSHIP_REASSIGNMENT_DATE_MESSAGE error message label
    * @param {object} allowMultipleCaseClients allow multiple clients configuration value
    * @param {object} civicaseCrmApi service to interact with civicrm api
    * @param {object} civicasePeopleTabRoles People's tab roles list service
@@ -58,14 +62,13 @@
    * @param {object} dialogService A reference to the dialog service
    * @param {Function} removeDatePickerHrefs Removes date picker href attributes
    */
-  function civicaseViewPeopleController ($q, $scope, allowMultipleCaseClients,
-    civicaseCrmApi, civicasePeopleTabRoles, DateHelper, ts, RelationshipType, civicaseSingleCaseRolePerType,
-    dialogService, removeDatePickerHrefs) {
+  function civicaseViewPeopleController ($q, $scope,
+    CONTACT_CANT_HAVE_ROLE_MESSAGE, CONTACT_NOT_SELECTED_MESSAGE,
+    RELATIONSHIP_END_DATE_MESSAGE, RELATIONSHIP_REASSIGNMENT_DATE_MESSAGE,
+    allowMultipleCaseClients,
+    civicaseCrmApi, civicasePeopleTabRoles, DateHelper, ts, RelationshipType,
+    civicaseSingleCaseRolePerType, dialogService, removeDatePickerHrefs) {
     // The ts() and hs() functions help load strings for this module.
-    var CONTACT_CANT_HAVE_ROLE_MESSAGE = ts('Case clients cannot be selected for a case role. Please select another contact.');
-    var CONTACT_NOT_SELECTED_MESSAGE = ts('Please select a contact.');
-    var REASSIGNMENT_DATE_MESSAGE = ts('Reassignment date cannot be before start date of the relationship.');
-    var END_DATE_MESSAGE = ts('End date cannot be before start date of the relationship.');
     var clients = _.indexBy($scope.item.client, 'contact_id');
     var item = $scope.item;
     var relTypes = RelationshipType.getAll();
@@ -300,7 +303,10 @@
           },
           function (contactPromptResult) {
             if (!isSameOrAfter(contactPromptResult.endDate, contactPromptResult.role.start_date)) {
-              contactPromptResult.showErrorMessageFor('endDate', END_DATE_MESSAGE);
+              contactPromptResult.showErrorMessageFor(
+                'endDate',
+                RELATIONSHIP_END_DATE_MESSAGE
+              );
 
               return;
             }
@@ -736,7 +742,10 @@
 
         if (contactPromptResult.reassignmentDate &&
           !isSameOrAfter(contactPromptResult.reassignmentDate, contactPromptResult.role.start_date)) {
-          contactPromptResult.showErrorMessageFor('reassignmentDate', REASSIGNMENT_DATE_MESSAGE);
+          contactPromptResult.showErrorMessageFor(
+            'reassignmentDate',
+            RELATIONSHIP_REASSIGNMENT_DATE_MESSAGE
+          );
           isError = true;
         }
 

@@ -1,11 +1,10 @@
 /* eslint-env jasmine */
 
 describe('Case Details People Tab', () => {
-  let $controller, $rootScope, $scope, CasesData, caseRoleSelectorContact,
+  let $controller, $rootScope, $scope, CONTACT_CANT_HAVE_ROLE_MESSAGE,
+    CONTACT_NOT_SELECTED_MESSAGE, CasesData, caseRoleSelectorContact,
     ContactsData, crmConfirmDialog, crmConfirmYesEvent, originalCrmConfirm,
     originalSelect2, dialogServiceMock, CaseTypesMockData;
-  const CONTACT_CANT_HAVE_ROLE_MESSAGE = 'Case clients cannot be selected for a case role. Please select another contact.';
-  const CONTACT_NOT_SELECTED_MESSAGE = 'Please select a contact.';
 
   beforeEach(module('civicase', 'civicase.data', ($provide) => {
     dialogServiceMock = jasmine.createSpyObj('dialogService', ['open', 'close']);
@@ -13,10 +12,13 @@ describe('Case Details People Tab', () => {
     $provide.value('dialogService', dialogServiceMock);
   }));
 
-  beforeEach(inject(function (_$controller_, _$q_, _$rootScope_, _CasesData_,
-    _ContactsData_, _CaseTypesMockData_) {
+  beforeEach(inject(function (_$controller_, _$q_, _$rootScope_,
+    _CONTACT_CANT_HAVE_ROLE_MESSAGE_, _CONTACT_NOT_SELECTED_MESSAGE_,
+    _CasesData_, _ContactsData_, _CaseTypesMockData_) {
     $controller = _$controller_;
     $rootScope = _$rootScope_;
+    CONTACT_CANT_HAVE_ROLE_MESSAGE = _CONTACT_CANT_HAVE_ROLE_MESSAGE_;
+    CONTACT_NOT_SELECTED_MESSAGE = _CONTACT_NOT_SELECTED_MESSAGE_;
     CasesData = _CasesData_;
     ContactsData = _ContactsData_;
     CaseTypesMockData = _CaseTypesMockData_;
