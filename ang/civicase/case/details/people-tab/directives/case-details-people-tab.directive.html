@@ -26,11 +26,11 @@
           </li>
         </ul>
       </div>
-      <h3>{{ ts('%1 Contacts', {1: getCountOfRolesWithContacts(roles)}) }}</h3>
+      <h3>{{ ts('%1 Contacts', {1: roles.getCountOfAssignedRoles()}) }}</h3>
       <div class="civicase__people-tab__selection">
         <span> {{ ts('Select Records:') }} </span>
         <input type="radio" value="all" ng-model="rolesSelectionMode" id="rolesSelectionMode-all" />
-        <label for="rolesSelectionMode-all" class="people-selection-radio">{{ ts('All %1 records', {1: getCountOfRolesWithContacts(roles)}) }}</label>
+        <label for="rolesSelectionMode-all" class="people-selection-radio">{{ ts('All %1 records', {1: roles.getCountOfAssignedRoles()}) }}</label>
         <input type="radio" value="checked" ng-model="rolesSelectionMode" id="rolesSelectionMode-checked"/>
         <label for="rolesSelectionMode-checked" class="people-selection-radio">Selected records only</label>
       </div>
@@ -60,11 +60,11 @@
     </div>
     <div class="civicase__people-tab__filter">
       <paging
-        class="center-block paging-top"
+        class="paging-top"
         page="rolesPage"
-        page-size="25"
-        total="rolesCount"
-        ng-show="rolesCount > 25"
+        page-size="roles.ROLES_PER_PAGE"
+        total="roles.totalCount"
+        ng-show="roles.totalCount > roles.ROLES_PER_PAGE"
         show-prev-next="true"
         show-first-last="true"
         text-first="{{ ts('<< First') }}"
@@ -102,10 +102,17 @@
       </div>
 
       <div class="civicase__people-tab__filter-role">
-        <select class="form-control" ng-model="rolesFilter" crm-ui-select>
+        <select
+          class="form-control"
+          ng-model="rolesFilter"
+          crm-ui-select
+          ng-change="roles.filterRoles(rolesAlphaFilter, rolesFilter)"
+        >
           <option value="">{{ ts('All Roles') }}</option>
-          <option value="client">{{ ts('Client') }}</option>
-          <option ng-repeat="role in allRoles" value="{{ role.name }}">{{ role.role }}</option>
+          <option value="{{ts('Client')}}">{{ ts('Client') }}</option>
+          <option ng-repeat="role in roles.caseTypeRoles" value="{{ role.role }}">
+            {{ role.role }}
+          </option>
         </select>
       </div>
     </div>
@@ -123,14 +130,19 @@
         </tr>
       </thead>
       <tbody class="civicase__people-tab__table-body">
-        <tr class="contact--{{role.contact_id}}" ng-repeat="role in roles track by $index" ng-if="!isRolesLoading" ng-class="{unassigned: !role.contact_id}">
+        <tr class="contact--{{role.contact_id}}" ng-repeat="role in roles.list track by $index" ng-if="!roles.isLoading" ng-class="{unassigned: !role.contact_id}">
           <td class="civicase__people-tab__table-column civicase__people-tab__table-column--first">
             <span ng-if="role.contact_id" class="civicase__checkbox" >
               <input id="select-role-{{ $index }}" class="civicase__people-tab__table-checkbox" type="checkbox" ng-model="role.checked" ng-click="setSelectionMode('checked', 'roles')" />
               <i ng-if="role.checked" class="civicase__checkbox--checked material-icons">check_box</i>
             </span>
             <label for="select-role-{{ $index }}">
-              <div><strong>{{ role.role }}</strong></div>
+              <div>
+                <strong>{{ role.role }}</strong>
+                <span class="badge" ng-if="role.isPastRole">
+                  Past
+                </span>
+              </div>
               <div><em>{{ role.description }}</em></div>
               <div>{{ role.desc }}</div>
             </label>
@@ -183,10 +195,10 @@
         </tr>
         <tr
           ng-repeat="i in [1, 2, 3]"
-          ng-if="isRolesLoading"
+          ng-if="roles.isLoading"
           ng-include="'~/civicase/case/details/people-tab/directives/case-details-people-tab-placeholder.html'"
         ></tr>
-        <tr ng-if="!roles.length && !isRolesLoading">
+        <tr ng-if="!roles.list.length && !roles.isLoading">
           <td colspan="9" class="text-center">
             <button class="btn btn-default" disabled>
               {{ ts('None Found') }}
@@ -196,13 +208,15 @@
       </tbody>
     </table>
     <div class="civicase__people-tab-counter clearfix">
-      <div class="pull-right">{{ ts('Page %1 of %2', {1: rolesPage, 2: ceil(rolesCount / 25)}) }}</div>
+      <div class="pull-right">
+        {{ ts('Page %1 of %2', {1: rolesPage, 2: ceil(roles.totalCount / roles.ROLES_PER_PAGE)}) }}
+      </div>
       <paging
         class="center-block"
         page="rolesPage"
-        page-size="25"
-        total="rolesCount"
-        ng-show="rolesCount > 25"
+        page-size="roles.ROLES_PER_PAGE"
+        total="roles.totalCount"
+        ng-show="roles.totalCount > roles.ROLES_PER_PAGE"
         show-prev-next="true"
         show-first-last="true"
         text-first="{{ ts('<< First') }}"
