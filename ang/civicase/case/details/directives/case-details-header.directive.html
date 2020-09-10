@@ -35,7 +35,18 @@
             title="{{ ts('Change Case Type') }}"
             class="crm-popup crm-editable-enabled"
             crm-popup-form-success="pushCaseData($data.civicase_reload[0])"
-            ng-href="{{ 'civicrm/case/activity' | civicaseCrmUrl:{ action: 'add', reset: 1, cid: item.client[0].contact_id, caseid: item.id, atype: getActivityType('Change Case Type'), case_status_id: id, civicase_reload: caseGetParamsAsString() } }}">
+            ng-href="{{
+              'civicrm/case/activity' | civicaseCrmUrl: {
+                action: 'add',
+                reset: 1,
+                cid: item.client[0].contact_id,
+                caseid: item.id,
+                atype: getActivityType('Change Case Type'),
+                case_status_id: id,
+                civicase_reload: caseGetParamsAsString()
+              }
+            }}"
+          >
             {{ item.case_type }}
           </a>
           <span ng-if="caseTypesLength < 2">
@@ -88,9 +99,11 @@
       <div class="btn-group btn-group-md">
         <button
           type="button"
-          style="background-color: {{ caseStatuses[item.status_id].color }};"
+          ng-style="{'background-color': caseStatuses[item.status_id].color }"
           class="btn btn-primary"
-          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="{{ ts('Change case status') }}">
+          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+          title="{{ ts('Change case status') }}"
+        >
           {{ item.status }}
           <span class="caret"></span>
         </button>
@@ -102,14 +115,29 @@
             <a
               crm-popup-form-success="pushCaseData($data.civicase_reload[0])"
               class="crm-popup"
-              ng-href="{{ 'civicrm/case/activity' | civicaseCrmUrl:{ action: 'add', reset: 1, cid: item.client[0].contact_id, caseid: item.id, atype: getActivityType('Change Case Status'), case_status_id: status.value, civicase_reload: caseGetParamsAsString() } }}">
+              ng-href="{{
+                'civicrm/case/activity' | civicaseCrmUrl: {
+                  action: 'add',
+                  reset: 1,
+                  cid: item.client[0].contact_id,
+                  caseid: item.id,
+                  atype: getActivityType('Change Case Status'),
+                  case_status_id: status.value,
+                  civicase_reload: caseGetParamsAsString()
+                }
+              }}"
+            >
               {{ status.label }}
             </a>
           </li>
         </ul>
       </div>
       <div class="btn-group btn-group-md">
-        <button type="button" class="civicase__case-header__action-icon btn btn-primary" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button
+          type="button"
+          class="civicase__case-header__action-icon btn btn-primary"
+          data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+        >
           <i class="material-icons">menu</i>
         </button>
         <ul
