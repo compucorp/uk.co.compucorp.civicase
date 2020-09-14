@@ -212,3 +212,9 @@
   line-height: 18px;
   padding: 16px 24px;
 }
+
+.civicase__people-tab__table-column {
+  .civicase-inline-datepicker__wrapper {
+    margin-top: -($padding-base-vertical + 1px);
+  }
+}
