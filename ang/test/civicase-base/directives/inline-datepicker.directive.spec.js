@@ -3,14 +3,16 @@
 (($) => {
   describe('civicaseInlineDatepicker', () => {
     const NG_INVALID_CLASS = 'ng-invalid';
-    let $compile, $rootScope, $scope, element, originalDatepickerFunction,
-      removeDatePickerHrefs;
+    let $compile, $rootScope, $scope, dateInputFormatValue, element,
+      originalDatepickerFunction, removeDatePickerHrefs;
 
     beforeEach(module('civicase-base', 'civicase.data'));
 
-    beforeEach(inject((_$compile_, _$rootScope_, _removeDatePickerHrefs_) => {
+    beforeEach(inject((_$compile_, _$rootScope_, _dateInputFormatValue_,
+      _removeDatePickerHrefs_) => {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
+      dateInputFormatValue = _dateInputFormatValue_;
       removeDatePickerHrefs = _removeDatePickerHrefs_;
       $scope = $rootScope.$new();
       originalDatepickerFunction = $.fn.datepicker;
@@ -32,11 +34,17 @@
         expect($.fn.datepicker).toHaveBeenCalled();
       });
 
+      it('sets the date format as the one specified by CiviCRM setting', () => {
+        expect($.fn.datepicker).toHaveBeenCalledWith(jasmine.objectContaining({
+          dateFormat: dateInputFormatValue
+        }));
+      });
+
       it('removes the HREF attributes from the datepicker links', () => {
-        expect($.fn.datepicker).toHaveBeenCalledWith({
+        expect($.fn.datepicker).toHaveBeenCalledWith(jasmine.objectContaining({
           beforeShow: removeDatePickerHrefs,
           onChangeMonthYear: removeDatePickerHrefs
-        });
+        }));
       });
     });
 
@@ -48,11 +56,11 @@
           initDirective();
         });
 
-        it('sets the input format in DD/MM/YYYY', () => {
+        it('sets the input format in day/month/year', () => {
           expect(element.val()).toBe('31/01/1999');
         });
 
-        it('keeps the model value in the YYYY-MM-DD format', () => {
+        it('keeps the model value in the year-month-day format', () => {
           expect($scope.date).toBe('1999-01-31');
         });
       });
@@ -67,11 +75,11 @@
           $scope.$digest();
         });
 
-        it('sets the input format in DD/MM/YYYY', () => {
+        it('sets the input format in day/month/year', () => {
           expect(element.val()).toBe('28/02/1999');
         });
 
-        it('keeps the model value in the YYYY-MM-DD format', () => {
+        it('keeps the model value in the year-month-day format', () => {
           expect($scope.date).toBe('1999-02-28');
         });
       });

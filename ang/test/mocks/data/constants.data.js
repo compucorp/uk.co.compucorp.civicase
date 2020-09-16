@@ -12,6 +12,7 @@
   };
 
   module.config(($provide) => {
+    $provide.constant('dateInputFormatValue', CRM.config.dateInputFormat);
     $provide.constant('allowMultipleCaseClients', CRM['civicase-base'].allowMultipleCaseClients);
     $provide.constant('allowCaseLocks', CRM['civicase-base'].allowCaseLocks);
     $provide.constant('currentCaseCategory', CRM['civicase-base'].currentCaseCategory);
