@@ -43,6 +43,11 @@ $form-control-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
     }
   }
 
+  .civicase__inline-datepicker--open {
+    border: 1px solid $crm-grayblue-darker;
+    box-shadow: $form-control-box-shadow;
+  }
+
   [civicase-inline-datepicker]:focus + .addon,
   [civicase-inline-datepicker]:active + .addon {
     opacity: 1;

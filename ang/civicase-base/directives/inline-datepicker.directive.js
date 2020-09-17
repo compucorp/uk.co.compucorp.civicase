@@ -30,11 +30,30 @@
         model.$validators.isValidDate = isValidDate;
 
         element.datepicker({
-          beforeShow: removeDatePickerHrefs,
+          beforeShow: handleDatepickerOpen,
           dateFormat: dateInputFormatValue,
-          onChangeMonthYear: removeDatePickerHrefs
+          onChangeMonthYear: removeDatePickerHrefs,
+          onClose: handleDatePickerClose
         });
       })();
+
+      /**
+       * Removes the open class from the input element.
+       */
+      function handleDatePickerClose () {
+        element.removeClass('civicase__inline-datepicker--open');
+      }
+
+      /**
+       * Adds the open class and removes HREF attributes from the calendar
+       * element. This avoids changing the URL by mistake when selecting a date.
+       * We pass down any arguments to this function, which includes a reference
+       * to the jQuery UI object and the calendar's element.
+       */
+      function handleDatepickerOpen () {
+        element.addClass('civicase__inline-datepicker--open');
+        removeDatePickerHrefs.apply(this, arguments);
+      }
 
       /**
        * @param {string} modelValue the value stored in the model.
