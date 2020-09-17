@@ -1,19 +1,21 @@
 /* eslint-env jasmine */
 
-(($) => {
+(($, _) => {
   describe('civicaseInlineDatepicker', () => {
     const NG_INVALID_CLASS = 'ng-invalid';
     let $compile, $rootScope, $scope, dateInputFormatValue, element,
       originalDatepickerFunction, removeDatePickerHrefs;
 
-    beforeEach(module('civicase-base', 'civicase.data'));
+    beforeEach(module('civicase-base', 'civicase.data', ($provide) => {
+      removeDatePickerHrefs = jasmine.createSpy('removeDatePickerHrefs');
 
-    beforeEach(inject((_$compile_, _$rootScope_, _dateInputFormatValue_,
-      _removeDatePickerHrefs_) => {
+      $provide.value('removeDatePickerHrefs', removeDatePickerHrefs);
+    }));
+
+    beforeEach(inject((_$compile_, _$rootScope_, _dateInputFormatValue_) => {
       $compile = _$compile_;
       $rootScope = _$rootScope_;
       dateInputFormatValue = _dateInputFormatValue_;
-      removeDatePickerHrefs = _removeDatePickerHrefs_;
       $scope = $rootScope.$new();
       originalDatepickerFunction = $.fn.datepicker;
       $.fn.datepicker = jasmine.createSpy('datepicker');
@@ -39,12 +41,54 @@
           dateFormat: dateInputFormatValue
         }));
       });
+    });
 
-      it('does not change the site url wrongly when selecting a date', () => {
-        expect($.fn.datepicker).toHaveBeenCalledWith(jasmine.objectContaining({
-          beforeShow: removeDatePickerHrefs,
-          onChangeMonthYear: removeDatePickerHrefs
-        }));
+    describe('handling the datepicker events', () => {
+      beforeEach(() => {
+        initDirective();
+      });
+
+      describe('when the datepicker is opened', () => {
+        beforeEach(() => {
+          const beforeShow = $.fn.datepicker.calls.first()
+            .args[0].beforeShow || _.noop;
+
+          beforeShow(1, 2, 3, 4);
+        });
+
+        it('does not change the site url wrongly when selecting a date', () => {
+          expect(removeDatePickerHrefs).toHaveBeenCalledWith(1, 2, 3, 4);
+        });
+
+        it('keeps displaying the input even after moving out to select a date', () => {
+          expect(element.hasClass('civicase__inline-datepicker--open')).toBe(true);
+        });
+      });
+
+      describe('when the datepicker month or year changes', () => {
+        beforeEach(() => {
+          const onChangeMonthYear = $.fn.datepicker.calls.first()
+            .args[0].onChangeMonthYear || _.noop;
+
+          onChangeMonthYear(1, 2, 3, 4);
+        });
+
+        it('does not change the site url wrongly when selecting a date', () => {
+          expect(removeDatePickerHrefs).toHaveBeenCalledWith(1, 2, 3, 4);
+        });
+      });
+
+      describe('when the datepicker is closed', () => {
+        beforeEach(() => {
+          const onClose = $.fn.datepicker.calls.first()
+            .args[0].onClose || _.noop;
+
+          onClose();
+        });
+
+        it('hides the input element if not directly hovering it', () => {
+          expect(element.hasClass('civicase__inline-datepicker--open')).toBe(false);
+        });
       });
     });
 
@@ -135,4 +179,4 @@
       $scope.$digest();
     }
   });
-})(CRM.$);
+})(CRM.$, CRM._);
