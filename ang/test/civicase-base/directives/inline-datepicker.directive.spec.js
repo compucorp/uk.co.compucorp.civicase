@@ -40,7 +40,7 @@
         }));
       });
 
-      it('removes the HREF attributes from the datepicker links', () => {
+      it('does not change the site url wrongly when selecting a date', () => {
         expect($.fn.datepicker).toHaveBeenCalledWith(jasmine.objectContaining({
           beforeShow: removeDatePickerHrefs,
           onChangeMonthYear: removeDatePickerHrefs
