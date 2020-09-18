@@ -135,7 +135,12 @@
               phone: contact.phone,
               relationship_type_id: caseTypeRole.relationship_type_id,
               role: caseTypeRole.role,
-              start_date: caseRelation.start_date
+              relationship: caseRelation,
+              start_date: caseRelation.start_date,
+              previousValues: {
+                end_date: caseRelation.end_date,
+                start_date: caseRelation.start_date
+              }
             });
           });
         } else {
@@ -194,20 +199,24 @@
      * @returns {object[]} a unique list of case relationships.
      */
     function getUniqueCaseRelationships (relationships) {
-      return _.chain(relationships)
+      return _(relationships)
         .map(function (relationship) {
           return _.assign({}, relationship, {
             startDateTimestamp: moment(relationship.start_date).valueOf()
           });
         })
         .sortByAll(['is_active', 'startDateTimestamp'])
-        .filter(function (relationship, index, sortedRelationships) {
-          var similarRelationshipIndex = _.findLastIndex(sortedRelationships, {
-            contact_id_b: relationship.contact_id_b,
-            relationship_type_id: relationship.relationship_type_id
-          });
+        .groupBy(function (relationship) {
+          return [
+            relationship.contact_id_b,
+            relationship.relationship_type_id
+          ].join();
+        })
+        .map(function (relationships) {
+          var relationship = _.first(relationships);
+          relationship.relationship_ids = _.map(relationships, 'id');
 
-          return similarRelationshipIndex === index;
+          return relationship;
         })
         .value();
     }
