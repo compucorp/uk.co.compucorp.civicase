@@ -1,4 +1,4 @@
-((angular) => {
+((_, angular) => {
   const module = angular.module('civicase.data');
 
   CRM['civicase-base'].allowMultipleCaseClients = true;
@@ -19,5 +19,6 @@
     $provide.constant('caseCategoryWebformSettings', CRM['civicase-base'].caseCategoryWebformSettings);
     $provide.constant('includeActivitiesForInvolvedContact', CRM['civicase-base'].includeActivitiesForInvolvedContact);
     $provide.constant('showFullContactNameOnActivityFeed', CRM['civicase-base'].showFullContactNameOnActivityFeed);
+    $provide.constant('loggedInContactId', _.uniqueId());
   });
-})(angular);
+})(CRM._, angular);
