@@ -2,9 +2,9 @@
 
 describe('Case Details People Tab', () => {
   let $controller, $rootScope, $scope, CasesData, caseRoleSelectorContact,
-    ContactsData, crmConfirmDialog, crmConfirmYesEvent, originalCrmConfirm,
-    originalSelect2, dialogServiceMock, CaseTypesMockData,
-    PeoplesTabMessageConstants;
+    civicasePeopleTabRoles, civicaseRoleDatesUpdater, ContactsData,
+    crmConfirmDialog, crmConfirmYesEvent, originalCrmConfirm, originalSelect2,
+    dialogServiceMock, CaseTypesMockData, PeoplesTabMessageConstants;
 
   beforeEach(module('civicase', 'civicase.data', ($provide) => {
     dialogServiceMock = jasmine.createSpyObj('dialogService', ['open', 'close']);
@@ -13,11 +13,13 @@ describe('Case Details People Tab', () => {
   }));
 
   beforeEach(inject(function (_$controller_, _$q_, _$rootScope_,
-    _CasesData_, _ContactsData_, _CaseTypesMockData_,
-    _PeoplesTabMessageConstants_) {
+    _CasesData_, _civicasePeopleTabRoles_, _civicaseRoleDatesUpdater_,
+    _ContactsData_, _CaseTypesMockData_, _PeoplesTabMessageConstants_) {
     $controller = _$controller_;
     $rootScope = _$rootScope_;
     CasesData = _CasesData_;
+    civicasePeopleTabRoles = _civicasePeopleTabRoles_;
+    civicaseRoleDatesUpdater = _civicaseRoleDatesUpdater_;
     ContactsData = _ContactsData_;
     CaseTypesMockData = _CaseTypesMockData_;
     PeoplesTabMessageConstants = _PeoplesTabMessageConstants_;
@@ -60,6 +62,16 @@ describe('Case Details People Tab', () => {
 
     initController({
       $scope: $scope
+    });
+  });
+
+  describe('on init', () => {
+    it('stores a reference to the people tab roles service', () => {
+      expect($scope.roles).toBe(civicasePeopleTabRoles);
+    });
+
+    it('stores a reference to the role dates updater service', () => {
+      expect($scope.roleDatesUpdater).toBe(civicaseRoleDatesUpdater);
     });
   });
 

@@ -55,6 +55,7 @@
    * @param {object} PeoplesTabMessageConstants Error message strings
    * @param {object} ts ts
    * @param {object} RelationshipType RelationshipType
+   * @param {object} civicaseRoleDatesUpdater Role Dates Updater service
    * @param {boolean} civicaseSingleCaseRolePerType if a single case role can be assigned per type
    * @param {object} dialogService A reference to the dialog service
    * @param {Function} removeDatePickerHrefs Removes date picker href attributes
@@ -63,7 +64,8 @@
     allowMultipleCaseClients,
     civicaseCrmApi, civicasePeopleTabRoles, DateHelper,
     PeoplesTabMessageConstants, ts, RelationshipType,
-    civicaseSingleCaseRolePerType, dialogService, removeDatePickerHrefs) {
+    civicaseRoleDatesUpdater, civicaseSingleCaseRolePerType, dialogService,
+    removeDatePickerHrefs) {
     // The ts() and hs() functions help load strings for this module.
     var clients = _.indexBy($scope.item.client, 'contact_id');
     var item = $scope.item;
@@ -83,6 +85,7 @@
     $scope.relationsAlphaFilter = '';
     $scope.relationsSelectionMode = '';
     $scope.relationsSelectedTask = '';
+    $scope.roleDatesUpdater = civicaseRoleDatesUpdater;
     $scope.showInactiveRoles = false;
     $scope.letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     $scope.contactTasks = CRM.civicase.contactTasks;
