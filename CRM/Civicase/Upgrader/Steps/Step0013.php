@@ -1,12 +1,15 @@
 <?php
 
 /**
- * CRM_Civicase_Upgrader_Steps_Step0013 class.
+ * Creates the activity types for case role date changes.
  */
 class CRM_Civicase_Upgrader_Steps_Step0013 {
 
   /**
-   * Creates the activity types for case role date changes.
+   * Runs the upgrader changes.
+   *
+   * @return bool
+   *   Return value in boolean.
    */
   public function apply() {
     $this->insertUniqueActivityType(
