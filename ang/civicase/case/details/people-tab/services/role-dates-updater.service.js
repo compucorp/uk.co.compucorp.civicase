@@ -28,7 +28,19 @@
     }
 
     /**
-     * @param {object} params List of parameters to use for return the API calls.
+     * @param {object} params List of parameters used for building the change
+     *   relationship date's API calls.
+     * @param {string} params.activityTypeId Name of the activity type that will
+     *   be used when recording the date change.
+     *   Ex: "Change Case Role End Date".
+     * @param {string} params.caseId The ID of the case the activity will belong
+     *   to.
+     * @param {string} params.dateFieldLabel Human readable name for the date
+     *   field. Example: "start date".
+     * @param {string} params.dateFieldName Name of the date field as defined
+     *   in the endpoint.
+     * @param {object} params.role Role object as returned by the People's tab
+     *   role service.
      * @returns {Array} a list of API calls for updating the date for each case
      *   relation and also create an activity that records the change done to the
      *   date.
