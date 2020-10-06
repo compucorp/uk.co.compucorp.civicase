@@ -3,7 +3,7 @@
 /**
  * Creates the Change Case Role Date activity types.
  */
-class CRM_Civicase_Setup_ChangeCaseRoleDateActivityTypeSetup {
+class CRM_Civicase_Setup_AddChangeCaseRoleDateActivityTypes {
 
   /**
    * Runs the setup commands.
