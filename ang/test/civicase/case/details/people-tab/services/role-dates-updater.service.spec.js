@@ -108,6 +108,46 @@
       });
     });
 
+    describe('when the previous role date is not defined', () => {
+      beforeEach(() => {
+        delete roleData.previousValues.start_date;
+
+        roleData.relationship.start_date = '2000-01-31';
+        returnedApiCalls = roleDatesUpdater.getApiCallsForStartDate(
+          roleData,
+          caseId
+        );
+      });
+
+      it('does not add the previous role date to the activity subject', () => {
+        expect(returnedApiCalls).toEqual(jasmine.arrayContaining([
+          ['Activity', 'create', jasmine.objectContaining({
+            subject: 'Jon Snow, with Ranger case role, had start date changed to 31/01/2000'
+          })]
+        ]));
+      });
+    });
+
+    describe('when the current role date is not defined', () => {
+      beforeEach(() => {
+        delete roleData.relationship.start_date;
+
+        roleData.previousValues.start_date = '2000-01-31';
+        returnedApiCalls = roleDatesUpdater.getApiCallsForStartDate(
+          roleData,
+          caseId
+        );
+      });
+
+      it('does not add the current role date to the activity subject', () => {
+        expect(returnedApiCalls).toEqual(jasmine.arrayContaining([
+          ['Activity', 'create', jasmine.objectContaining({
+            subject: 'Jon Snow, with Ranger case role, had start date changed from 31/01/2000'
+          })]
+        ]));
+      });
+    });
+
     describe('when updating the previous end date value', () => {
       beforeEach(() => {
         roleData.relationship.end_date = '2000-12-31';

@@ -28,19 +28,8 @@
     }
 
     /**
-     * @param {object} params List of parameters used for building the change
-     *   relationship date's API calls.
-     * @param {string} params.activityTypeId Name of the activity type that will
-     *   be used when recording the date change.
-     *   Ex: "Change Case Role End Date".
-     * @param {string} params.caseId The ID of the case the activity will belong
-     *   to.
-     * @param {string} params.dateFieldLabel Human readable name for the date
-     *   field. Example: "start date".
-     * @param {string} params.dateFieldName Name of the date field as defined
-     *   in the endpoint.
-     * @param {object} params.role Role object as returned by the People's tab
-     *   role service.
+     * @param {RoleDateChangeParams} params List of parameters used for building
+     *   the change role date's API calls.
      * @returns {Array} a list of API calls for updating the date for each case
      *   relation and also create an activity that records the change done to the
      *   date.
@@ -48,12 +37,9 @@
     function getApiCallsForDate (params) {
       var role = params.role;
       var caseId = params.caseId;
-      var previousDateValue = role.previousValues[params.dateFieldName];
       var currentDateValue = role.relationship[params.dateFieldName];
+      var subject = getRoleDateChangeActivitySubject(params);
       var relationshipApiCallParams = {};
-      var subject = role.display_name + ', with ' + role.role + ' case role,' +
-        ' had ' + params.dateFieldLabel + ' changed from ' +
-        formatDate(previousDateValue) + ' to ' + formatDate(currentDateValue);
       relationshipApiCallParams[params.dateFieldName] = currentDateValue;
 
       return _([])
@@ -104,6 +90,30 @@
     }
 
     /**
+     * @param {RoleDateChangeParams} params List of parameters used for building
+     *   the change role date's API calls.
+     * @returns {string} Returns the subject used for the activity that gets
+     *   recorded when the role's start or end date changes.
+     */
+    function getRoleDateChangeActivitySubject (params) {
+      var role = params.role;
+      var previousDateValue = role.previousValues[params.dateFieldName];
+      var currentDateValue = role.relationship[params.dateFieldName];
+      var subject = role.display_name + ', with ' + role.role + ' case role,' +
+        ' had ' + params.dateFieldLabel + ' changed';
+
+      if (previousDateValue) {
+        subject += ' from ' + formatDate(previousDateValue);
+      }
+
+      if (currentDateValue) {
+        subject += ' to ' + formatDate(currentDateValue);
+      }
+
+      return subject;
+    }
+
+    /**
      * @param {object} role A role object as provided by the roles service.
      * @param {object} extraParams Extra parameters to pass to each one of the
      *   relationship update api calls.
@@ -130,5 +140,20 @@
     function updatePreviousValue (role, fieldName) {
       role.previousValues[fieldName] = role.relationship[fieldName];
     }
+
+    /**
+     * @typedef {object} RoleDateChangeParams
+     * @param {string} activityTypeId Name of the activity type that will
+     *   be used when recording the date change.
+     *   Ex: "Change Case Role End Date".
+     * @param {string} caseId The ID of the case the activity will belong
+     *   to.
+     * @param {string} dateFieldLabel Human readable name for the date
+     *   field. Example: "start date".
+     * @param {string} dateFieldName Name of the date field as defined
+     *   in the endpoint.
+     * @param {object} role Role data as returned by the People's tab
+     *   role service.
+     */
   }
 })(CRM._, CRM.$, angular);
