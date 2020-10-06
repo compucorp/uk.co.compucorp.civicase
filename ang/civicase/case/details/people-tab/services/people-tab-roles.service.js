@@ -205,7 +205,7 @@
             startDateTimestamp: moment(relationship.start_date).valueOf()
           });
         })
-        .sortByAll(['is_active', 'startDateTimestamp'])
+        .sortBy('startDateTimestamp')
         .groupBy(function (relationship) {
           return [
             relationship.contact_id_b,
@@ -213,7 +213,12 @@
           ].join();
         })
         .map(function (relationships) {
-          var relationship = _.first(relationships);
+          var relationship = _.find(relationships, { is_active: '1' });
+
+          if (!relationship) {
+            relationship = _.first(relationships);
+          }
+
           relationship.relationship_ids = _.map(relationships, 'id');
 
           return relationship;

@@ -142,6 +142,47 @@
           }));
         });
       });
+
+      describe('when the same contact holds multiple active and inactive roles', () => {
+        beforeEach(() => {
+          const mixedRelationships = [
+            _.extend({}, relationships[0], { is_active: '0' }),
+            _.extend({}, relationships[0], { contact_id_b: _.unique(), is_active: '0' }),
+            _.extend({}, relationships[0], { is_active: '1' })
+          ];
+
+          peopleTabRoles.setCaseRelationships(mixedRelationships);
+          peopleTabRoles.updateRolesList();
+        });
+
+        it('includes the role relationship and marks it as active', () => {
+          expect(peopleTabRoles.list).toContain(jasmine.objectContaining({
+            contact_id: relationships[0].contact_id_b,
+            relationship: jasmine.objectContaining({
+              is_active: '1'
+            })
+          }));
+        });
+      });
+
+      describe('when the same contact holds multiple inactive roles', () => {
+        beforeEach(() => {
+          const inactiveRelationships = [
+            _.extend({}, relationships[0], { is_active: '0' }),
+            _.extend({}, relationships[0], { contact_id_b: _.unique(), is_active: '0' }),
+            _.extend({}, relationships[0], { is_active: '0' })
+          ];
+
+          peopleTabRoles.setCaseRelationships(inactiveRelationships);
+          peopleTabRoles.updateRolesList();
+        });
+
+        it('does not include the contact relation since all of its relationships to the case are not active', () => {
+          expect(peopleTabRoles.list).not.toContain(jasmine.objectContaining({
+            contact_id: relationships[0].contact_id_b
+          }));
+        });
+      });
     });
 
     describe('filtering', () => {
