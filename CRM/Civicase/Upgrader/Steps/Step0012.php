@@ -3,7 +3,7 @@
 use CRM_Civicase_Setup_CaseCategoryInstanceSupport as CaseCategoryInstanceSupport;
 
 /**
- * Upgrader to add case category instamce support.
+ * Creates the activity types for case role date changes.
  */
 class CRM_Civicase_Upgrader_Steps_Step0012 {
 

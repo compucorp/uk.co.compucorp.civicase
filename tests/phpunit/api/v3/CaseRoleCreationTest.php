@@ -54,7 +54,7 @@ class api_v3_CaseRoleCreationTest extends BaseHeadlessTest {
       'contact_id_a' => $client['id'],
       'relationship_type_id' => $relationshipTypeA['id'],
       'case_id' => $case['id'],
-      'start_date' => '2020-06-01',
+      'start_date' => '',
     ];
 
     // PostProcessing Should Be Triggered Here.

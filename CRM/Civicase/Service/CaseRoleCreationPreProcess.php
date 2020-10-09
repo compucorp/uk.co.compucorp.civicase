@@ -16,7 +16,10 @@ class CRM_Civicase_Service_CaseRoleCreationPreProcess extends CRM_Civicase_Servi
    *   API request parameters.
    */
   public function onCreate(array &$requestParams) {
-    if ($this->isSingleCaseRole && !$this->isMultiClient) {
+    if (
+      $this->isSingleCaseRole && !$this->isMultiClient &&
+      empty($requestParams['params']['start_date'])
+    ) {
       $requestParams['params']['start_date'] = date('Y-m-d');
     }
   }

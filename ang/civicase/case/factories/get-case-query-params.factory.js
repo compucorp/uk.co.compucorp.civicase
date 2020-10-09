@@ -27,7 +27,8 @@
         'custom_field.name', 'custom_field.label', 'custom_value.display',
         'custom_group.style'
       ];
-      var relationshipReturnParams = ['id', 'relationship_type_id', 'contact_id_a', 'contact_id_b', 'description', 'start_date'];
+      var relationshipReturnParams = ['id', 'relationship_type_id', 'contact_id_a',
+        'contact_id_b', 'description', 'end_date', 'is_active', 'start_date'];
 
       return {
         id: filters.caseId,
@@ -105,8 +106,10 @@
         // Relationship description field
         'api.Relationship.get': {
           case_id: filters.caseId,
-          is_active: 1,
-          return: relationshipReturnParams
+          return: relationshipReturnParams,
+          'api.Contact.get': {
+            contact_id: '$value.contact_id_b'
+          }
         },
         sequential: 1
       };

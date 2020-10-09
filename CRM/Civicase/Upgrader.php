@@ -9,6 +9,7 @@ use CRM_Civicase_Setup_UpdateMenuLinks as MenuLinksSetup;
 use CRM_Civicase_Uninstall_RemoveCustomGroupSupportForCaseCategory as RemoveCustomGroupSupportForCaseCategory;
 use CRM_Civicase_Setup_ProcessCaseCategoryForCustomGroupSupport as ProcessCaseCategoryForCustomGroupSupport;
 use CRM_Civicase_Setup_CaseCategoryInstanceSupport as CaseCategoryInstanceSupport;
+use CRM_Civicase_Setup_AddChangeCaseRoleDateActivityTypes as AddChangeCaseRoleDateActivityTypes;
 
 /**
  * Collection of upgrade steps.
@@ -75,6 +76,7 @@ class CRM_Civicase_Upgrader extends CRM_Civicase_Upgrader_Base {
       new MoveCaseTypesToCasesCategory(),
       new CreateSafeFileExtensionOptionValue(),
       new ProcessCaseCategoryForCustomGroupSupport(),
+      new AddChangeCaseRoleDateActivityTypes(),
     ];
     foreach ($steps as $step) {
       $step->apply();

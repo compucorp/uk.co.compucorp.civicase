@@ -489,6 +489,34 @@ function civicase_civicrm_alterAPIPermissions($entity, $action, &$params, &$perm
 }
 
 /**
+ * Implements hook_civicrm_tokens().
+ */
+function civicase_civicrm_tokens(&$tokens) {
+  $contactFieldsService = new CRM_Civicase_Service_ContactFieldsProvider();
+  $contactCustomFieldsService = new CRM_Civicase_Service_ContactCustomFieldsProvider();
+  $hooks = [
+    new CRM_Civicase_Hook_Tokens_AddContactTokens($contactFieldsService, $contactCustomFieldsService),
+  ];
+  foreach ($hooks as &$hook) {
+    $hook->run($tokens);
+  }
+}
+
+/**
+ * Implements hook_civicrm_tokenValues().
+ */
+function civicase_civicrm_tokenValues(&$values, $cids, $job = NULL, $tokens = [], $context = NULL) {
+  $contactFieldsService = new CRM_Civicase_Service_ContactFieldsProvider();
+  $contactCustomFieldsService = new CRM_Civicase_Service_ContactCustomFieldsProvider();
+  $hooks = [
+    new CRM_Civicase_Hook_Tokens_AddContactTokensValues($contactFieldsService, $contactCustomFieldsService),
+  ];
+  foreach ($hooks as &$hook) {
+    $hook->run($values, $cids, $job, $tokens, $context);
+  }
+}
+
+/**
  * Implements hook_civicrm_pageRun().
  */
 function civicase_civicrm_pageRun(&$page) {

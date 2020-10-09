@@ -12,14 +12,28 @@ class CRM_Civicase_Service_CaseRoleCreationPreProcessTest extends BaseHeadlessTe
 
   /**
    * Test start date is modified when single case role setting on.
+   *
+   * Start date must be empty or NULL.
    */
   public function testStartDateIsModifiedWhenSingleCaseRoleSettingIsOnAndMultiClientIsOff() {
     $this->setSingleCaseRoleSetting(TRUE);
     $this->setMultiClientCaseSetting(FALSE);
-    $params = ['start_date' => '2020-06-05'];
+    $params = ['start_date' => ''];
     $apiRequestParams = $this->callPreProcessCreate($params);
 
     $this->assertEquals(date('Y-m-d'), $apiRequestParams['params']['start_date']);
+  }
+
+  /**
+   * Test the start date is not modified when it is present.
+   */
+  public function testStartDateNotModifiedWhenPresent() {
+    $this->setSingleCaseRoleSetting(TRUE);
+    $this->setMultiClientCaseSetting(FALSE);
+
+    $params = ['start_date' => '2020-06-05'];
+    $apiRequestParams = $this->callPreProcessCreate($params);
+    $this->assertEquals($params['start_date'], $apiRequestParams['params']['start_date']);
   }
 
   /**

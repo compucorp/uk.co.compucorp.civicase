@@ -1,5 +1,5 @@
 (function (angular, $, _) {
-  var module = angular.module('civicase');
+  var module = angular.module('civicase-base');
 
   module.service('removeDatePickerHrefs', function ($timeout) {
     var HREFS_SELECTOR = '[data-handler="selectDay"] a';
