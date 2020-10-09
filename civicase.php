@@ -6,6 +6,7 @@
  */
 
 use Civi\Angular\AngularLoader;
+use CRM_Civicase_ExtensionUtil as E;
 
 require_once 'civicase.civix.php';
 
@@ -232,15 +233,15 @@ function civicase_civicrm_buildForm($formName, &$form) {
     ]);
     $opts = [];
     if ($form->getVar('_gName') == 'activity_status') {
-      $placeholder = ts('All');
+      $placeholder = E::ts('All');
       // Activity status can also apply to uncategorized activities.
       $opts[] = [
         'id' => 'none',
-        'text' => ts('Uncategorized'),
+        'text' => E::ts('Uncategorized'),
       ];
     }
     else {
-      $placeholder = ts('Uncategorized');
+      $placeholder = E::ts('Uncategorized');
     }
     foreach ($options['values'] as $opt) {
       $opts[] = [
@@ -248,7 +249,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
         'text' => $opt['label'],
       ];
     }
-    $form->add('select2', 'grouping', ts('Activity Category'), $opts, FALSE, [
+    $form->add('select2', 'grouping', E::ts('Activity Category'), $opts, FALSE, [
       'class' => 'crm-select2',
       'multiple' => TRUE,
       'placeholder' => $placeholder,
@@ -270,7 +271,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
         'options' => ['limit' => 0, 'sort' => 'weight'],
       ]);
       $newOptions = $el->_options = [];
-      $newOptions[''] = ts('- select -');
+      $newOptions[''] = E::ts('- select -');
       foreach ($options['values'] as $option) {
         if (empty($option['grouping']) || array_intersect($cat, explode(',', $option['grouping']))) {
           $newOptions[$option['value']] = $option['label'];
@@ -316,7 +317,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
       if ($form->_action & (CRM_Core_Action::ADD + CRM_Core_Action::UPDATE)) {
         $buttonGroup = $form->getElement('buttons');
         $buttons = $buttonGroup->getElements();
-        $buttons[] = $form->createElement('submit', $form->getButtonName('refresh'), ts('Save Draft'), [
+        $buttons[] = $form->createElement('submit', $form->getButtonName('refresh'), E::ts('Save Draft'), [
           'crm-icon' => 'fa-pencil-square-o',
           'class' => 'crm-form-submit',
         ]);
@@ -338,11 +339,11 @@ function civicase_civicrm_buildForm($formName, &$form) {
             'context' => 'standalone',
             'draft_id' => $id,
           ]);
-          $buttonMarkup = '<a class="button" href="' . $composeUrl . '"><i class="crm-i fa-pencil-square-o"></i> &nbsp;' . ts('Continue Editing') . '</a>';
+          $buttonMarkup = '<a class="button" href="' . $composeUrl . '"><i class="crm-i fa-pencil-square-o"></i> &nbsp;' . E::ts('Continue Editing') . '</a>';
           $form->assign('activityTypeDescription', $buttonMarkup);
         }
         else {
-          $form->assign('activityTypeDescription', '<i class="crm-i fa-pencil-square-o"></i> &nbsp;' . ts('Saved as a Draft'));
+          $form->assign('activityTypeDescription', '<i class="crm-i fa-pencil-square-o"></i> &nbsp;' . E::ts('Saved as a Draft'));
         }
       }
     }
@@ -618,8 +619,8 @@ function _civicase_add_case_category_case_type_entity(array &$entityTypes) {
     $fields['case_type_category'] = [
       'name' => 'case_type_category',
       'type' => CRM_Utils_Type::T_INT,
-      'title' => ts('Case Type Category'),
-      'description' => ts('FK to a civicrm_option_value (case_type_categories)'),
+      'title' => E::ts('Case Type Category'),
+      'description' => E::ts('FK to a civicrm_option_value (case_type_categories)'),
       'required' => FALSE,
       'where' => 'civicrm_case_type.case_type_category',
       'table_name' => 'civicrm_case_type',
