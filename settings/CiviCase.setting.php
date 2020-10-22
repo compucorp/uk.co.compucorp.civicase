@@ -140,6 +140,24 @@ $setting = [
     'description' => ts('This setting will only allow one active instance of each case role for all case types.'),
     'help_text' => '',
   ],
+  'civicaseRestrictCaseEmailContacts' => [
+    'group_name' => 'CiviCRM Preferences',
+    'group' => 'core',
+    'name' => 'civicaseRestrictCaseEmailContacts',
+    'type' => 'Boolean',
+    'quick_form_type' => 'YesNo',
+    'default' => FALSE,
+    'html_type' => 'radio',
+    'add' => '4.7',
+    'title' => 'Restrict email recipients to contacts involved with the case',
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => '',
+    'help_text' => TRUE,
+    'html_attributes' => [
+      'data-help-text' => 'When this setting is enabled users will only be able to add existing contacts who are either the case clients or people currently involved with the case as recipients of new emails.',
+    ],
+  ],
 ];
 
 $caseSetting = new CRM_Civicase_Service_CaseCategorySetting();
