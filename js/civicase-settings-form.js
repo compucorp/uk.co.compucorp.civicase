@@ -1,11 +1,13 @@
-(function ($) {
+(function ($, crmHelp) {
   $(document).on('crmLoad', function () {
     var $radioButtonsThatToggleVisibility = $('[data-toggles-visibility-for]');
     var $multiCaseClient = $('#civicaseAllowMultipleClients');
     var $singleCaseRoleParent = $('.crm-mail-form-block-civicaseSingleCaseRolePerType');
     var $singleCaseRole = $('#civicaseSingleCaseRolePerType_civicaseSingleCaseRolePerType');
+    var $helpTextIcons = $('#crm-main-content-wrapper .helpicon');
 
     (function init () {
+      displayHelpTextMessagesOnClick();
       toggleVisibilityOnRadioButtonChange();
       toggleVisibilityForSingleCaseRole();
 
@@ -14,6 +16,37 @@
         $multiCaseClient.change(toggleVisibilityForSingleCaseRole);
       }
     })();
+
+    /**
+     * Handles the display of help text messages associated with setting fields.
+     *
+     * Fixes an issue in core where help texts are not properly displayed.
+     */
+    function displayHelpTextMessagesOnClick () {
+      $helpTextIcons.each((index, helpTextIconReference) => {
+        var $helpTextIcon = $(helpTextIconReference);
+        var $field = $helpTextIcon.siblings('[data-help-text]');
+        var helpText = $field.attr('data-help-text');
+        var fieldName = $field.attr('name');
+
+        $helpTextIcon.removeAttr('onclick');
+        $helpTextIcon.on('click', displayHelpTextMessage);
+
+        /**
+         * Displays the text message for the field.
+         *
+         * @param {object} event DOM Event.
+         */
+        function displayHelpTextMessage (event) {
+          event.preventDefault();
+
+          crmHelp(helpText, {
+            id: fieldName + '-id',
+            file: 'CRM/Admin/Form/Setting/Case'
+          });
+        }
+      });
+    }
 
     /**
      * Toggles the visibility of civicase settings fields based on radio button values.
@@ -64,4 +97,4 @@
       }
     }
   });
-})(CRM.$);
+})(CRM.$, CRM.help);
