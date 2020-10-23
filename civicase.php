@@ -213,6 +213,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
     new CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm(),
     new CRM_Civicase_Hook_BuildForm_LinkToCaseSearchByCaseId(),
     new CRM_Civicase_Hook_BuildForm_RemoveExportActionFromReports(),
+    new CRM_Civicase_Hook_BuildForm_RestrictCaseEmailContacts(),
   ];
 
   foreach ($hooks as $hook) {

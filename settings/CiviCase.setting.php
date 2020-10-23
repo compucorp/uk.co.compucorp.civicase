@@ -2,6 +2,13 @@
 
 /**
  * @file
+ * Civicase Settings.
+ */
+
+use CRM_Civicase_ExtensionUtil as E;
+
+/**
+ * @file
  * CiviCase Setting file.
  */
 
@@ -18,10 +25,10 @@ $setting = [
     'default' => FALSE,
     'html_type' => 'radio',
     'add' => '4.7',
-    'title' => 'Allow cases to be locked',
+    'title' => E::ts('Allow cases to be locked'),
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => 'This will allow cases to be locked for certain contacts.',
+    'description' => E::ts('This will allow cases to be locked for certain contacts.'),
     'help_text' => '',
   ],
   'civicaseShowComingSoonCaseSummaryBlock' => [
@@ -33,10 +40,10 @@ $setting = [
     'default' => TRUE,
     'html_type' => 'radio',
     'add' => '4.7',
-    'title' => 'Show "Coming Soon" section on Case Summary',
+    'title' => E::ts('Show "Coming Soon" section on Case Summary'),
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => 'This configuration controls the visibility of the coming soon section on the case summary screen which has Next Milestone, Next Activity and the Case Calendar.',
+    'description' => E::ts('This configuration controls the visibility of the coming soon section on the case summary screen which has Next Milestone, Next Activity and the Case Calendar.'),
   ],
   'civicaseAllowLinkedCasesTab' => [
     'group_name' => 'CiviCRM Preferences',
@@ -47,10 +54,10 @@ $setting = [
     'default' => FALSE,
     'html_type' => 'radio',
     'add' => '4.7',
-    'title' => 'Allow linked cases tab',
+    'title' => E::ts('Allow linked cases tab'),
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => 'This will allow linked cases to be viewed on a separate tab.',
+    'description' => E::ts('This will allow linked cases to be viewed on a separate tab.'),
     'help_text' => '',
   ],
   'civicaseShowWebformsListSeparately' => [
@@ -66,10 +73,10 @@ $setting = [
     ],
     'html_type' => 'radio',
     'add' => '4.7',
-    'title' => 'Show Webforms list in a separate dropdown',
+    'title' => E::ts('Show Webforms list in a separate dropdown'),
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => 'This will show the webforms list in a separate dropdown.',
+    'description' => E::ts('This will show the webforms list in a separate dropdown.'),
     'help_text' => '',
   ],
   'civicaseWebformsDropdownButtonLabel' => [
@@ -86,10 +93,10 @@ $setting = [
     'html_type' => 'text',
     'default' => 'Webforms',
     'add' => '4.7',
-    'title' => 'Label for the Webforms dropdown button',
+    'title' => E::ts('Label for the Webforms dropdown button'),
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => 'Label for the Webforms dropdown button',
+    'description' => E::ts('Label for the Webforms dropdown button'),
     'help_text' => '',
   ],
   'showFullContactNameOnActivityFeed' => [
@@ -101,10 +108,10 @@ $setting = [
     'default' => TRUE,
     'html_type' => 'radio',
     'add' => '4.7',
-    'title' => 'Show full name on Case activity feed',
+    'title' => E::ts('Show full name on Case activity feed'),
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => 'This configuration determines whether or not the full name of the activity creator is displayed in the case activity feed.',
+    'description' => E::ts('This configuration determines whether or not the full name of the activity creator is displayed in the case activity feed.'),
     'help_text' => '',
   ],
   'includeActivitiesForInvolvedContact' => [
@@ -116,10 +123,10 @@ $setting = [
     'default' => FALSE,
     'html_type' => 'radio',
     'add' => '4.7',
-    'title' => "Include activities I'm involved in",
+    'title' => E::ts("Include activities I'm involved in"),
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => "Cases I'm involved in filter will include 'activities created by me' and 'activities assigned to me'.",
+    'description' => E::ts("Cases I'm involved in filter will include 'activities created by me' and 'activities assigned to me'."),
     'help_text' => '',
   ],
   'civicaseSingleCaseRolePerType' => [
@@ -134,11 +141,29 @@ $setting = [
     ],
     'html_type' => 'checkbox',
     'add' => '4.7',
-    'title' => ts('One active case role'),
+    'title' => E::ts('One active case role'),
     'is_domain' => 1,
     'is_contact' => 0,
-    'description' => ts('This setting will only allow one active instance of each case role for all case types.'),
+    'description' => E::ts('This setting will only allow one active instance of each case role for all case types.'),
     'help_text' => '',
+  ],
+  'civicaseRestrictCaseEmailContacts' => [
+    'group_name' => 'CiviCRM Preferences',
+    'group' => 'core',
+    'name' => 'civicaseRestrictCaseEmailContacts',
+    'type' => 'Boolean',
+    'quick_form_type' => 'YesNo',
+    'default' => FALSE,
+    'html_type' => 'radio',
+    'add' => '4.7',
+    'title' => E::ts('Restrict email recipients to contacts involved with the case'),
+    'is_domain' => 1,
+    'is_contact' => 0,
+    'description' => '',
+    'help_text' => TRUE,
+    'html_attributes' => [
+      'data-help-text' => E::ts('When this setting is enabled users will only be able to add existing contacts who are either the case clients or people currently involved with the case as recipients of new emails.'),
+    ],
   ],
 ];
 
