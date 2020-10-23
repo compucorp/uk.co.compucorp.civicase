@@ -6,6 +6,13 @@
 class CRM_Civicase_Hook_BuildForm_RestrictCaseEmailContacts {
 
   /**
+   * The current form's instance.
+   *
+   * @var CRM_Core_Form
+   */
+  private $form;
+
+  /**
    * Handles the hook's implementation.
    *
    * @param CRM_Core_Form $form
@@ -16,7 +23,7 @@ class CRM_Civicase_Hook_BuildForm_RestrictCaseEmailContacts {
   public function run(CRM_Core_Form $form, $formName) {
     $this->form = $form;
 
-    if (!$this->shouldRun($form)) {
+    if (!$this->shouldRun()) {
       return;
     }
 
