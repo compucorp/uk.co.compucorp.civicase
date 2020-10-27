@@ -69,6 +69,7 @@ class CRM_Civicase_Hook_BuildForm_RestrictCaseEmailContacts {
         'email' => $caseContact['email'],
         'value' => $caseContact['contact_id'] . '::' . $caseContact['email'],
         'display_name' => $caseContact['display_name'],
+        'contact_id' => $caseContact['contact_id'],
       ];
     }, $caseDetails['contacts']);
 

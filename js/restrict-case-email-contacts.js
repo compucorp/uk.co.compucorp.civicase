@@ -11,24 +11,37 @@
   /**
    * Replaces the "To", "CC", "BCC" dropdowns with new ones that only contain
    * case contacts.
+   *
+   * The "To" field values must be stored in a `123::contact@example.com` format,
+   * where `123` is the contact's ID. The "CC" and "BCC" field values must contain
+   * the contact ID only.
    */
   function addNewRecipientDropdowns () {
-    var caseContactSelect2Options = getCaseContactSelect2Options();
+    $recipientFields.each(function () {
+      var $field = $(this);
+      var isToField = $field.attr('name') === 'to';
+      var caseContactSelect2Options = isToField
+        ? getCaseContactOptions({ idFieldName: 'value' })
+        : getCaseContactOptions({ idFieldName: 'contact_id' });
 
-    $recipientFields.crmSelect2({
-      multiple: true,
-      data: caseContactSelect2Options
+      $field.crmSelect2({
+        multiple: true,
+        data: caseContactSelect2Options
+      });
     });
   }
 
   /**
+   * @param {object} options list of options.
+   * @param {string} options.idFieldName The contact's field name to use as the
+   * option's ID.
    * @returns {object[]} The list of case contacts as expected by the select2
    * dropdowns.
    */
-  function getCaseContactSelect2Options () {
+  function getCaseContactOptions (options) {
     return caseContacts.map(function (caseContact) {
       return {
-        id: caseContact.value,
+        id: caseContact[options.idFieldName],
         text: _.template('<%= display_name %> <<%= email %>>')(caseContact)
       };
     });
