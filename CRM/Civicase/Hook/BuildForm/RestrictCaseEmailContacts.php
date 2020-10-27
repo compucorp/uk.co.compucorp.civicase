@@ -73,6 +73,7 @@ class CRM_Civicase_Hook_BuildForm_RestrictCaseEmailContacts {
     }, $caseDetails['contacts']);
 
     CRM_Core_Resources::singleton()
+      ->addScriptFile('uk.co.compucorp.civicase', 'js/restrict-case-email-contacts.js')
       ->addSetting([
         'civicase-base' => [
           'case_contacts' => json_encode($caseContacts),
