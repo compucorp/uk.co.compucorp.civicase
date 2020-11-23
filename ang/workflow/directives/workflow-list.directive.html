@@ -9,18 +9,20 @@
     <div class="panel-body">
       <table class="table">
         <thead>
-        <tr>
-          <th>{{:: ts('Title') }}</th>
-          <th>{{:: ts('Description') }}</th>
-          <th>{{:: ts('Enabled?') }}</th>
-          <th width="20"></th>
-        </tr>
+          <tr>
+            <th ng-repeat="tableColumn in tableColumns" ng-show="tableColumn.isVisible">
+              {{:: tableColumn.label}}
+            </th>
+            <th width="20"></th>
+          </tr>
         </thead>
         <tbody>
           <tr ng-repeat="workflow in workflows">
-            <td>{{workflow.title}}</td>
-            <td>{{workflow.description}}</td>
-            <td>{{workflow.is_active ? ts('Yes') : ts('No') }}</td>
+            <td ng-repeat="tableColumn in tableColumns" ng-show="tableColumn.isVisible">
+              <ng-include
+                civicase-include-replace src="tableColumn.templateUrl">
+              </ng-include>
+            </td>
             <td>
               <div
               class="btn-group btn-group-md"

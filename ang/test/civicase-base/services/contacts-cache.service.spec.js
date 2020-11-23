@@ -4,7 +4,7 @@
     var $q, $rootScope, ContactsCache, ContactsData, civicaseCrmApi;
 
     beforeEach(function () {
-      module('civicase', 'civicase.data', function ($provide) {
+      module('civicase-base', 'civicase.data', function ($provide) {
         $provide.value('civicaseCrmApi', jasmine.createSpy('civicaseCrmApi'));
       });
     });

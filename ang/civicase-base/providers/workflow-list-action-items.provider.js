@@ -1,5 +1,5 @@
 (function (angular, $, _) {
-  var module = angular.module('workflow');
+  var module = angular.module('civicase-base');
 
   module.provider('WorkflowListActionItems', function () {
     var workflowListActionItems = [];

@@ -3,7 +3,8 @@
 ((_) => {
   describe('workflow list', () => {
     let $q, $controller, $rootScope, $scope, CaseTypesMockData,
-      civicaseCrmApiMock, WorkflowListActionItems;
+      civicaseCrmApiMock, WorkflowListActionItems, CasemanagementWorkflow,
+      WorkflowListColumns;
 
     beforeEach(module('workflow', 'civicase.data', ($provide) => {
       civicaseCrmApiMock = jasmine.createSpy('civicaseCrmApi');
@@ -12,19 +13,24 @@
     }));
 
     beforeEach(inject((_$q_, _$controller_, _$rootScope_, _CaseTypesMockData_,
-      _WorkflowListActionItems_) => {
+      _WorkflowListActionItems_, _CasemanagementWorkflow_,
+      _WorkflowListColumns_) => {
       $q = _$q_;
       $controller = _$controller_;
       $rootScope = _$rootScope_;
       WorkflowListActionItems = _WorkflowListActionItems_;
+      WorkflowListColumns = _WorkflowListColumns_;
       CaseTypesMockData = _CaseTypesMockData_;
+      CasemanagementWorkflow = _CasemanagementWorkflow_;
+
+      spyOn(CasemanagementWorkflow, 'getWorkflowsList');
     }));
 
     describe('basic tests', () => {
       beforeEach(() => {
-        civicaseCrmApiMock.and.returnValue($q.resolve({
-          values: CaseTypesMockData.getSequential()
-        }));
+        CasemanagementWorkflow.getWorkflowsList.and.returnValue($q.resolve(
+          CaseTypesMockData.getSequential()
+        ));
         initController();
       });
 
@@ -41,14 +47,6 @@
           expect($scope.isLoading).toBe(false);
         });
 
-        it('fetches the case types for the current case type category', () => {
-          expect(civicaseCrmApiMock).toHaveBeenCalledWith('CaseType', 'get', {
-            sequential: 1,
-            case_type_category: 'some_case_type_category',
-            options: { limit: 0 }
-          });
-        });
-
         it('displays the list of fetched workflows', () => {
           expect($scope.workflows).toEqual(CaseTypesMockData.getSequential());
         });
@@ -56,14 +54,31 @@
         it('displays the action items dropdown', () => {
           expect($scope.actionItems).toEqual(WorkflowListActionItems);
         });
+
+        describe('columns', () => {
+          var expectedColumns;
+
+          beforeEach(function () {
+            expectedColumns = _.map(WorkflowListColumns, function (column) {
+              column = _.extend({}, column);
+              column.isVisible = true;
+
+              return column;
+            });
+          });
+
+          it('displays the columns', () => {
+            expect($scope.tableColumns).toEqual(expectedColumns);
+          });
+        });
       });
     });
 
     describe('when list refresh event is fired', () => {
       beforeEach(() => {
-        civicaseCrmApiMock.and.returnValue($q.resolve({
-          values: CaseTypesMockData.getSequential()
-        }));
+        CasemanagementWorkflow.getWorkflowsList.and.returnValue($q.resolve(
+          CaseTypesMockData.getSequential()
+        ));
         initController();
         $scope.$digest();
         $scope.workflows = [];
@@ -72,12 +87,7 @@
       });
 
       it('fetches the case types for the current case type category', () => {
-        expect(civicaseCrmApiMock.calls.count()).toBe(2);
-        expect(civicaseCrmApiMock.calls.mostRecent().args).toEqual(['CaseType', 'get', {
-          sequential: 1,
-          case_type_category: 'some_case_type_category',
-          options: { limit: 0 }
-        }]);
+        expect(CasemanagementWorkflow.getWorkflowsList).toHaveBeenCalled();
       });
 
       it('refreshes the workflows list', () => {
@@ -90,7 +100,7 @@
      */
     function initController () {
       $scope = $rootScope.$new();
-      $scope.caseTypeCategory = 'some_case_type_category';
+      $scope.caseTypeCategory = 'Cases';
 
       $controller('workflowListController', { $scope: $scope });
     }

@@ -1,5 +1,5 @@
 (function (angular, $, _) {
-  var module = angular.module('civicase');
+  var module = angular.module('civicase-base');
 
   module.service('ContactsCache', ContactsCache);
 
