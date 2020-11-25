@@ -5,6 +5,7 @@
     const NG_INVALID_CLASS = 'ng-invalid';
     let $compile, $rootScope, $scope, dateInputFormatValue, element,
       originalDatepickerFunction, removeDatePickerHrefs;
+    var API_DATE_FORMAT = 'yy-mm-dd';
 
     beforeEach(module('civicase-base', 'civicase.data', ($provide) => {
       removeDatePickerHrefs = jasmine.createSpy('removeDatePickerHrefs');
@@ -28,18 +29,61 @@
     });
 
     describe('when the directive is initialised', () => {
-      beforeEach(() => {
-        initDirective();
+      describe('general properties', () => {
+        beforeEach(() => {
+          initDirective();
+        });
+
+        it('sets the element as a datepicker input element', () => {
+          expect($.fn.datepicker).toHaveBeenCalled();
+        });
+
+        it('sets the date format as the one specified by CiviCRM setting', () => {
+          expect($.fn.datepicker).toHaveBeenCalledWith(jasmine.objectContaining({
+            dateFormat: dateInputFormatValue
+          }));
+        });
       });
 
-      it('sets the element as a datepicker input element', () => {
-        expect($.fn.datepicker).toHaveBeenCalled();
-      });
+      describe('mininum and maximum date properties', () => {
+        describe('when minimum and maximum dates are provided', () => {
+          beforeEach(() => {
+            $scope.minDate = '1999-01-01';
+            $scope.maxDate = '1999-01-31';
 
-      it('sets the date format as the one specified by CiviCRM setting', () => {
-        expect($.fn.datepicker).toHaveBeenCalledWith(jasmine.objectContaining({
-          dateFormat: dateInputFormatValue
-        }));
+            initDirective();
+          });
+
+          it('sets the datepicker minimum date as provided by the directive attributes', () => {
+            expect($.fn.datepicker).toHaveBeenCalledWith(jasmine.objectContaining({
+              minDate: $.datepicker.parseDate(API_DATE_FORMAT, $scope.minDate)
+            }));
+          });
+
+          it('sets the datepicker minimum date as provided by the directive attributes', () => {
+            expect($.fn.datepicker).toHaveBeenCalledWith(jasmine.objectContaining({
+              maxDate: $.datepicker.parseDate(API_DATE_FORMAT, $scope.maxDate)
+            }));
+          });
+        });
+
+        describe('when no minimum and maximum dates are provided', () => {
+          beforeEach(() => {
+            initDirective();
+          });
+
+          it('does not define a minimum date for the datepicker', () => {
+            expect($.fn.datepicker).toHaveBeenCalledWith(jasmine.objectContaining({
+              minDate: null
+            }));
+          });
+
+          it('does not define a maximum date for the datepicker', () => {
+            expect($.fn.datepicker).toHaveBeenCalledWith(jasmine.objectContaining({
+              maxDate: null
+            }));
+          });
+        });
       });
     });
 
@@ -164,6 +208,48 @@
       });
     });
 
+    describe('minimum and maximum attribute changes', () => {
+      describe('when the minimum attribute changes', () => {
+        beforeEach(() => {
+          $scope.minDate = '1999-01-01';
+
+          initDirective();
+
+          $scope.minDate = '1999-02-01';
+
+          $scope.$digest();
+        });
+
+        it('updates the minimum date for the datepicker', () => {
+          expect($.fn.datepicker).toHaveBeenCalledWith(
+            'option',
+            'minDate',
+            $.datepicker.parseDate(API_DATE_FORMAT, $scope.minDate)
+          );
+        });
+      });
+
+      describe('when the maximum attribute changes', () => {
+        beforeEach(() => {
+          $scope.maxDate = '1999-12-31';
+
+          initDirective();
+
+          $scope.maxDate = '1999-11-30';
+
+          $scope.$digest();
+        });
+
+        it('updates the minimum date for the datepicker', () => {
+          expect($.fn.datepicker).toHaveBeenCalledWith(
+            'option',
+            'maxDate',
+            $.datepicker.parseDate(API_DATE_FORMAT, $scope.maxDate)
+          );
+        });
+      });
+    });
+
     /**
      * Initialises the Inline Datepicker directive on an input element using
      * the global $scope variable.
@@ -172,6 +258,8 @@
       element = $compile(`
         <input
           civicase-inline-datepicker
+          data-min-date="{{ minDate }}"
+          data-max-date="{{ maxDate }}"
           ng-model="date"
           type="text"
         />

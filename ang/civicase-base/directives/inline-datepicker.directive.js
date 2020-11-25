@@ -32,8 +32,18 @@
         element.datepicker({
           beforeShow: handleDatepickerOpen,
           dateFormat: dateInputFormatValue,
+          maxDate: parseApiDate(attributes.maxDate),
+          minDate: parseApiDate(attributes.minDate),
           onChangeMonthYear: removeDatePickerHrefs,
           onClose: handleDatePickerClose
+        });
+
+        attributes.$observe('maxDate', function () {
+          element.datepicker('option', 'maxDate', parseApiDate(attributes.maxDate));
+        });
+
+        attributes.$observe('minDate', function () {
+          element.datepicker('option', 'minDate', parseApiDate(attributes.minDate));
         });
       })();
 
@@ -65,9 +75,22 @@
         if (modelValue) {
           return $.datepicker.formatDate(
             dateInputFormatValue,
-            $.datepicker.parseDate(API_DATE_FORMAT, modelValue)
+            parseApiDate(modelValue)
           );
         }
+      }
+
+      /**
+       * @param {string} date The date formatted as a string as provided by
+       *   the API.
+       * @returns {Date} a Date instance corresponding to the given date.
+       */
+      function parseApiDate (date) {
+        if (!date) {
+          return null;
+        }
+
+        return $.datepicker.parseDate(API_DATE_FORMAT, date);
       }
 
       /**
@@ -103,7 +126,7 @@
         }
 
         try {
-          $.datepicker.parseDate(API_DATE_FORMAT, modelValue);
+          parseApiDate(modelValue);
 
           return true;
         } catch (exception) {
