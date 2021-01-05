@@ -35,7 +35,7 @@
      * @returns {object[]} a list of case types.
      */
     function filter (userFilterValues) {
-      var filterValues = _.defaults({}, DEFAULT_FILTER_VALUES, userFilterValues);
+      var filterValues = _.defaults({}, userFilterValues, DEFAULT_FILTER_VALUES);
       var caseTypes = _.values(CaseType.getAll({ includeInactive: true }));
       var listOfFiltersToRun = _.filter(listOfFilters, function (filter) {
         return filter.shouldRun(filterValues);

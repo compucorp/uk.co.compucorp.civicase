@@ -53,7 +53,8 @@
       beforeEach(() => {
         expectedFilters = {
           case_type_category: 'Cases',
-          id: { IN: ['1', '2'] }
+          id: { IN: ['1', '2'] },
+          is_active: '1'
         };
 
         civicaseCrmApi.and.returnValue($q.resolve([CasesOverviewStats]));

@@ -5,8 +5,10 @@
 
   /**
    * IsActiveCaseTypeFilter Case Type Filter service.
+   *
+   * @param {Function} isTruthy service to compare truthy values.
    */
-  function IsActiveCaseTypeFilter () {
+  function IsActiveCaseTypeFilter (isTruthy) {
     this.run = run;
     this.shouldRun = shouldRun;
 
@@ -16,7 +18,7 @@
      * @returns {boolean} true when active
      */
     function run (caseType, caseTypeFilters) {
-      return caseType.is_active === caseTypeFilters.is_active;
+      return isTruthy(caseType.is_active) === isTruthy(caseTypeFilters.is_active);
     }
 
     /**
