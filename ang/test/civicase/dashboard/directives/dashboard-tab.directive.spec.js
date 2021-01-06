@@ -13,7 +13,7 @@
       });
     }
 
-    beforeEach(module('civicase.templates', 'civicase.data', 'civicase', 'crmUtil', function ($provide) {
+    beforeEach(module('civicase.templates', 'civicase', 'crmUtil', function ($provide) {
       $provide.value('civicaseCrmApi', jasmine.createSpy('civicaseCrmApi'));
     }));
 

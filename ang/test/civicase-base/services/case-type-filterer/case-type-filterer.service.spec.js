@@ -2,16 +2,27 @@
 
 ((_) => {
   describe('CaseTypeFilterer service', () => {
-    let allCaseTypeCategories, allCaseTypes, CaseTypeFilterer, expectedCaseTypes,
-      returnedCaseTypes;
+    let allCaseTypeCategories, allCaseTypes, CaseTypeFilterer,
+      CaseTypesMockDataProvider, expectedCaseTypes, returnedCaseTypes;
 
-    beforeEach(module('civicase-base'));
+    beforeEach(module('civicase-base', 'civicase.data', (_CaseTypesMockDataProvider_) => {
+      CaseTypesMockDataProvider = _CaseTypesMockDataProvider_;
+
+      CaseTypesMockDataProvider.add({
+        title: 'inactive case type',
+        is_active: '0'
+      });
+    }));
 
     beforeEach(inject((_CaseType_, _CaseTypeCategory_, _CaseTypeFilterer_) => {
       allCaseTypeCategories = _CaseTypeCategory_.getAll();
-      allCaseTypes = _CaseType_.getAll();
+      allCaseTypes = _CaseType_.getAll({ includeInactive: true });
       CaseTypeFilterer = _CaseTypeFilterer_;
     }));
+
+    afterEach(() => {
+      CaseTypesMockDataProvider.restore();
+    });
 
     describe('when filtering by case type id', () => {
       beforeEach(() => {
@@ -92,6 +103,57 @@
         });
 
         it('returns a list of case types filtered by multiple parameters', () => {
+          expect(returnedCaseTypes)
+            .toEqual(jasmine.arrayWithExactContents(expectedCaseTypes));
+        });
+      });
+    });
+
+    describe('active and disabled case types', () => {
+      describe('when filtering without specifying the case type active field', () => {
+        beforeEach(() => {
+          expectedCaseTypes = _.filter(allCaseTypes, {
+            is_active: '1'
+          });
+
+          returnedCaseTypes = CaseTypeFilterer.filter({});
+        });
+
+        it('returns all active case types', () => {
+          expect(returnedCaseTypes)
+            .toEqual(jasmine.arrayWithExactContents(expectedCaseTypes));
+        });
+      });
+
+      describe('when filtering for active case types', () => {
+        beforeEach(() => {
+          expectedCaseTypes = _.filter(allCaseTypes, {
+            is_active: '1'
+          });
+
+          returnedCaseTypes = CaseTypeFilterer.filter({
+            is_active: '1'
+          });
+        });
+
+        it('returns all active case types', () => {
+          expect(returnedCaseTypes)
+            .toEqual(jasmine.arrayWithExactContents(expectedCaseTypes));
+        });
+      });
+
+      describe('when filtering for disabled case types', () => {
+        beforeEach(() => {
+          expectedCaseTypes = _.filter(allCaseTypes, {
+            is_active: '0'
+          });
+
+          returnedCaseTypes = CaseTypeFilterer.filter({
+            is_active: '0'
+          });
+        });
+
+        it('returns all active case types', () => {
           expect(returnedCaseTypes)
             .toEqual(jasmine.arrayWithExactContents(expectedCaseTypes));
         });
