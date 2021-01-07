@@ -5,7 +5,7 @@
     let CaseType, CaseTypesData, CaseTypesMockData, CaseTypesMockDataProvider;
 
     afterEach(() => {
-      CaseTypesMockDataProvider.restore();
+      CaseTypesMockDataProvider.reset();
     });
 
     describe('when getting all active case types', () => {
