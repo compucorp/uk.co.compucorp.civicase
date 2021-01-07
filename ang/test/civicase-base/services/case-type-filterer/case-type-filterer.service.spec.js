@@ -21,12 +21,14 @@
     }));
 
     afterEach(() => {
-      CaseTypesMockDataProvider.restore();
+      CaseTypesMockDataProvider.reset();
     });
-
     describe('when filtering by case type id', () => {
       beforeEach(() => {
-        const sampleCaseType = _.sample(allCaseTypes);
+        const sampleCaseType = _.chain(allCaseTypes)
+          .filter({ is_active: '1' })
+          .sample()
+          .value();
 
         expectedCaseTypes = [
           sampleCaseType
@@ -38,14 +40,16 @@
       });
 
       it('returns a list of case types that only includes the requested case type', () => {
-        expect(returnedCaseTypes)
-          .toEqual(jasmine.arrayWithExactContents(expectedCaseTypes));
+        expect(returnedCaseTypes).toEqual(expectedCaseTypes);
       });
     });
 
     describe('when filtering by a list of case type ids', () => {
       beforeEach(() => {
-        expectedCaseTypes = _.sample(allCaseTypes, 2);
+        expectedCaseTypes = _.chain(allCaseTypes)
+          .filter({ is_active: '1' })
+          .sample(2)
+          .value();
         const expectedCaseTypeIds = _.map(expectedCaseTypes, 'id');
 
         returnedCaseTypes = CaseTypeFilterer.filter({
@@ -77,8 +81,7 @@
       });
 
       it('returns a list of case types belonging to the case type category', () => {
-        expect(returnedCaseTypes)
-          .toEqual(jasmine.arrayWithExactContents(expectedCaseTypes));
+        expect(returnedCaseTypes).toEqual(expectedCaseTypes);
       });
     });
 
@@ -103,8 +106,7 @@
         });
 
         it('returns a list of case types filtered by multiple parameters', () => {
-          expect(returnedCaseTypes)
-            .toEqual(jasmine.arrayWithExactContents(expectedCaseTypes));
+          expect(returnedCaseTypes).toEqual(expectedCaseTypes);
         });
       });
     });
@@ -120,8 +122,7 @@
         });
 
         it('returns all active case types', () => {
-          expect(returnedCaseTypes)
-            .toEqual(jasmine.arrayWithExactContents(expectedCaseTypes));
+          expect(returnedCaseTypes).toEqual(expectedCaseTypes);
         });
       });
 
@@ -137,8 +138,7 @@
         });
 
         it('returns all active case types', () => {
-          expect(returnedCaseTypes)
-            .toEqual(jasmine.arrayWithExactContents(expectedCaseTypes));
+          expect(returnedCaseTypes).toEqual(expectedCaseTypes);
         });
       });
 
@@ -153,9 +153,8 @@
           });
         });
 
-        it('returns all active case types', () => {
-          expect(returnedCaseTypes)
-            .toEqual(jasmine.arrayWithExactContents(expectedCaseTypes));
+        it('returns disabled case types only', () => {
+          expect(returnedCaseTypes).toEqual(expectedCaseTypes);
         });
       });
     });
