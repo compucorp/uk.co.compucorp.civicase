@@ -1,4 +1,5 @@
 .civicase__checkbox {
+  display: inline-block;
   background-color: $crm-white;
   border: 1px solid $crm-grayblue-darker;
   border-radius: 2px;
@@ -6,6 +7,8 @@
   box-sizing: border-box;
   height: 18px;
   position: relative;
+  margin-right: 5px;
+  top: 4px;
   width: 18px;
 }
 
