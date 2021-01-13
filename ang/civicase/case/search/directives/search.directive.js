@@ -65,7 +65,6 @@
     $scope.doSearchIfNotExpanded = doSearchIfNotExpanded;
     $scope.handleSearchSubmit = handleSearchSubmit;
     $scope.isEnabled = isEnabled;
-    $scope.toggleIsDeleted = toggleIsDeleted;
 
     (function init () {
       bindRouteParamsToScope();
@@ -499,21 +498,6 @@
         $scope.relationshipType = ['is_case_manager'];
       } else if (isFilterEqualToLoggedInUser('contact_involved')) {
         $scope.relationshipType = ['is_involved'];
-      }
-    }
-
-    /**
-     * Check/Uncheck `Show deleted` filters
-     *
-     * @param {object} $event - event object of Event API
-     */
-    function toggleIsDeleted ($event) {
-      var pressedSpaceOrEnter =
-        $event.type === 'keydown' && ($event.keyCode === 32 || $event.keyCode === 13);
-
-      if ($event.type === 'click' || pressedSpaceOrEnter) {
-        $scope.filters.is_deleted = !$scope.filters.is_deleted;
-        $event.preventDefault();
       }
     }
   });

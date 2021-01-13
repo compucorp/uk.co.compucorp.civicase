@@ -92,23 +92,11 @@
         </div>
       </div>
       <div
-        class="civicase__case-filter-form-elements"
-        ng-if="checkPerm('administer CiviCase') && isEnabled('is_deleted')">
-        <span
-          class="civicase__checkbox" role="checkbox" tabindex="0"
-          aria-checked="{{filters.is_deleted}}" aria-labelledby="Deleted Cases"
-          ng-click="toggleIsDeleted($event)" ng-keydown="toggleIsDeleted($event)">
-          <i
-            ng-if="filters.is_deleted"
-            class="civicase__checkbox--checked material-icons">
-            check_box
-          </i>
-        </span>
-        <label
-          ng-click="toggleIsDeleted($event)" for="case_search_field_is_deleted"
-          class="control-label">
-          {{ ts('Deleted Cases') }}
-        </label>
+        civicase-checkbox
+        ng-if="checkPerm('administer CiviCase') && isEnabled('is_deleted')"
+        ng-model="filters.is_deleted"
+      >
+        {{ ts('Deleted Cases') }}
       </div>
       <div
         civicase-checkbox
