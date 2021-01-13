@@ -3,8 +3,8 @@
 (() => {
   describe('checkbox', () => {
     let $controller, $scope, event;
-    const trueValue = 'this is correct';
-    const falseValue = 'this is not correct';
+    const TRUE_VALUE = 'this is correct';
+    const FALSE_VALUE = 'this is not correct';
 
     beforeEach(module('civicase-base'));
 
@@ -39,20 +39,20 @@
           initController({ $scope });
         });
 
-        it('sets the checkbox as checked', () => {
+        it('sets the checkbox as unchecked', () => {
           expect($scope.isChecked).toBe(false);
         });
       });
 
       describe('when setting different true and false values', () => {
         beforeEach(() => {
-          $scope.trueValue = trueValue;
-          $scope.falseValue = falseValue;
+          $scope.trueValue = TRUE_VALUE;
+          $scope.falseValue = FALSE_VALUE;
         });
 
         describe('when the model value is "this is correct"', () => {
           beforeEach(() => {
-            $scope.ngModel = trueValue;
+            $scope.ngModel = TRUE_VALUE;
 
             initController({ $scope });
           });
@@ -64,12 +64,12 @@
 
         describe('when the model value is "this is not correct"', () => {
           beforeEach(() => {
-            $scope.ngModel = falseValue;
+            $scope.ngModel = FALSE_VALUE;
 
             initController({ $scope });
           });
 
-          it('sets the checkbox as checked', () => {
+          it('sets the checkbox as unchecked', () => {
             expect($scope.isChecked).toBe(false);
           });
         });
@@ -190,9 +190,9 @@
     describe('toggling the checkbox using custom values', () => {
       beforeEach(() => {
         event.type = 'click';
-        $scope.trueValue = trueValue;
-        $scope.falseValue = falseValue;
-        $scope.ngModel = falseValue;
+        $scope.trueValue = TRUE_VALUE;
+        $scope.falseValue = FALSE_VALUE;
+        $scope.ngModel = FALSE_VALUE;
 
         initController({ $scope });
       });
@@ -203,7 +203,7 @@
         });
 
         it('sets the model value to the true value', () => {
-          expect($scope.ngModel).toBe(trueValue);
+          expect($scope.ngModel).toBe(TRUE_VALUE);
         });
       });
 
@@ -214,7 +214,7 @@
         });
 
         it('sets the model value to the false value', () => {
-          expect($scope.ngModel).toBe(falseValue);
+          expect($scope.ngModel).toBe(FALSE_VALUE);
         });
       });
     });
