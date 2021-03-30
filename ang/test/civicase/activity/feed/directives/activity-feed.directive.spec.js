@@ -24,6 +24,12 @@
         showFullContactNameOnActivityFeed = _showFullContactNameOnActivityFeed_;
 
         $scope = $rootScope.$new();
+        $scope.caseTypeId = '1';
+        $scope.filters = {};
+        $scope.displayOptions = {};
+        $scope.params = {
+          displayOptions: 1
+        };
         $scope.$bindToRoute = jasmine.createSpy('$bindToRoute');
         civicaseCrmApi = _civicaseCrmApi_;
       }));
@@ -35,6 +41,92 @@
 
         it('provides the value for the "Show Full Contact Name On ActivityFeed" setting', () => {
           expect($scope.showFullContactNameOnActivityFeed).toBe(showFullContactNameOnActivityFeed);
+        });
+      });
+
+      describe('binding URL parameters to scope', () => {
+        describe('when we do not skip URL parameters binding', () => {
+          beforeEach(() => {
+            initController();
+          });
+
+          it('binds the current activity ID parameter', () => {
+            expect($scope.$bindToRoute).toHaveBeenCalledWith(jasmine.objectContaining({
+              param: 'aid',
+              expr: 'aid'
+            }));
+          });
+
+          it('binds the activity filters parameters', () => {
+            expect($scope.$bindToRoute).toHaveBeenCalledWith(jasmine.objectContaining({
+              param: 'af',
+              expr: 'filters'
+            }));
+          });
+
+          it('binds the activity display option parameters', () => {
+            expect($scope.$bindToRoute).toHaveBeenCalledWith(jasmine.objectContaining({
+              param: 'ado',
+              expr: 'displayOptions'
+            }));
+          });
+
+          describe('when passing display options', () => {
+            beforeEach(() => {
+              $scope.params.displayOptions = { custom_display_option: true };
+
+              initController();
+            });
+
+            it('adds default parameters to the display options URL binding', () => {
+              expect($scope.$bindToRoute).toHaveBeenCalledWith(jasmine.objectContaining({
+                param: 'ado',
+                expr: 'displayOptions',
+                default: jasmine.objectContaining({
+                  followup_nested: true,
+                  overdue_first: true,
+                  include_case: true
+                })
+              }));
+            });
+
+            it('uses the values passed as defaults for the display options URL binding', () => {
+              expect($scope.$bindToRoute).toHaveBeenCalledWith(jasmine.objectContaining({
+                param: 'ado',
+                expr: 'displayOptions',
+                default: jasmine.objectContaining({
+                  custom_display_option: true
+                })
+              }));
+            });
+          });
+        });
+
+        describe('when we skip the URL paramaters binding', () => {
+          beforeEach(() => {
+            $scope.skipUrlParamatersBinding = true;
+            $scope.params.displayOptions = { custom_display_option: true };
+
+            initController();
+          });
+
+          it('does not bind the URL parameters to the scope', () => {
+            expect($scope.$bindToRoute).not.toHaveBeenCalled();
+          });
+
+          it('sets the default values for the display options', () => {
+            expect($scope.displayOptions).toEqual(jasmine.objectContaining({
+              followup_nested: true,
+              overdue_first: true,
+              include_case: true
+            }));
+          });
+
+          it('includes the default values passed to the display options', () => {
+            expect($scope.displayOptions).toEqual(jasmine.objectContaining({
+              custom_display_option: true
+            }));
+          });
         });
       });
 
@@ -389,13 +481,6 @@
        * Initializes the activity feed controller.
        */
       function initController () {
-        $scope.caseTypeId = '1';
-        $scope.filters = {};
-        $scope.displayOptions = {};
-        $scope.params = {
-          displayOptions: 1
-        };
-
         $controller('civicaseActivityFeedController', {
           $scope: $scope
         });

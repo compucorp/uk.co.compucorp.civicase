@@ -13,6 +13,7 @@
         canSelectCaseTypeCategory: '=',
         caseTypeId: '=',
         refreshCase: '=?refreshCallback',
+        skipUrlParamatersBinding: '<',
         hideQuickNavWhenDetailsIsVisible: '='
       }
     };
@@ -79,6 +80,11 @@
     var pageNum = { down: 0, up: 0 };
     var activitySets = $scope.caseTypeId &&
       CaseType.getById($scope.caseTypeId).definition.activitySets;
+    var DEFAULT_DISPLAY_OPTIONS = angular.extend({}, {
+      followup_nested: true,
+      overdue_first: true,
+      include_case: true
+    }, $scope.params.displayOptions || {});
 
     $scope.filters = {};
     $scope.isMonthNavVisible = true;
@@ -100,7 +106,13 @@
 
     (function init () {
       applyFiltersFromBindings();
-      bindRouteParamsToScope();
+
+      if ($scope.skipUrlParamatersBinding) {
+        $scope.displayOptions = DEFAULT_DISPLAY_OPTIONS;
+      } else {
+        bindRouteParamsToScope();
+      }
+
       initiateWatchersAndEvents();
     }());
 
@@ -226,11 +238,7 @@
       $scope.$bindToRoute({
         expr: 'displayOptions',
         param: 'ado',
-        default: angular.extend({}, {
-          followup_nested: true,
-          overdue_first: true,
-          include_case: true
-        }, $scope.params.displayOptions || {})
+        default: DEFAULT_DISPLAY_OPTIONS
       });
     }
 
