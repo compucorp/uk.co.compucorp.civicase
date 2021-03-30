@@ -35,7 +35,9 @@
           color: '#d9534f',
           name: 'Unread',
           grouping: 'communication',
-          is_active: '1'
+          is_active: '1',
+          weight: '9',
+          filter: '0'
         });
       });
     });
