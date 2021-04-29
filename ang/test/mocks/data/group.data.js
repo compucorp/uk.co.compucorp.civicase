@@ -22,6 +22,26 @@
       group_type: ['1'],
       is_hidden: '0',
       is_reserved: '0'
+    }, {
+      id: '3',
+      name: 'Group3',
+      title: 'Group 3',
+      description: 'Contacts in this group are assigned Administrator role permissions.',
+      is_active: '1',
+      visibility: 'User and User Admin Only',
+      group_type: ['1'],
+      is_hidden: '0',
+      is_reserved: '0'
+    }, {
+      id: '4',
+      name: 'Group4',
+      title: 'Group 4',
+      description: 'Contacts in this group are assigned user role permissions.',
+      is_active: '1',
+      visibility: 'User Only',
+      group_type: ['1'],
+      is_hidden: '0',
+      is_reserved: '0'
     }
   ];
 
