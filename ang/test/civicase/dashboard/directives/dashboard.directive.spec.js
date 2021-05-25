@@ -64,7 +64,7 @@
 
         it('filters the cases and activties where the user is the manager', function () {
           expect($scope.activityFilters.case_filter).toEqual(jasmine.objectContaining({
-            case_manager: CRM.config.user_contact_id
+            case_manager: CRM.config.cid
           }));
         });
       });
@@ -78,7 +78,7 @@
 
         it('filters the cases and activties where the user is involved', function () {
           expect($scope.activityFilters.case_filter).toEqual(jasmine.objectContaining({
-            contact_involved: { IN: [CRM.config.user_contact_id] }
+            contact_involved: { IN: [CRM.config.cid] }
           }));
         });
 
@@ -129,7 +129,7 @@
                 case_type_category: '1',
                 case_type_id: ['type'],
                 status_id: ['status'],
-                case_manager: [CRM.config.user_contact_id]
+                case_manager: [CRM.config.cid]
               })
             }));
         });
@@ -150,7 +150,7 @@
                 case_type_category: '1',
                 case_type_id: ['type'],
                 status_id: ['status'],
-                contact_involved: [CRM.config.user_contact_id]
+                contact_involved: [CRM.config.cid]
               })
             }));
         });

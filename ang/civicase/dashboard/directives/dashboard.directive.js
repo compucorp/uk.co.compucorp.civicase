@@ -53,7 +53,7 @@
      */
     $scope.linkToManageCase = function (type, status) {
       var cf = { case_type_category: $scope.currentCaseCategory };
-      var userContactId = [CRM.config.user_contact_id];
+      var userContactId = [CRM.config.cid];
 
       if (type) {
         cf.case_type_id = [type];
@@ -107,11 +107,11 @@
      */
     function caseRelationshipTypeWatcher (newValue) {
       newValue === 'is_case_manager'
-        ? $scope.activityFilters.case_filter.case_manager = CRM.config.user_contact_id
+        ? $scope.activityFilters.case_filter.case_manager = CRM.config.cid
         : delete ($scope.activityFilters.case_filter.case_manager);
 
       if (newValue === 'is_involved') {
-        $scope.activityFilters.case_filter.contact_involved = { IN: [CRM.config.user_contact_id] };
+        $scope.activityFilters.case_filter.contact_involved = { IN: [CRM.config.cid] };
         $scope.activityFilters.case_filter.has_activities_for_involved_contact =
           includeActivitiesForInvolvedContact ? 1 : 0;
       } else {
