@@ -32,6 +32,7 @@
         expect(returnedStatus).toEqual({
           value: '9',
           label: 'Unread',
+          filter: '0',
           color: '#d9534f',
           name: 'Unread',
           grouping: 'communication',

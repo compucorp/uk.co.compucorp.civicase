@@ -1,4 +1,3 @@
-// UNit testssss
 (function (angular, _) {
   var module = angular.module('civicase');
 
@@ -10,7 +9,7 @@
       scope: {}
     };
   });
-  // CiviCRM: access CiviCRM backend and API
+
   module.controller('CivicaseMyActivitiesController', CivicaseMyActivitiesController);
 
   /**

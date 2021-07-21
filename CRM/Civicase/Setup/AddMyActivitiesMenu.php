@@ -21,6 +21,7 @@ class CRM_Civicase_Setup_AddMyActivitiesMenu {
    * Adds My Activities Menu item.
    */
   private function addMenuLink() {
+    // Put it in correct place.
     civicrm_api3('Navigation', 'create', [
       'is_active' => 1,
       'parent_id' => 'user-menu-ext__user-menu',
