@@ -47,4 +47,19 @@
       controller: 'civicaseSearchPageController'
     });
   });
+
+  module.config(function ($routeProvider) {
+    var templateMarkup;
+
+    if (CRM.checkPerm('access CiviCRM backend and API')) {
+      templateMarkup = '<civicase-my-activities></civicase-my-activities>';
+    } else {
+      templateMarkup = '<civicase-access-denied></civicase-access-denied>';
+    }
+
+    $routeProvider.when('/myactivities', {
+      reloadOnSearch: false,
+      template: templateMarkup
+    });
+  });
 })(angular, CRM.$, CRM._);
