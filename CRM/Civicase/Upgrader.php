@@ -13,6 +13,7 @@ use CRM_Civicase_Setup_AddManageWorkflowMenu as AddManageWorkflowMenu;
 use CRM_Civicase_Service_CaseCategoryInstance as CaseCategoryInstance;
 use CRM_Civicase_Helper_CaseUrl as CaseUrlHelper;
 use CRM_Civicase_Setup_AddSingularLabels as AddSingularLabels;
+use CRM_Civicase_Setup_AddMyActivitiesMenu as AddMyActivitiesMenu;
 
 /**
  * Collection of upgrade steps.
@@ -81,6 +82,7 @@ class CRM_Civicase_Upgrader extends CRM_Civicase_Upgrader_Base {
       new ProcessCaseCategoryForCustomGroupSupport(),
       new AddChangeCaseRoleDateActivityTypes(),
       new AddSingularLabels(),
+      new AddMyActivitiesMenu(),
     ];
     foreach ($steps as $step) {
       $step->apply();
