@@ -5,7 +5,6 @@
  * Extension file.
  */
 
-use Civi\Angular\AngularLoader;
 use Civi\Angular\Manager;
 
 require_once 'civicase.civix.php';
@@ -28,10 +27,8 @@ function civicase_civicrm_tabset($tabsetName, &$tabs, $context) {
   }
 
   if ($useAng) {
-    $loader = new AngularLoader();
-    $loader->setPageName('civicrm/case/a');
-    $loader->setModules(['civicase']);
-    $loader->load();
+    $loader = Civi::service('angularjs.loader');
+    $loader->addModules('civicase');
   }
 }
 
