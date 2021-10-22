@@ -21,6 +21,17 @@ class CRM_Civicase_APIHelpers_CaseDetails {
     $resultMetadata = [];
     $params += ['return' => []];
 
+    // Search using multiselect fields not bringing back results
+    // Change operation from IN to LIKE
+    foreach($params as $key => $value) {
+      // Check if this is custom field and multi select (will have 'IN' array)
+      if (substr($key, 0, 7) == 'custom_' && !empty($params[$key]['IN'])) {
+        $svals = $params[$key]['IN'];
+        unset($params[$key]);
+        $params[$key]['LIKE'] = '%' . reset($svals) . '%';
+      }
+    }
+
     if (is_string($params['return'])) {
       $params['return'] = explode(',', str_replace(' ', '', $params['return']));
     }
