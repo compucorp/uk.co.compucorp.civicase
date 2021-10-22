@@ -25,7 +25,7 @@
         act.color = ''; // controlled by css
       }
 
-      if (caseId && (!act.case_id || act.case_id === caseId || _.contains(act.case_id, caseId))) {
+      if (caseId && (act.case_id === caseId || _.contains(act.case_id, caseId))) {
         act.case_id = caseId;
       } else if (act.case_id) {
         act.case_id = act.case_id[0];
