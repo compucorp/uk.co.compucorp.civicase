@@ -75,6 +75,10 @@ class CRM_Civicase_APIHelpers_CaseDetails {
 
     // Set page number dynamically based on selected record.
     if (!empty($params['options']['page_of_record'])) {
+      /*Sort by contact_id doesn't match the api call. Resulting in the paging/offset being incorrect and the selected record not showing. Instead it triggers showClearfiltersUi.*/
+      if (!empty($params['options']['sort']) && FALSE !== strpos($params['options']['sort'], 'contact_id')) {
+        unset($params['options']['sort']);
+      }
       $prParams = ['sequential' => 1] + $params;
       $prParams['return'] = ['id'];
       $prParams['options']['limit'] = $prParams['options']['offset'] = 0;
