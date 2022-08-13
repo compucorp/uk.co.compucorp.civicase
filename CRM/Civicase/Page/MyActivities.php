@@ -20,7 +20,7 @@ class CRM_Civicase_Page_MyActivities extends CRM_Core_Page {
   public function run() {
     $loader = new AngularLoader();
     $loader->setPageName('civicrm/case/my-activities');
-    $loader->setModules(['crmApp', 'my-activities']);
+    $loader->addModules(['crmApp', 'my-activities']);
     $loader->load();
 
     CRM_Core_Resources::singleton()
