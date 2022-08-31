@@ -214,7 +214,6 @@ function civicase_civicrm_buildForm($formName, &$form) {
     new CRM_Civicase_Hook_BuildForm_ModifyCaseTypesForAdvancedSearch(),
     new CRM_Civicase_Hook_BuildForm_AddCaseCategoryInstanceField(),
     new CRM_Civicase_Hook_BuildForm_AddStyleFieldToCaseCustomGroups(),
-    new CRM_Civicase_Hook_BuildForm_DisplayAllCustomGroupsInCaseForm(),
     new CRM_Civicase_Hook_BuildForm_RemoveExportActionFromReports(),
     new CRM_Civicase_Hook_BuildForm_RestrictCaseEmailContacts(),
     new CRM_Civicase_Hook_BuildForm_LimitRecipientFieldsToOnlySelectedContacts(),
