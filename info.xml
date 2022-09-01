@@ -18,7 +18,7 @@
   <version>2.9.1</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.39</ver>
+    <ver>5.51</ver>
   </compatibility>
   <comments>
     Supported CiviCRM versions  :
