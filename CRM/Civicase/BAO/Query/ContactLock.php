@@ -6,11 +6,10 @@
 class CRM_Civicase_BAO_Query_ContactLock extends CRM_Contact_BAO_Query_Interface {
 
   /**
-   * Implements getFields method, required by CRM_Contact_BAO_Query_Interface
-   * class.
+   * {@inheritDoc}
    */
   public function &getFields() {
-    $fields = array();
+    $fields = [];
 
     return $fields;
   }
@@ -47,9 +46,7 @@ class CRM_Civicase_BAO_Query_ContactLock extends CRM_Contact_BAO_Query_Interface
   }
 
   /**
-   * Implements getPanesMapper, required by getPanesMapper hook.
-   *
-   * @param $panes
+   * {@inheritDoc}
    */
   public function getPanesMapper(&$panes) {
 
