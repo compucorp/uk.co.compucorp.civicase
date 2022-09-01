@@ -69,6 +69,9 @@ class CRM_Civicase_Hook_alterMailParams_SubjectCaseTypeCategoryProcessor {
    *   returns TRUE if hook should run, FALSE otherwise.
    */
   private function shouldRun(array $params, $context, $caseId) {
+    if (empty($params['subject'])) {
+      return FALSE;
+    }
     // If case id is set and email subject starts with '[case '.
     return $caseId && strpos($params['subject'], $this->toReplace) === 0;
   }
