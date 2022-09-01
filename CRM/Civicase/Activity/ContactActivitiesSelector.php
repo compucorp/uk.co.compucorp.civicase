@@ -1,9 +1,7 @@
 <?php
 
 /**
- * Class CRM_Civicase_Activity_ContactActivitiesSelector.
- *
- * Handle fetching activities for a given contact.
+ * Handles fetching activities for a given contact.
  */
 class CRM_Civicase_Activity_ContactActivitiesSelector {
 
