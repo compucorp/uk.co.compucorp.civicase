@@ -322,6 +322,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
     $this->form->addElement('hidden', 'subject', $subject);
     $this->form->addElement('hidden', 'text_message', $body);
     $this->form->addElement('hidden', 'html_message', $body);
+    $this->form->addElement('hidden', 'from_email_address', 'example@mail.com');
 
     return (new SendBulkEmailHook())->run($formName, $fields, $files, $this->form, $errors);
   }
