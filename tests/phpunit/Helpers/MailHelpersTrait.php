@@ -40,7 +40,11 @@ trait Helpers_MailHelpersTrait {
       $headerValues = [];
       foreach ($allHeaders as $headerLine) {
         $tmp = explode(': ', $headerLine);
-        $headerValues[$tmp[0]] = $tmp[1];
+        // Not all headers are separated by `: ` some headers
+        // are separated by by `=`
+        // e.g. boundary="=_450418403cfd293a551c46b24aeb05c6"
+        // we simply ignore such header value.
+        $headerValues[$tmp[0]] = $tmp[1] ?? '';
       }
 
       $emails[$result->recipient_email][] = array_merge(
