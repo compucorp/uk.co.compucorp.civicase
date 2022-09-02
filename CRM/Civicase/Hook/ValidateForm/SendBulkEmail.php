@@ -2,6 +2,12 @@
 
 /**
  * Send bulk email.
+ *
+ * CiviCRM only supports sending bulk emails to clients in a single case,
+ * Sending to clients in multiple case, like we do in CiviCase
+ * results in the case tokens not being resolved. to bypass this limitation
+ * in CiviCRM we use this hook to intercept the email form,
+ * and then send the bulk email to a case at a time.
  */
 class CRM_Civicase_Hook_ValidateForm_SendBulkEmail {
 
@@ -45,7 +51,7 @@ class CRM_Civicase_Hook_ValidateForm_SendBulkEmail {
    *
    * @var array|int[]
    */
-  private $originalToContactEmails;
+  private $originalToContactEmails = [];
 
   /**
    * CRM_Civicase_Hook_ValidateForm_SendBulkEmail constructor.
@@ -82,26 +88,33 @@ class CRM_Civicase_Hook_ValidateForm_SendBulkEmail {
    * @return bool
    *   TRUE if the hook ran, false otherwise.
    */
-  public function run($formName, array &$fields, array &$files, CRM_Core_Form &$form, array &$errors) {
+  public function run($formName, array &$fields, array &$files, CRM_Core_Form $form, array &$errors) {
     $this->form = $form;
     if (!$this->shouldRun()) {
       return FALSE;
     }
 
+    $data = $this->form->controller->container();
     $this->originalContactIds = $this->form->_contactIds;
-    $this->originalToContactEmails = $this->form->_toContactEmails;
+    $this->originalToContactEmails = explode(',', $data['values']['Email']['to']);
 
     $casesContactInfo = $this->getCasesContactInfo();
     $messageSentCount = 0;
     foreach ($casesContactInfo as $caseId => $contactIds) {
-      $this->sendEmailForCase($caseId, $contactIds);
+      // We are cloning here because we want each form submission
+      // for a caseID to be handle as a new form submission in CiviCRM
+      // though the only thing being changed for each form is the  case ID
+      // and to field.
+      $emailForm = clone $this->form;
+      $this->sendEmailForCase($emailForm, $caseId, $contactIds);
 
       $messageSentCount += count($contactIds);
     }
 
-    if ($messageSentCount > count($this->originalContactIds)) {
+    if ($messageSentCount > 1) {
       $this->updateStatusMessage($messageSentCount);
     }
+
     if (CRM_Utils_Array::value('snippet', $_GET) === 'json') {
       CRM_Core_Page_AJAX::returnJsonResponse([]);
     }
@@ -117,7 +130,7 @@ class CRM_Civicase_Hook_ValidateForm_SendBulkEmail {
    */
   private function shouldRun() {
     return (
-      get_class($this->form) === CRM_Contact_Form_Task_Email::class &&
+      get_class($this->form) === CRM_Case_Form_Task_Email::class &&
       !empty($this->caseIds) &&
       (!empty($this->caseRoles) || $this->isClientRoleSelected)
     );
@@ -209,23 +222,33 @@ class CRM_Civicase_Hook_ValidateForm_SendBulkEmail {
   /**
    * Send the emails for the contacts associated with the given case.
    *
+   * @param CRM_Case_Form_Task_Email $form
+   *   A clone of the form object.
    * @param int $caseId
    *   The Id of the Case.
    * @param array|int[] $contactIds
    *   Array with contact Ids.
    */
-  private function sendEmailForCase(int $caseId, array $contactIds) {
+  private function sendEmailForCase(CRM_Case_Form_Task_Email $form, int $caseId, array $contactIds) {
     $_GET['caseid'] = $_REQUEST['caseid'] = $caseId;
-    $this->form->_caseId = $caseId;
-    $this->form->_contactIds = $contactIds;
+    $form->_caseId = $caseId;
+    $form->_contactIds = $contactIds;
 
     $toContactEmails = [];
-    foreach ($contactIds as $contactId) {
-      $originalPosition = array_search($contactId, $this->originalContactIds);
-      $toContactEmails[] = $this->originalToContactEmails[$originalPosition];
+
+    $data = &$form->controller->container();
+    foreach ($this->originalToContactEmails as $emailId) {
+      $separatedEmailId = explode('::', $emailId);
+      $id = $separatedEmailId[0];
+
+      if (in_array($id, $contactIds)) {
+        $toContactEmails[$id] = $emailId;
+      }
     }
-    $this->form->_toContactEmails = $toContactEmails;
-    $this->form->submit($this->form->exportValues());
+
+    $data['values']['Email']['to'] = implode(',', $toContactEmails);
+
+    $form->submit($form->exportValues());
   }
 
   /**
@@ -236,14 +259,11 @@ class CRM_Civicase_Hook_ValidateForm_SendBulkEmail {
    */
   private function updateStatusMessage(int $messageSentCount) {
     $status = CRM_Core_Session::singleton()->getStatus(TRUE)[0];
-
-    $originalMessage = count($this->originalContactIds) === 1
-      ? 'One message was sent successfully.'
-      : count($this->originalContactIds) . ' messages were sent successfully.';
+    $originalMessage = explode('.', $status['text'])[0] ?? "";
 
     $status['text'] = str_replace(
       $originalMessage,
-      "$messageSentCount messages were sent successfully.",
+      "$messageSentCount messages were sent successfully",
       $status['text']
     );
     CRM_Core_Session::setStatus(
