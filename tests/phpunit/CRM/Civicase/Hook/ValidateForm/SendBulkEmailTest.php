@@ -80,7 +80,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
     );
     $this->assertEquals(0, count($emailsSent));
 
-    $this->form = new CRM_Contact_Form_Task_Email();
+    $this->form = new CRM_Case_Form_Task_Email();
     $this->runHook(
       'Test {case.id} for contact {contact.contact_id}',
       'Body for {contact.first_name} {case.id}',
@@ -148,7 +148,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
     );
     $this->assertEquals(0, count($emailsSent));
 
-    $this->form = new CRM_Contact_Form_Task_Email();
+    $this->form = new CRM_Case_Form_Task_Email();
     $this->runHook(
       'Test {case.id} for contact {contact.contact_id}',
       'Body for {contact.first_name} {case.id}',
@@ -183,7 +183,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
 
     $_REQUEST['caseRoles'] = $_GET['caseRoles'] = 'client';
 
-    $this->form = new CRM_Contact_Form_Task_Email();
+    $this->form = new CRM_Case_Form_Task_Email();
     $result = $this->runHook(
       '',
       '',
@@ -220,7 +220,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
   public function testHookDoesNotRunWhenNoCasesAreSelected() {
     $_REQUEST['caseRoles'] = $_GET['caseRoles'] = '';
 
-    $this->form = new CRM_Contact_Form_Task_Email();
+    $this->form = new CRM_Case_Form_Task_Email();
     $result = $this->runHook('', '', [], []);
 
     $this->assertFalse($result);
@@ -335,7 +335,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
         'contact_id' => $contact['id'],
         'preferred_mail_format' => 'HTML',
       ];
-      $formValues['to'][] = $contact['id'] . '::' . $contact['email'];
+      $formValues['to'][$contact['id']] = $contact['id'] . '::' . $contact['email'];
     }
     $formValues['to'] = implode(',', $formValues['to']);
 
