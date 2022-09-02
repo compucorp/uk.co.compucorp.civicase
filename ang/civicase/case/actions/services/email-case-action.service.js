@@ -198,7 +198,7 @@
         }
 
         var popupPath = {
-          path: 'civicrm/activity/email/add',
+          path: 'civicrm/case/email/add',
           query: {
             action: 'add',
             hideDraftButton: 1,

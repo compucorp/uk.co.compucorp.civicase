@@ -96,7 +96,7 @@
 
             it('returns the path to open the send email popup and hides the draft button', () => {
               expect(returnValue).toEqual({
-                path: 'civicrm/activity/email/add',
+                path: 'civicrm/case/email/add',
                 query: {
                   action: 'add',
                   reset: 1,
@@ -167,7 +167,7 @@
 
         it('adds bulk email activitiy to all the selected cases', () => {
           expect(returnValue).toEqual({
-            path: 'civicrm/activity/email/add',
+            path: 'civicrm/case/email/add',
             query: {
               action: 'add',
               reset: 1,

@@ -629,7 +629,7 @@
       });
 
       it('open a popup to create emails', function () {
-        expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/activity/email/add', {
+        expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/case/email/add', {
           action: 'add',
           caseid: $scope.item.id,
           atype: '3',
