@@ -10,7 +10,7 @@
    */
   function AddCustomPathActivityForm (civicaseCrmUrl) {
     var ACTIVITY_TYPES_CUSTOM_PATHS = {
-      Email: 'civicrm/activity/email/add',
+      Email: 'civicrm/case/email/add',
       'Print PDF Letter': 'civicrm/activity/pdf/add'
     };
 

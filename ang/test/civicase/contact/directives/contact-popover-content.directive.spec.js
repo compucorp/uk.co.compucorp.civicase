@@ -44,7 +44,7 @@
         });
 
         it('returns the URL for sending a standalone email activity', () => {
-          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/activity/email/add', {
+          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/case/email/add', {
             action: 'add',
             cid: $scope.contactId,
             reset: 1
@@ -63,7 +63,7 @@
         });
 
         it('returns the URL for sending a case email activity', () => {
-          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/activity/email/add', {
+          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/case/email/add', {
             action: 'add',
             caseid: $scope.caseId,
             cid: $scope.contactId,

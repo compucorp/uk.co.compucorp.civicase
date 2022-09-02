@@ -175,7 +175,7 @@
         <td class="civicase__people-tab__table-column">
           <a
             class="crm-popup"
-            ng-href="{{ 'civicrm/activity/email/add' | civicaseCrmUrl:{ action: 'add', caseid: item.id, reset: 1, cid: role.contact_id } }}"
+            ng-href="{{ 'civicrm/case/email/add' | civicaseCrmUrl:{ action: 'add', caseid: item.id, reset: 1, cid: role.contact_id } }}"
           >
             {{ role.email }}
           </a>
@@ -214,7 +214,7 @@
               </li>
               <li role="separator" class="divider"></li>
               <li ng-if="role.email">
-                <a class="crm-popup" ng-href="{{ 'civicrm/activity/email/add' | civicaseCrmUrl:{ action: 'add', caseid: item.id, reset: 1, cid: role.contact_id } }}">{{ ts('Send Email') }}</a>
+                <a class="crm-popup" ng-href="{{ 'civicrm/case/email/add' | civicaseCrmUrl:{ action: 'add', caseid: item.id, reset: 1, cid: role.contact_id } }}">{{ ts('Send Email') }}</a>
               </li>
               <li>
                 <a class="crm-popup" ng-href="{{ 'civicrm/activity/pdf/add' | civicaseCrmUrl:{ action: 'add', caseid: item.id, reset: 1, cid: role.contact_id, context: 'standalone' } }}">{{ ts('Print/Merge Document') }}</a>
