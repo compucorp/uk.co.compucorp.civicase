@@ -94,7 +94,7 @@
         });
 
         it('returns the form url to create a new activity', () => {
-          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/activity/email/add', {
+          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/case/email/add', {
             action: 'add',
             reset: 1,
             caseid: activity.case_id,

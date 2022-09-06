@@ -122,7 +122,7 @@
         <td class="civicase__people-tab__table-column">
           <a
             class="crm-popup"
-            ng-href="{{ 'civicrm/activity/email/add' | civicaseCrmUrl:{ action: 'add', caseid: item.id, reset: 1, cid: contact.contact_id } }}">
+            ng-href="{{ 'civicrm/case/email/add' | civicaseCrmUrl:{ action: 'add', caseid: item.id, reset: 1, cid: contact.contact_id } }}">
             {{ contact.email }}
           </a>
         </td>
@@ -152,7 +152,7 @@
               <li ng-if="contact.email">
                 <a
                   class="crm-popup"
-                  ng-href="{{ 'civicrm/activity/email/add' | civicaseCrmUrl:{ action: 'add', caseid: item.id, reset: 1, cid: contact.id } }}">
+                  ng-href="{{ 'civicrm/case/email/add' | civicaseCrmUrl:{ action: 'add', caseid: item.id, reset: 1, cid: contact.id } }}">
                   {{ ts('Send Email') }}
                 </a>
               </li>

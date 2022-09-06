@@ -1,5 +1,6 @@
 <?php
 
+use Civi\Test\Api3TestTrait;
 use CRM_Civicase_Hook_ValidateForm_SendBulkEmail as SendBulkEmailHook;
 
 /**
@@ -11,6 +12,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
 
   use CRM_Civicase_Helpers_SessionTrait;
   use Helpers_MailHelpersTrait;
+  use Api3TestTrait;
 
   /**
    * Instance of the form sent on the hook.
@@ -27,13 +29,20 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
   private $caseType;
 
   /**
+   * Currently logged in User.
+   *
+   * @var array
+   */
+  private $loggedInUser;
+
+  /**
    * {@inheritDoc}
    */
   public function setUp() {
     parent::setUp();
 
-    $loggedInUser = CRM_Civicase_Test_Fabricator_Contact::fabricateWithEmail();
-    $this->registerCurrentLoggedInContactInSession($loggedInUser['id']);
+    $this->loggedInUser = CRM_Civicase_Test_Fabricator_Contact::fabricateWithEmail();
+    $this->registerCurrentLoggedInContactInSession($this->loggedInUser['id']);
 
     $this->caseType = CRM_Civicase_Test_Fabricator_CaseType::fabricate()['id'];
   }
@@ -71,7 +80,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
     );
     $this->assertEquals(0, count($emailsSent));
 
-    $this->form = new CRM_Contact_Form_Task_Email();
+    $this->form = new CRM_Case_Form_Task_Email();
     $this->runHook(
       'Test {case.id} for contact {contact.contact_id}',
       'Body for {contact.first_name} {case.id}',
@@ -139,7 +148,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
     );
     $this->assertEquals(0, count($emailsSent));
 
-    $this->form = new CRM_Contact_Form_Task_Email();
+    $this->form = new CRM_Case_Form_Task_Email();
     $this->runHook(
       'Test {case.id} for contact {contact.contact_id}',
       'Body for {contact.first_name} {case.id}',
@@ -174,7 +183,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
 
     $_REQUEST['caseRoles'] = $_GET['caseRoles'] = 'client';
 
-    $this->form = new CRM_Contact_Form_Task_Email();
+    $this->form = new CRM_Case_Form_Task_Email();
     $result = $this->runHook(
       '',
       '',
@@ -211,7 +220,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
   public function testHookDoesNotRunWhenNoCasesAreSelected() {
     $_REQUEST['caseRoles'] = $_GET['caseRoles'] = '';
 
-    $this->form = new CRM_Contact_Form_Task_Email();
+    $this->form = new CRM_Case_Form_Task_Email();
     $result = $this->runHook('', '', [], []);
 
     $this->assertFalse($result);
@@ -299,9 +308,20 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
    *   Return the result of calling the hook.
    */
   private function runHook(string $subject, string $body, array $cases, array $contacts) {
+    $formName = $this->form->getName();
+    $senderEmail = $this->callAPISuccess('Email', 'getsingle', ['contact_id' => $this->loggedInUser['id']]);
+
+    $formValues = [
+      'to' => [],
+      'cc_id' => [],
+      'bcc_id' => [],
+      'subject' => $subject,
+      'text_message' => $body,
+      'html_message' => $body,
+      'from_email_address' => $senderEmail['id'],
+    ];
     $_REQUEST['allCaseIds'] = $_GET['allCaseIds'] = implode(',', $cases);
 
-    $formName = 'Test Form';
     $fields = $files = $errors = [];
 
     $this->form->_contactIds = [];
@@ -315,15 +335,34 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
         'contact_id' => $contact['id'],
         'preferred_mail_format' => 'HTML',
       ];
+      $formValues['to'][$contact['id']] = $contact['id'] . '::' . $contact['email'];
     }
+    $formValues['to'] = implode(',', $formValues['to']);
+
+    $this->setFormSubmitValues($formName, $formValues);
+    return (new SendBulkEmailHook())->run($formName, $fields, $files, $this->form, $errors);
+  }
+
+  /**
+   * Sets the form submission values in Session and element.
+   *
+   * @param string $formName
+   *   The form name.
+   * @param array $formValues
+   *   The values of the form fields.
+   */
+  private function setFormSubmitValues(string $formName, array $formValues) {
+    $this->form->controller = new CRM_Core_Controller_Simple(get_class($this->form), $formName);
+    $_SESSION['_' . $this->form->controller->_name . '_container']['values'][$formName] = $formValues;
+    $_SESSION['_' . $this->form->controller->_name . '_container']['values']['Search'] = [];
 
     $this->form->addElement('hidden', 'cc_id', []);
     $this->form->addElement('hidden', 'bcc_id', []);
-    $this->form->addElement('hidden', 'subject', $subject);
-    $this->form->addElement('hidden', 'text_message', $body);
-    $this->form->addElement('hidden', 'html_message', $body);
-
-    return (new SendBulkEmailHook())->run($formName, $fields, $files, $this->form, $errors);
+    $this->form->addElement('hidden', 'to', $formValues['to']);
+    $this->form->addElement('hidden', 'subject', $formValues['subject']);
+    $this->form->addElement('hidden', 'text_message', $formValues['text_message']);
+    $this->form->addElement('hidden', 'html_message', $formValues['html_message']);
+    $this->form->addElement('hidden', 'from_email_address', $formValues['from_email_address']);
   }
 
   /**

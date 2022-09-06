@@ -40,7 +40,7 @@
         emailUrlParameters.caseid = $scope.caseId;
       }
 
-      return civicaseCrmUrl('civicrm/activity/email/add', emailUrlParameters);
+      return civicaseCrmUrl('civicrm/case/email/add', emailUrlParameters);
     }
   }
 })(angular);
