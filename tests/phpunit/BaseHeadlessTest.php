@@ -1,13 +1,58 @@
 <?php
 
+use Civi\Test;
 use Civi\Test\HeadlessInterface;
 use Civi\Test\TransactionalInterface;
 
+/**
+ * Base test class.
+ */
 abstract class BaseHeadlessTest extends PHPUnit_Framework_TestCase implements HeadlessInterface, TransactionalInterface {
 
+  /**
+   * {@inheritDoc}
+   */
   public function setUpHeadless() {
-    return \Civi\Test::headless()
+    return Test::headless()
       ->installMe(__DIR__)
       ->apply();
   }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getMockBuilder($className) {
+    $mockBuilder = (new class($this, $className) extends PHPUnit_Framework_MockObject_MockBuilder {
+
+      /**
+       * {@inheritDoc}
+       */
+      public function getMock() {
+        static::setSupressedErrorHandler();
+
+        try {
+          return parent::getMock();
+        } finally {
+          restore_error_handler();
+        }
+      }
+
+      /**
+       * Supress `ReflectionType::__toString()` depreciation warning.
+       */
+      public static function setSupressedErrorHandler() {
+        $previousHandler = set_error_handler(function ($code, $description, $file = NULL, $line = NULL, $context = NULL) use (&$previousHandler) {
+          if (($code & E_DEPRECATED) && ($description === 'Function ReflectionType::__toString() is deprecated')) {
+              return TRUE;
+          }
+
+            return $previousHandler($code, $description, $file, $line, $context);
+        });
+      }
+
+    });
+
+    return $mockBuilder;
+  }
+
 }
