@@ -29,7 +29,7 @@ class CRM_Civicase_Helper_Category {
     $categoryData = array_shift($categoryData['values']);
 
     $categoryCustomFields = (new CaseCategoryCustomFieldsSetting())->get($categoryData['value']);
-    $categoryData['singular_label'] = $categoryCustomFields['singular_label'];
+    $categoryData['singular_label'] = $categoryCustomFields['singular_label'] ?? NULL;
 
     return $categoryData;
   }
