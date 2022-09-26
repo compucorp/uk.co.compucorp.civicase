@@ -38,7 +38,7 @@ jobs:
         working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}
         run: |
           git clone --depth 1 https://github.com/civicrm/org.civicrm.shoreditch.git
-          git clone --depth 1 https://github.com/compucorp/uk.co.compucorp.usermenu.git
+          git clone -b MAE-847-php8 --depth 1 https://github.com/compucorp/uk.co.compucorp.usermenu.git
           cv en shoreditch usermenu civicase
 
       - name: Run JS unit tests
