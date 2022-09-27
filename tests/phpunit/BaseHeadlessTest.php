@@ -38,11 +38,11 @@ abstract class BaseHeadlessTest extends PHPUnit_Framework_TestCase implements He
       }
 
       /**
-       * Supress `ReflectionType::__toString()` depreciation warning.
+       * Supress depreciation warnings.
        */
       public static function setSupressedErrorHandler() {
         $previousHandler = set_error_handler(function ($code, $description, $file = NULL, $line = NULL, $context = NULL) use (&$previousHandler) {
-          if (($code & E_DEPRECATED) && ($description === 'Function ReflectionType::__toString() is deprecated')) {
+          if ($code & E_DEPRECATED) {
               return TRUE;
           }
 
