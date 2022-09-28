@@ -5,30 +5,44 @@
  */
 class CRM_Civicase_Test_Fabricator_CaseType {
 
-  private static $defaultParams = array(
+  /**
+   * Default Parameters.
+   *
+   * @var array
+   */
+  private static $defaultParams = [
     'title' => 'test case type',
     'name' => 'test_case_type',
     'is_active' => 1,
     'sequential'   => 1,
     'weight' => 100,
-    'definition' => array(
-      'activityTypes' => array(
-        array('name' => 'Test'),
-      ),
-      'activitySets' => array(
-        array(
+    'definition' => [
+      'activityTypes' => [
+        ['name' => 'Meeting'],
+      ],
+      'activitySets' => [
+        [
           'name' => 'set1',
           'label' => 'Label 1',
           'timeline' => 1,
-          'activityTypes' => array(
-            array('name' => 'Open Case', 'status' => 'Completed'),
-          ),
-        ),
-      ),
-    ),
-  );
+          'activityTypes' => [
+            ['name' => 'Open Case', 'status' => 'Completed'],
+          ],
+        ],
+      ],
+    ],
+  ];
 
-  public static function fabricate($params = array()) {
+  /**
+   * Fabricates new CaseType entity.
+   *
+   * @param array $params
+   *   Case parameters.
+   *
+   * @return array
+   *   Values of newly created Case entity.
+   */
+  public static function fabricate(array $params = []) {
     $params = array_merge(self::$defaultParams, $params);
     $result = civicrm_api3(
       'CaseType',

@@ -5,11 +5,25 @@
  */
 class CRM_Civicase_Test_Fabricator_Case {
 
-  private static $defaultParams = array(
+  /**
+   * Default Parameters.
+   *
+   * @var array
+   */
+  private static $defaultParams = [
     'subject' => 'test test',
-  );
+  ];
 
-  public static function fabricate($params = array()) {
+  /**
+   * Fabricate Case.
+   *
+   * @param array $params
+   *   Parameters.
+   *
+   * @return mixed
+   *   Api result.
+   */
+  public static function fabricate(array $params = []) {
     if (empty($params['contact_id'])) {
       throw new Exception('Please specify contact_id value');
     }

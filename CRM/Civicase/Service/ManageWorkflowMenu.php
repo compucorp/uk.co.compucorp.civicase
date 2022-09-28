@@ -50,7 +50,7 @@ class CRM_Civicase_Service_ManageWorkflowMenu {
         ? 'Manage ' . $caseTypeCategory['name']
         : 'Manage Workflows';
 
-      if ($parentMenuForCaseCategory['id']) {
+      if (!empty($parentMenuForCaseCategory['id'])) {
         $this->addSeparatorToTheLastMenuOf(
           $parentMenuForCaseCategory['id']
         );

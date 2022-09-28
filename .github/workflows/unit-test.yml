@@ -6,7 +6,7 @@ jobs:
   run-unit-tests:
 
     runs-on: ubuntu-latest
-    container: compucorp/civicrm-buildkit:1.1.1-php7.2-chrome
+    container: compucorp/civicrm-buildkit:1.3.0-php8.0-chrome
 
     env:
       CIVICRM_EXTENSIONS_DIR: site/web/sites/all/modules/civicrm/tools/extensions
@@ -28,7 +28,15 @@ jobs:
         run : amp config:set --mysql_dsn=mysql://root:root@mysql:3306
 
       - name: Build Drupal site
-        run: civibuild create drupal-clean --civi-ver 5.51.3 --cms-ver 7.85 --web-root $GITHUB_WORKSPACE/site
+        run: civibuild create drupal-clean --civi-ver 5.51.3 --cms-ver 7.79 --web-root $GITHUB_WORKSPACE/site
+
+      - uses: compucorp/apply-patch@1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          repo: compucorp/civicrm-core
+          version: 5.51.3
+          path: site/web/sites/all/modules/civicrm
 
       - uses: actions/checkout@v2
         with:
@@ -38,7 +46,7 @@ jobs:
         working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}
         run: |
           git clone --depth 1 https://github.com/civicrm/org.civicrm.shoreditch.git
-          git clone --depth 1 https://github.com/compucorp/uk.co.compucorp.usermenu.git
+          git clone -b MAE-847-php8 --depth 1 https://github.com/compucorp/uk.co.compucorp.usermenu.git
           cv en shoreditch usermenu civicase
 
       - name: Run JS unit tests
