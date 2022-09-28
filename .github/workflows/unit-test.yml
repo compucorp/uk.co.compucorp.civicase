@@ -30,6 +30,14 @@ jobs:
       - name: Build Drupal site
         run: civibuild create drupal-clean --civi-ver 5.51.3 --cms-ver 7.85 --web-root $GITHUB_WORKSPACE/site
 
+      - uses: compucorp/apply-patch@1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          repo: compucorp/civicrm-core
+          version: 5.51.3
+          path: site/web/sites/all/modules/civicrm
+
       - uses: actions/checkout@v2
         with:
             path: ${{ env.CIVICRM_EXTENSIONS_DIR }}/uk.co.compucorp.civicase
