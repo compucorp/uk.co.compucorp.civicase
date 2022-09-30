@@ -86,7 +86,7 @@ function _civicrm_api3_activity_getActivityActionLinks(array $params) {
     $values
   );
 
-  return _civicrm_api3_activity_GetActionLinks_processLinks($seqLinks);
+  return _civicrm_api3_activity_GetActionLinks_processLinks($seqLinks, $values);
 }
 
 /**
@@ -98,7 +98,7 @@ function _civicrm_api3_activity_getActivityActionLinks(array $params) {
  * @return array
  *   Activity Action Links.
  */
-function _civicrm_api3_activity_GetActionLinks_processLinks(array $activityActionLinks) {
+function _civicrm_api3_activity_GetActionLinks_processLinks(array $activityActionLinks, array $values) {
   foreach ($activityActionLinks as $id => $link) {
     // Remove action links already added by civicase.
     if (in_array($link['name'], ACTIONS_DEFINED_BY_CIVICASE)) {
