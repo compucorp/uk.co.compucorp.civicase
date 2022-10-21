@@ -91,10 +91,12 @@
      */
     function doContactTask (tab) {
       var task = $scope.contactTasks[$scope[tab + 'SelectedTask']];
-      $scope[tab + 'SelectedTask'] = '';
       civicaseCrmLoadForm(civicaseCrmUrl(
         task.url, { cids: $scope.getSelectedContacts(tab).join(',') })
       )
+        .on('crmFormLoad', function () {
+          $scope[tab + 'SelectedTask'] = '';
+        })
         .on('crmFormSuccess', $scope.refresh)
         .on('crmFormSuccess', function () {
           $scope.refresh();
