@@ -204,7 +204,7 @@ class CRM_Civicase_Hook_alterAPIPermissions_CaseCategory {
     }
 
     $caseTypeCategoryParam = $params[$key];
-    if (array_key_exists('IN', $caseTypeCategoryParam)) {
+    if (is_array($caseTypeCategoryParam) && array_key_exists('IN', $caseTypeCategoryParam)) {
       foreach ($caseTypeCategoryParam['IN'] as $caseCategory) {
         return $this->getCaseTypeCategoryNameFromOptions($caseCategory);
       }
