@@ -70,16 +70,16 @@ function _civicrm_api3_case_getdetails_spec(array &$spec) {
  * @throws API_Exception
  */
 function civicrm_api3_case_getdetails(array $params) {
-  list(
+  [
     'resultMetadata' => $resultMetadata,
     'params' => $params,
     'toReturn' => $toReturn,
-    'sql' => $sql
-  ) = CaseDetailsQuery::get($params);
+    'sql' => $sql,
+  ] = CaseDetailsQuery::get($params);
 
   // Call the case api.
   $result = civicrm_api3_case_get(['sequential' => 0] + $params, $sql);
-  if (!empty($result['values'])) {
+  if (!empty($result['values']) && is_array($result['values'])) {
     $ids = array_keys($result['values']);
 
     // Remove legacy cruft.
