@@ -35,6 +35,8 @@ function _civicrm_api3_activity_getall_spec(array &$spec) {
  */
 function civicrm_api3_activity_getall(array $params) {
   $contactTypesToReturn = [];
+  $params['return'] = is_string($params['return']) ? explode(',', $params['return']) : $params['return'];
+
   $targetContactParamIndex = array_search('target_contact_name', $params['return']);
   if ($targetContactParamIndex !== FALSE) {
     $contactTypesToReturn['target_contact_name'] = 1;
@@ -47,6 +49,7 @@ function civicrm_api3_activity_getall(array $params) {
     unset($params['return'][$assigneeContactParamIndex]);
   }
 
+  $params['return'] = implode(',', $params['return']);
   $result = civicrm_api3('Activity', 'get', $params);
 
   // These two activity types are known to often have a lot
