@@ -34,7 +34,7 @@ class CRM_Civicase_Hook_ValidateForm_SaveActivityDraft {
       return;
     }
 
-    if (!array_key_exists($form->getButtonName('refresh'), $fields['buttons'])) {
+    if (empty($fields['buttons']) || !array_key_exists($form->getButtonName('refresh'), $fields['buttons'])) {
       return;
     }
 

@@ -143,7 +143,7 @@ function _join_to_case(CRM_Utils_SQL_Select $query, $value) {
 function _get_case_ids(array $caseParams) {
   $results = civicrm_api3('Case', 'getcaselist', array_merge([
     'return' => 'id',
-    'options' => [limit => 0],
+    'options' => ['limit' => 0],
   ], $caseParams))['values'];
 
   return array_column($results, 'id');
