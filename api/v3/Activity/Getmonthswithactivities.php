@@ -134,5 +134,5 @@ function get_records_from_activity_get_api(array $params) {
     $params['return'] = array_keys($options['return']);
   }
 
-  return _civicrm_api3_basic_get(CRM_Activity_BAO_Activity, $params, FALSE, 'Activity', $sql);
+  return _civicrm_api3_basic_get('CRM_Activity_BAO_Activity', $params, FALSE, 'Activity', $sql);
 }
