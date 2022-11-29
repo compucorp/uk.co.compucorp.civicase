@@ -55,7 +55,7 @@ function civicrm_api3_activity_Getmonthswithactivities(array $params) {
   $grouped_activity_dates = [];
 
   foreach ($activities as $activity) {
-    list($activity_year, $activity_month) = explode('-', $activity['activity_date_time']);
+    [$activity_year, $activity_month] = explode('-', $activity['activity_date_time']);
 
     $activity_group_index = -1;
     foreach ($grouped_activity_dates as $key => $val) {
@@ -119,7 +119,7 @@ function get_records_from_activity_get_api(array $params) {
     $sort = explode(', ', $options['sort']);
 
     foreach ($sort as $index => &$sortString) {
-      list($sortField, $dir) = array_pad(explode(' ', $sortString), 2, 'ASC');
+      [$sortField, $dir] = array_pad(explode(' ', $sortString), 2, 'ASC');
       if ($sortField == 'is_overdue') {
         $incomplete = implode(',', array_keys(CRM_Activity_BAO_Activity::getStatusesByType(CRM_Activity_BAO_Activity::INCOMPLETE)));
         $sql->orderBy("IF((a.activity_date_time >= NOW() OR a.status_id NOT IN ($incomplete)), 0, 1) $dir", NULL, $index);
