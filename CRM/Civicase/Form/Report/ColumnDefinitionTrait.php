@@ -253,13 +253,9 @@ trait CRM_Civicase_Form_Report_ColumnDefinitionTrait {
   /**
    * Get contact columns.
    *
-   * @param array $options
-   *   Options for generating the columns.
-   *
-   * @return array
-   *   Contact columns
+   * @inheritDoc
    */
-  public function getContactColumns(array $options = []) {
+  protected function getContactColumns($options = []) {
     $defaultOptions = [
       'prefix' => '',
       'prefix_label' => '',
