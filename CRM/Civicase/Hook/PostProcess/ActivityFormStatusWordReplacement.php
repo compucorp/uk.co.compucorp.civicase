@@ -32,6 +32,7 @@ class CRM_Civicase_Hook_PostProcess_ActivityFormStatusWordReplacement {
       return;
     }
 
+    $caseId = ((array) $caseId)[0] ?? NULL;
     $caseCategoryName = CaseCategoryHelper::getCategoryName($caseId);
     CaseCategoryWordReplacementHelper::addWordReplacements($caseCategoryName);
     $translatedActivityTypeName = civicaseTs($form->getVar('_activityTypeName'));
