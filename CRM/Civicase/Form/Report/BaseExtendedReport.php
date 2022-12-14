@@ -1173,23 +1173,9 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
    * of fields to be selected in the column header fields which is not
    * possible in the original function in base class.
    *
-   * @param array $specs
-   *   Specifications.
-   * @param string $tableName
-   *   Table name.
-   * @param string|null $daoName
-   *   DAO name.
-   * @param string|null $tableAlias
-   *   Table alias.
-   * @param array $defaults
-   *   Defaults.
-   * @param array $options
-   *   Options.
-   *
-   * @return array
-   *   Column lists.
+   * @inheritDoc
    */
-  protected function buildColumns(array $specs, $tableName, $daoName = NULL, $tableAlias = NULL, array $defaults = [], array $options = []) {
+  protected function buildColumns($specs, $tableName, $daoName = NULL, $tableAlias = NULL, $defaults = [], $options = []) {
 
     if (!$tableAlias) {
       $tableAlias = str_replace('civicrm_', '', $tableName);
@@ -1283,8 +1269,8 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
         }
       }
     }
-    $columns[$tableName]['prefix'] = isset($options['prefix']) ? $options['prefix'] : '';
-    $columns[$tableName]['prefix_label'] = isset($options['prefix_label']) ? $options['prefix_label'] : '';
+    $columns[$tableName]['prefix'] = $options['prefix'] ?? '';
+    $columns[$tableName]['prefix_label'] = $options['prefix_label'] ?? '';
     if (isset($options['group_title'])) {
       $groupTitle = $options['group_title'];
     }
@@ -1305,12 +1291,9 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
    * results for the row totals based on new Data aggregate functions
    * introduced.
    *
-   * @param array $rows
-   *   Result rows.
-   * @param bool $pager
-   *   Pager.
+   * @inheritDoc
    */
-  public function formatDisplay(array &$rows, $pager = TRUE) {
+  public function formatDisplay(&$rows, $pager = TRUE) {
     // Set pager based on if any limit was applied in the query.
     if ($pager) {
       $this->setPager();
@@ -1352,19 +1335,7 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
   /**
    * Use the options for the field to map the display value.
    *
-   * @param string $value
-   *   Value of the field.
-   * @param array $row
-   *   Row display values.
-   * @param string $selectedField
-   *   Selected field.
-   * @param string $criteriaFieldName
-   *   Criteria field name.
-   * @param array $specs
-   *   Specifications of the column.
-   *
-   * @return string
-   *   Label of the option ids.
+   * @inheritDoc
    */
   public function alterFromOptions($value, array &$row, $selectedField, $criteriaFieldName, array $specs) {
     if ($specs['data_type'] == 'ContactReference') {
@@ -1798,10 +1769,9 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
    * when next the report instance is opened, those panes are automatically
    * expanded.
    *
-   * @param array $params
-   *   Params.
+   * @inheritDoc
    */
-  public function setParams(array $params) {
+  public function setParams($params) {
     if (empty($params)) {
       $this->_params = $params;
       return;

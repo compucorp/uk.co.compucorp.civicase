@@ -830,7 +830,7 @@ class CRM_Civicase_Form_Report_ExtendedReport extends CRM_Report_Form {
    *
    * @throws Exception
    */
-  function addColumnAggregateSelect($fieldName, $dbAlias, $spec) {
+  public function addColumnAggregateSelect($fieldName, $dbAlias, array $spec) {
     if (empty($fieldName)) {
       $this->addAggregateTotal($fieldName);
       return;
@@ -2314,7 +2314,7 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
    * @param string $fieldAlias
    * @param string $title
    */
-  protected function addRowHeader($tableAlias, $selectedField, $fieldAlias, $title = '') {
+  protected function addRowHeader($tableAlias, array $selectedField, $fieldAlias, $title = '') {
     if (empty($tableAlias)) {
       $this->_select = 'SELECT 1 '; // add a fake value just to save lots of code to calculate whether a comma is required later
       $this->_rollup = NULL;
@@ -2578,7 +2578,7 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
    *
    * @param $rows
    */
-  function alterRollupRows(&$rows) {
+  function alterRollupRows(array &$rows) {
     if (count($rows) === 1) {
       // If the report only returns one row there is no rollup.
       return;
@@ -2636,7 +2636,7 @@ LEFT JOIN civicrm_contact {$field['alias']} ON {$field['alias']}.id = {$this->_a
    *
    * @return string
    */
-  function alterFromOptions($value, &$row, $selectedField, $criteriaFieldName, $specs) {
+  public function alterFromOptions($value, array &$row, $selectedField, $criteriaFieldName, array $specs) {
     if ($specs['data_type'] == 'ContactReference') {
       if (!empty($row[$selectedField])) {
         return CRM_Contact_BAO_Contact::displayName($row[$selectedField]);
@@ -7488,7 +7488,7 @@ WHERE cg.extends IN ('" . $extendsString . "') AND
    * @param $prefixLabel
    * @param $tableKey
    */
-  protected function addCustomTableToColumns($field, $currentTable, $prefix, $prefixLabel, $tableKey) {
+  protected function addCustomTableToColumns(array $field, $currentTable, $prefix, $prefixLabel, $tableKey) {
     $entity = $field['extends'];
     if (in_array($entity, ['Individual', 'Organization', 'Household'])) {
       $entity = 'Contact';
@@ -7572,7 +7572,7 @@ WHERE cg.extends IN ('" . $extendsString . "') AND
    * @return array
    * @throws \Exception
    */
-  protected function getCustomFieldOptions($spec) {
+  protected function getCustomFieldOptions(array $spec) {
     $options = [];
     if (!empty($spec['options'])) {
       return $spec['options'];
