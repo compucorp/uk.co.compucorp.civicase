@@ -29,11 +29,11 @@ class CRM_Civicase_Hook_BuildForm_TokenTreeTest extends BaseHeadlessTest {
   public function testRun() {
     $this->setContactCustomFields();
     $this->setCaseCustomFields();
-    $form = new CRM_Contact_Form_Task_Email();
+    $form = new CRM_Case_Form_Task_Email();
     $form->assign('tokens', $this->getTokens());
     $_GET['caseid'] = $_REQUEST['caseid'] = 1;
     $hook = new TokenTree();
-    $hook->run($form, CRM_Contact_Form_Task_Email::class);
+    $hook->run($form, CRM_Case_Form_Task_Email::class);
     $setting = CRM_Core_Resources::singleton()->getSettings();
     $this->assertNotEmpty($setting['civicase-base']['custom_token_tree']);
     $newTokenTree = $this->format(json_decode($setting['civicase-base']['custom_token_tree'], TRUE));

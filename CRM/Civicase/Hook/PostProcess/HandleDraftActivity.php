@@ -82,7 +82,7 @@ class CRM_Civicase_Hook_PostProcess_HandleDraftActivity {
    *   Whether the hook should run or not.
    */
   private function shouldRun($formName, $urlParams) {
-    $specialForms = ['CRM_Contact_Form_Task_PDF', 'CRM_Contact_Form_Task_Email'];
+    $specialForms = ['CRM_Contact_Form_Task_PDF', 'CRM_Case_Form_Task_Email'];
 
     return in_array($formName, $specialForms) && !empty($urlParams['draft_id']);
   }

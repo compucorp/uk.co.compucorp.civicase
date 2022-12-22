@@ -67,7 +67,7 @@ class CRM_Civicase_Hook_PostProcess_AttachEmailActivityToAllCases {
    *   Whether the hook should run or not.
    */
   private function shouldRun($formName) {
-    return $formName === CRM_Contact_Form_Task_Email::class &&
+    return $formName === CRM_Case_Form_Task_Email::class &&
       !empty(CRM_Utils_Array::value('allCaseIds', $_GET, '0')) &&
       !empty(CRM_Utils_Array::value('caseid', $_GET, '0'));
   }

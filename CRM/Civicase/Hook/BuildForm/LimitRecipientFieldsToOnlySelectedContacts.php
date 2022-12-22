@@ -57,7 +57,7 @@ class CRM_Civicase_Hook_BuildForm_LimitRecipientFieldsToOnlySelectedContacts {
    */
   private function shouldRun($formName) {
     return (
-      $formName === CRM_Contact_Form_Task_Email::class &&
+      $formName === CRM_Case_Form_Task_Email::class &&
       CRM_Utils_Array::value('caseRolesBulkEmail', $_GET, '0') === '1' &&
       CRM_Utils_Array::value('snippet', $_GET, '0') === CRM_Core_Smarty::PRINT_JSON &&
       CRM_Utils_Array::value('cid', $_GET, '0') &&

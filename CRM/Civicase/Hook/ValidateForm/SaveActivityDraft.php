@@ -12,7 +12,7 @@ class CRM_Civicase_Hook_ValidateForm_SaveActivityDraft {
    */
   private $specialForms = [
     'pdf' => 'CRM_Contact_Form_Task_PDF',
-    'email' => 'CRM_Contact_Form_Task_Email',
+    'email' => 'CRM_Case_Form_Task_Email',
   ];
 
   /**
@@ -56,7 +56,7 @@ class CRM_Civicase_Hook_ValidateForm_SaveActivityDraft {
     // The validate stage provides an opportunity to bypass normal
     // form processing, save the draft & return early.
     $activityType = $form->getVar('_activityTypeId');
-    $caseId = $form->getVar('_caseId');
+    $caseId = CRM_Utils_Request::retrieve('caseid', 'String');
     if (!$activityType) {
       $activityType = $formName == 'CRM_Contact_Form_Task_PDF' ? 'Print PDF Letter' : 'Email';
     }

@@ -45,8 +45,12 @@
         draftFormParameters.caseid = activity.case_id;
       }
 
+      var viewUrl = 'civicrm/activity/email/';
+      var addUrl = 'civicrm/case/email/';
+      var url = action === 'view' ? viewUrl : addUrl;
+
       return civicaseCrmUrl(
-        'civicrm/activity/email/' + action,
+        url + action,
         draftFormParameters
       );
     }

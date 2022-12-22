@@ -13,7 +13,7 @@ class CRM_Civicase_Hook_BuildForm_HandleDraftActivities {
   ];
 
   const PDF_LETTER_FORM_NAME = 'CRM_Contact_Form_Task_PDF';
-  const EMAIL_FORM_NAME = 'CRM_Contact_Form_Task_Email';
+  const EMAIL_FORM_NAME = 'CRM_Case_Form_Task_Email';
   const SPECIAL_FORMS = [
     self::PDF_LETTER_FORM_NAME,
     self::EMAIL_FORM_NAME,
@@ -96,7 +96,7 @@ class CRM_Civicase_Hook_BuildForm_HandleDraftActivities {
             'id' => $id,
             'return' => 'case_id',
           ]);
-          $composeUrl = CRM_Utils_System::url("civicrm/activity/$atype/add", [
+          $composeUrl = CRM_Utils_System::url("civicrm/case/$atype/add", [
             'action' => 'add',
             'reset' => 1,
             'caseId' => $caseId['case_id'][0],

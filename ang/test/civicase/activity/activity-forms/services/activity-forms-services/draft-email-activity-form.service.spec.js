@@ -67,7 +67,7 @@
         });
 
         it('returns the popup form URL for the draft activity in create mode by default', () => {
-          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/activity/email/add',
+          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/case/email/add',
             expectedActivityFormUrlParams);
         });
       });
@@ -83,7 +83,7 @@
         });
 
         it('returns the popup form URL for the draft activity in create mode by default', () => {
-          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/activity/email/add',
+          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/case/email/add',
             expectedActivityFormUrlParams);
         });
       });

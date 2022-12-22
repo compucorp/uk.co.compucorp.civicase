@@ -25,8 +25,8 @@ class CRM_Civicase_Hook_PostProcess_AttachEmailActivityToAllCasesTest extends Ba
     $_GET['allCaseIds'] = $_REQUEST['allCaseIds'] = $allCaseIds;
 
     (new AttachEmailActivityToAllCases())->run(
-      CRM_Contact_Form_Task_Email::class,
-      new CRM_Contact_Form_Task_Email()
+      CRM_Case_Form_Task_Email::class,
+      new CRM_Case_Form_Task_Email()
     );
 
     foreach ($cases as $caseId) {

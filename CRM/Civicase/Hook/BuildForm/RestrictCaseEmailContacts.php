@@ -40,8 +40,8 @@ class CRM_Civicase_Hook_BuildForm_RestrictCaseEmailContacts {
    *   True when the hook can run.
    */
   private function shouldRun() {
-    $isEmailForm = get_class($this->form) === CRM_Contact_Form_Task_Email::class;
-    $isCaseEmail = !empty($this->form->getVar('_caseId'));
+    $isEmailForm = get_class($this->form) === CRM_Case_Form_Task_Email::class;
+    $isCaseEmail = !empty(CRM_Utils_Request::retrieve('caseid', 'Positive'));
     $shouldRestrictContacts = (bool) Civi::settings()->get('civicaseRestrictCaseEmailContacts');
     $isBulkEmail = CRM_Utils_Array::value('caseRolesBulkEmail', $_GET, '0') === '1';
 
@@ -56,7 +56,7 @@ class CRM_Civicase_Hook_BuildForm_RestrictCaseEmailContacts {
    * switching cases or updating the contacts for the existing one.
    */
   private function addListOfCaseContactsToSettings() {
-    $caseId = $this->form->getVar('_caseId');
+    $caseId = CRM_Utils_Request::retrieve('caseid', 'Positive');
 
     $caseDetailsResponse = civicrm_api3('Case', 'getdetails', [
       'id' => $caseId,

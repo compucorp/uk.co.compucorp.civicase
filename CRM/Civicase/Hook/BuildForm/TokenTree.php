@@ -56,7 +56,7 @@ class CRM_Civicase_Hook_BuildForm_TokenTree {
     if (!$this->shouldRun($formName)) {
       return;
     }
-    $this->isEmailForm = $form instanceof CRM_Contact_Form_Task_Email;
+    $this->isEmailForm = $form instanceof CRM_Case_Form_Task_Email;
     $this->setAllRelevantCustomFields();
     $this->attachNewTokenTreeToForm($form);
   }
@@ -479,7 +479,7 @@ class CRM_Civicase_Hook_BuildForm_TokenTree {
     return CRM_Utils_Request::retrieve('caseid', 'Integer') &&
       in_array(
         $formName,
-        [CRM_Contact_Form_Task_Email::class, CRM_Contact_Form_Task_PDF::class]
+        [CRM_Case_Form_Task_Email::class, CRM_Contact_Form_Task_PDF::class]
       );
   }
 
