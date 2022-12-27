@@ -3,25 +3,21 @@
 use CRM_Civicase_Helper_CaseCategory as CaseCategoryHelper;
 
 /**
- * Class CRM_Civicase_XMLProcessor_Report.
+ * XMLProcessor report class.
  */
 class CRM_Civicase_XMLProcessor_Report extends CRM_Case_XMLProcessor_Report {
 
   /**
-   * Get Activities which match the sent filters.
+   * The selected activities.
    *
-   * @param int $clientID
-   *   Client ID.
-   * @param int $caseID
-   *   Case Id.
-   * @param array $activityTypes
-   *   Activity Types.
-   * @param array $activities
-   *   Activities.
-   * @param array $selectedActivities
-   *   Selected activities.
+   * @var array
    */
-  public function getActivities($clientID, $caseID, array $activityTypes, array &$activities, array $selectedActivities = NULL) {
+  public $selectedActivities;
+
+  /**
+   * {@inheritDoc}
+   */
+  public function getActivities($clientID, $caseID, $activityTypes, &$activities) {
     // Get all activities for this case that in this activityTypes set.
     foreach ($activityTypes as $aType) {
       $activityTypesMap[$aType['id']] = $aType;
@@ -52,7 +48,7 @@ AND    ac.case_id = %1
     $dao = CRM_Core_DAO::executeQuery($query, $params);
     while ($dao->fetch()) {
       $activityTypeInfo = $activityTypesMap[$dao->activity_type_id];
-      if (count($selectedActivities) === 0 || in_array($dao->id, $selectedActivities)) {
+      if (count($this->selectedActivities) === 0 || in_array($dao->id, $this->selectedActivities)) {
         $activities[] = $this->getActivity($clientID,
           $dao,
           $activityTypeInfo
@@ -62,25 +58,9 @@ AND    ac.case_id = %1
   }
 
   /**
-   * Get the Case Report for the sent filter.
-   *
-   * @param int $clientID
-   *   Client ID.
-   * @param int $caseID
-   *   Case Id.
-   * @param string $activitySetName
-   *   The activity set name.
-   * @param array $params
-   *   Parameters.
-   * @param CRM_Civicase_XMLProcessor_Report $report
-   *   CRM_Civicase_XMLProcessor_Report object.
-   * @param array $selectedActivities
-   *   Selected activities.
-   *
-   * @return mixed
-   *   Report contents.
+   * {@inheritDoc}
    */
-  public static function getCaseReport($clientID, $caseID, $activitySetName, array $params, CRM_Civicase_XMLProcessor_Report $report, array $selectedActivities = NULL) {
+  public static function getCaseReport($clientID, $caseID, $activitySetName, $params, $report) {
 
     $template = CRM_Core_Smarty::singleton();
 
@@ -136,7 +116,8 @@ AND    ac.case_id = %1
 
     // Now collect all the information about activities.
     $activities = [];
-    $report->getActivities($clientID, $caseID, $activityTypes, $activities, $selectedActivities);
+
+    $report->getActivities($clientID, $caseID, $activityTypes, $activities);
     $template->assign_by_ref('activities', $activities);
     // Now run the template.
     $contents = $template->fetch('CRM/Case/XMLProcessor/Report.tpl');
@@ -417,6 +398,7 @@ AND    ac.case_id = %1
         }
       }
     }
+    $report->selectedActivities = $selectedActivities;
     $template->assign('caseRelationships', $caseRelationships);
     $template->assign('caseRoles', $caseRoles);
     $template->assign('otherRelationships', $otherRelationships);
@@ -427,8 +409,7 @@ AND    ac.case_id = %1
       $caseID,
       $activitySetName,
       $params,
-      $report,
-      $selectedActivities
+      $report
     );
 
     $caseCategoryName = CRM_Civicase_Helper_CaseCategory::getCategoryName($caseID);
@@ -464,7 +445,8 @@ AND    ac.case_id = %1
       foreach ($caseCustomGroup['fields'] as $customField) {
         if (isset($customField['value']['id'])) {
           $displayField = $customField['value']['display'];
-          if ($customField['data_type'] === 'Money' && in_array($customField['html_type'], ['Radio', 'Select'])) {
+          if ($customField['data_type'] === 'Money'
+            && in_array($customField['html_type'], ['Radio', 'Select'])) {
             $displayField = $customField['value']['data'];
           }
           if ($customField['data_type'] === 'File') {
