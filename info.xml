@@ -25,13 +25,20 @@
     - A patched version of CiviCRM 5.39.1 (Download link: https://github.com/compucorp/civicrm-core/releases/download/5.39.1%2Bpatch.76dd32/civicrm-5.39.1+patch.76dd32.tar.gz)
   </comments>
   <classloader>
-    <psr4 prefix="Civi\" path="Civi" />
+    <psr4 prefix="Civi\" path="Civi"/>
   </classloader>
   <civix>
     <namespace>CRM/Civicase</namespace>
+    <format>22.05.2</format>
   </civix>
   <requires>
     <ext>org.civicrm.shoreditch</ext>
     <ext>uk.co.compucorp.usermenu</ext>
   </requires>
+  <mixins>
+    <mixin>ang-php@1.0.0</mixin>
+    <mixin>menu-xml@1.0.0</mixin>
+    <mixin>mgd-php@1.0.0</mixin>
+    <mixin>setting-php@1.0.0</mixin>
+  </mixins>
 </extension>

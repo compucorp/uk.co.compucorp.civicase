@@ -12,7 +12,7 @@ use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
  *
  * @group headless
  */
-class CRM_Civicase_BAO_CaseContactLockTest extends PHPUnit_Framework_TestCase implements HeadlessInterface, TransactionalInterface {
+class CRM_Civicase_BAO_CaseContactLockTest extends PHPUnit\Framework\TestCase implements HeadlessInterface, TransactionalInterface {
 
   /**
    * {@inheritdoc}
