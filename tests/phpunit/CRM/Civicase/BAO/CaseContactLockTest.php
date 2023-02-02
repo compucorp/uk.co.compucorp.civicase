@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
 use Civi\Test\HeadlessInterface;
 use Civi\Test\TransactionalInterface;
 use Civi\Test;
@@ -12,7 +13,7 @@ use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
  *
  * @group headless
  */
-class CRM_Civicase_BAO_CaseContactLockTest extends PHPUnit\Framework\TestCase implements HeadlessInterface, TransactionalInterface {
+class CRM_Civicase_BAO_CaseContactLockTest extends TestCase implements HeadlessInterface, TransactionalInterface {
 
   /**
    * {@inheritdoc}
