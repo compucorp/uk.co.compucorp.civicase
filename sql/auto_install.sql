@@ -29,3 +29,18 @@ CREATE TABLE IF NOT EXISTS `civicrm_case_category_instance` (
   PRIMARY KEY (`id`),
   UNIQUE INDEX `unique_category`(category_id)
  ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+-- /*******************************************************
+-- *
+-- * civicrm_case_category_features
+-- *
+-- * Stores additional features enabled for a case category
+-- *
+-- *******************************************************/
+CREATE TABLE IF NOT EXISTS `civicrm_case_category_features` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseCategoryFeatures ID',
+  `category_id` int unsigned NOT NULL COMMENT 'One of the values of the case_type_categories option group',
+  `feature_id` int unsigned NOT NULL COMMENT 'One of the values of the case_type_category_features option group',
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `unique_category_feature` (category_id, feature_id)
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;

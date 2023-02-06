@@ -14,6 +14,9 @@ class CRM_Civicase_Upgrader_Steps_Step0019 {
    *   Return value in boolean.
    */
   public function apply() {
+    $upgrader = CRM_Civicase_Upgrader_Base::instance();
+    $upgrader->executeSqlFile('sql/auto_install.sql');
+
     (new CaseTypeCategoryManager())->create();
 
     return TRUE;

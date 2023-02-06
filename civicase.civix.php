@@ -295,6 +295,11 @@ function _civicase_civix_fixNavigationMenuItems(&$nodes, &$maxNavID, $parentID) 
  */
 function _civicase_civix_civicrm_entityTypes(&$entityTypes) {
   $entityTypes = array_merge($entityTypes, [
+    'CRM_Civicase_DAO_CaseCategoryFeatures' => [
+      'name' => 'CaseCategoryFeatures',
+      'class' => 'CRM_Civicase_DAO_CaseCategoryFeatures',
+      'table' => 'civicrm_case_category_features',
+    ],
     'CRM_Civicase_DAO_CaseCategoryInstance' => [
       'name' => 'CaseCategoryInstance',
       'class' => 'CRM_Civicase_DAO_CaseCategoryInstance',
