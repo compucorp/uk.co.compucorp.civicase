@@ -67,11 +67,12 @@
         });
 
         it('returns the update form url for the case activity', () => {
-          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/case/activity', {
+          expect(civicaseCrmUrl).toHaveBeenCalledWith('civicrm/activity/add', {
             action: 'update',
             id: activity.id,
             reset: 1,
-            caseid: activity.case_id
+            caseid: activity.case_id,
+            context: 'case'
           });
         });
       });

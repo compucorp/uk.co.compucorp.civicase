@@ -38,8 +38,9 @@
       };
 
       if (activity.case_id) {
-        urlPath = 'civicrm/case/activity';
+        urlPath = 'civicrm/activity/add';
         urlParams.caseid = activity.case_id;
+        urlParams.context = 'case';
       }
 
       return civicaseCrmUrl(urlPath, urlParams);
