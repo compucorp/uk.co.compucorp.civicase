@@ -16,6 +16,7 @@ use CRM_Civicase_Setup_AddSingularLabels as AddSingularLabels;
 use CRM_Civicase_ExtensionUtil as E;
 use CRM_Civicase_Setup_AddMyActivitiesMenu as AddMyActivitiesMenu;
 use CRM_Civicase_Setup_Manage_CaseTypeCategoryFeaturesManager as CaseTypeCategoryFeaturesManager;
+use CRM_Civicase_Setup_Manage_CaseSalesOrderStatusManager as CaseSalesOrderStatusManager;
 
 /**
  * Collection of upgrade steps.
@@ -150,6 +151,7 @@ class CRM_Civicase_Upgrader extends CRM_Civicase_Upgrader_Base {
 
     $this->createManageCasesMenuItem();
     (new CaseTypeCategoryFeaturesManager())->create();
+    (new CaseSalesOrderStatusManager())->create();
   }
 
   /**
@@ -247,6 +249,7 @@ class CRM_Civicase_Upgrader extends CRM_Civicase_Upgrader_Base {
     }
 
     (new CaseTypeCategoryFeaturesManager())->remove();
+    (new CaseSalesOrderStatusManager())->remove();
   }
 
   /**
@@ -413,6 +416,7 @@ class CRM_Civicase_Upgrader extends CRM_Civicase_Upgrader_Base {
     $workflowMenu->apply();
 
     (new CaseTypeCategoryFeaturesManager())->enable();
+    (new CaseSalesOrderStatusManager())->enable();
   }
 
   /**
@@ -423,6 +427,7 @@ class CRM_Civicase_Upgrader extends CRM_Civicase_Upgrader_Base {
 
     $this->toggleNav('Manage Cases', FALSE);
     (new CaseTypeCategoryFeaturesManager())->disable();
+    (new CaseSalesOrderStatusManager())->disable();
   }
 
   /**
