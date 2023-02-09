@@ -44,3 +44,32 @@ CREATE TABLE IF NOT EXISTS `civicrm_case_category_features` (
   PRIMARY KEY (`id`),
   UNIQUE INDEX `unique_category_feature` (category_id, feature_id)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
+
+
+-- /*******************************************************
+-- *
+-- * civicrm_case_sales_order
+-- *
+-- * Sales order that represents quotations
+-- *
+-- *******************************************************/
+CREATE TABLE `civicrm_case_sales_order` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseSalesOrder ID',
+  `client_id` int unsigned COMMENT 'FK to Contact',
+  `owner_id` int unsigned COMMENT 'FK to Contact',
+  `case_id` int unsigned COMMENT 'FK to Case',
+  `currency` varchar(3) DEFAULT NULL COMMENT '3 character string, value from config setting or input via user.',
+  `status_id` int unsigned NOT NULL COMMENT 'One of the values of the case_sales_order_status option group',
+  `description` text NULL COMMENT 'Sales order deesctiption',
+  `notes` text NULL COMMENT 'Sales order notes',
+  `total_before_tax` decimal(20,2) NULL COMMENT 'Total amount of the sales order line items before tax deduction.',
+  `total_after_tax` decimal(20,2) NULL COMMENT 'Total amount of the sales order line items after tax deduction.',
+  `quotation_date` timestamp COMMENT 'Quotation date',
+  `created_at` timestamp DEFAULT CURRENT_TIMESTAMP COMMENT 'Date the sales order is created',
+  `is_deleted` tinyint DEFAULT 0 COMMENT 'Is this sales order deleted?',
+  PRIMARY KEY (`id`),
+  CONSTRAINT FK_civicrm_case_sales_order_client_id FOREIGN KEY (`client_id`) REFERENCES `civicrm_contact`(`id`) ON DELETE CASCADE,
+  CONSTRAINT FK_civicrm_case_sales_order_owner_id FOREIGN KEY (`owner_id`) REFERENCES `civicrm_contact`(`id`) ON DELETE CASCADE,
+  CONSTRAINT FK_civicrm_case_sales_order_case_id FOREIGN KEY (`case_id`) REFERENCES `civicrm_case`(`id`) ON DELETE CASCADE
+)
+ENGINE=InnoDB;
