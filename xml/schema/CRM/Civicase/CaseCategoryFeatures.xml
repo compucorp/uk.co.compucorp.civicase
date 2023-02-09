@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Civicase</base>
+  <class>CaseCategoryFeatures</class>
+  <name>civicrm_case_category_features</name>
+  <comment>Stores additional features enabled for a case category</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique CaseCategoryFeatures ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>category_id</name>
+    <type>int unsigned</type>
+    <comment>One of the values of the case_type_categories option group</comment>
+    <required>true</required>
+    <pseudoconstant>
+      <optionGroupName>case_type_categories</optionGroupName>
+    </pseudoconstant>
+  </field>
+
+  <field>
+    <name>feature_id</name>
+    <type>int unsigned</type>
+    <comment>One of the values of the case_type_category_features option group</comment>
+    <required>true</required>
+    <pseudoconstant>
+      <optionGroupName>case_type_category_features</optionGroupName>
+    </pseudoconstant>
+  </field>
+</table>

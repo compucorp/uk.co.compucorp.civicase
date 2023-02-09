@@ -15,6 +15,11 @@ class CRM_Civicase_Hook_CaseCategoryFormHookBase {
   const INSTANCE_TYPE_FIELD_NAME = 'case_category_instance_type';
 
   /**
+   * Instance field name.
+   */
+  const FEATURES_FIELD_NAME = 'case_category_features';
+
+  /**
    * Determines if the given form is a case type categories form.
    *
    * @param CRM_Core_Form $form
