@@ -73,3 +73,28 @@ CREATE TABLE `civicrm_case_sales_order` (
   CONSTRAINT FK_civicrm_case_sales_order_case_id FOREIGN KEY (`case_id`) REFERENCES `civicrm_case`(`id`) ON DELETE CASCADE
 )
 ENGINE=InnoDB;
+
+-- /*******************************************************
+-- *
+-- * civicrm_case_sales_order_line
+-- *
+-- * Sales order line items
+-- *
+-- *******************************************************/
+CREATE TABLE `civicrm_case_sales_order_line` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseSalesOrderLine ID',
+  `sales_order_id` int unsigned COMMENT 'FK to CaseSalesOrder',
+  `financial_type_id` int unsigned COMMENT 'FK to CiviCRM Financial Type',
+  `product_id` int unsigned,
+  `item_description` text NULL COMMENT 'line item deesctiption',
+  `quantity` decimal(20,2) COMMENT 'Quantity',
+  `unit_price` decimal(20,2) COMMENT 'Unit Price',
+  `tax_rate` decimal(20,2) COMMENT 'Tax rate for the line item',
+  `discounted_percentage` decimal(20,2) COMMENT 'Discount applied to the line item',
+  `subtotal_amount` decimal(20,2) COMMENT 'Quantity x Unit Price x (100-Discount)%',
+  PRIMARY KEY (`id`),
+  CONSTRAINT FK_civicrm_case_sales_order_line_sales_order_id FOREIGN KEY (`sales_order_id`) REFERENCES `civicrm_case_sales_order`(`id`) ON DELETE CASCADE,
+  CONSTRAINT FK_civicrm_case_sales_order_line_financial_type_id FOREIGN KEY (`financial_type_id`) REFERENCES `civicrm_financial_type`(`id`) ON DELETE SET NULL,
+  CONSTRAINT FK_civicrm_case_sales_order_line_product_id FOREIGN KEY (`product_id`) REFERENCES `civicrm_product`(`id`) ON DELETE SET NULL
+)
+ENGINE=InnoDB;
