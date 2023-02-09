@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Civicase</base>
+  <class>CaseSalesOrderLine</class>
+  <name>civicrm_case_sales_order_line</name>
+  <comment>Sales order line items</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique CaseSalesOrderLine ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>sales_order_id</name>
+    <type>int unsigned</type>
+    <comment>FK to CaseSalesOrder</comment>
+    <html>
+      <type>EntityRef</type>
+    </html>
+  </field>
+  <foreignKey>
+    <name>sales_order_id</name>
+    <table>civicrm_case_sales_order</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>financial_type_id</name>
+    <type>int unsigned</type>
+    <comment>FK to CiviCRM Financial Type</comment>
+    <html>
+      <label>Financial Type</label>
+      <type>EntityRef</type>
+    </html>
+  </field>
+  <pseudoconstant>
+      <table>civicrm_financial_type</table>
+      <keyColumn>id</keyColumn>
+      <labelColumn>name</labelColumn>
+    </pseudoconstant>
+  <foreignKey>
+    <name>financial_type_id</name>
+    <table>civicrm_financial_type</table>
+    <key>id</key>
+    <onDelete>SET NULL</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>product_id</name>
+    <title>Product ID</title>
+    <type>int unsigned</type>
+    <html>
+      <label>Product</label>
+      <type>EntityRef</type>
+    </html>
+  </field>
+  <foreignKey>
+    <name>product_id</name>
+    <table>civicrm_product</table>
+    <key>id</key>
+    <onDelete>SET NULL</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>item_description</name>
+    <type>text</type>
+    <required>false</required>
+    <comment>line item deesctiption</comment>
+    <html>
+      <label>Item Description</label>
+      <type>TextArea</type>
+    </html>
+  </field>
+
+  <field>
+    <name>quantity</name>
+    <type>decimal</type>
+    <comment>Quantity</comment>
+    <html>
+      <label>Quantity</label>
+      <type>Text</type>
+    </html>
+  </field>
+
+  <field>
+    <name>unit_price</name>
+    <type>decimal</type>
+    <comment>Unit Price</comment>
+    <html>
+      <label>Unit Price</label>
+      <type>Text</type>
+    </html>
+  </field>
+
+  <field>
+    <name>tax_rate</name>
+    <type>decimal</type>
+    <comment>Tax rate for the line item</comment>
+    <html>
+      <label>Tax</label>
+      <type>Text</type>
+    </html>
+  </field>
+
+  <field>
+    <name>discounted_percentage</name>
+    <type>decimal</type>
+    <comment>Discount applied to the line item</comment>
+    <html>
+      <label>Discount</label>
+      <type>Text</type>
+    </html>
+  </field>
+
+  <field>
+    <name>subtotal_amount</name>
+    <type>decimal</type>
+    <comment>Quantity x Unit Price x (100-Discount)%</comment>
+    <html>
+      <label>Subtotal</label>
+      <type>Text</type>
+    </html>
+  </field>
+</table>
