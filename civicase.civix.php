@@ -310,5 +310,10 @@ function _civicase_civix_civicrm_entityTypes(&$entityTypes) {
       'class' => 'CRM_Civicase_DAO_CaseContactLock',
       'table' => 'civicase_contactlock',
     ],
+    'CRM_Civicase_DAO_CaseSalesOrder' => [
+      'name' => 'CaseSalesOrder',
+      'class' => 'CRM_Civicase_DAO_CaseSalesOrder',
+      'table' => 'civicrm_case_sales_order',
+    ],
   ]);
 }

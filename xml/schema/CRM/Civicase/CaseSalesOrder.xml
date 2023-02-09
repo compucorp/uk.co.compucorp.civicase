@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Civicase</base>
+  <class>CaseSalesOrder</class>
+  <name>civicrm_case_sales_order</name>
+  <comment>Sales order that represents quotations</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique CaseSalesOrder ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>client_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Contact</comment>
+    <html>
+      <label>Client</label>
+      <type>EntityRef</type>
+    </html>
+  </field>
+  <foreignKey>
+    <name>client_id</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>owner_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Contact</comment>
+    <html>
+      <label>Owner</label>
+      <type>EntityRef</type>
+    </html>
+  </field>
+  <foreignKey>
+    <name>owner_id</name>
+    <table>civicrm_contact</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>case_id</name>
+    <type>int unsigned</type>
+    <comment>FK to Case</comment>
+    <html>
+      <label>Case/Opportunity</label>
+      <type>EntityRef</type>
+    </html>
+  </field>
+  <foreignKey>
+    <name>case_id</name>
+    <table>civicrm_case</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>currency</name>
+    <title>Financial Currency</title>
+    <type>varchar</type>
+    <length>3</length>
+    <default>NULL</default>
+    <headerPattern>/cur(rency)?/i</headerPattern>
+    <dataPattern>/^[A-Z]{3}$/</dataPattern>
+    <comment>3 character string, value from config setting or input via user.</comment>
+    <pseudoconstant>
+      <table>civicrm_currency</table>
+      <keyColumn>name</keyColumn>
+      <labelColumn>full_name</labelColumn>
+      <nameColumn>name</nameColumn>
+      <abbrColumn>symbol</abbrColumn>
+    </pseudoconstant>
+    <html>
+      <type>Select</type>
+    </html>
+  </field>
+
+  <field>
+    <name>status_id</name>
+    <type>int unsigned</type>
+    <comment>One of the values of the case_sales_order_status option group</comment>
+    <required>true</required>
+    <pseudoconstant>
+      <optionGroupName>case_sales_order_status</optionGroupName>
+    </pseudoconstant>
+    <html>
+      <label>Status</label>
+      <type>Select</type>
+    </html>
+  </field>
+
+  <field>
+    <name>description</name>
+    <type>text</type>
+    <required>false</required>
+    <comment>Sales order deesctiption</comment>
+    <html>
+      <label>Description</label>
+      <type>TextArea</type>
+    </html>
+  </field>
+
+  <field>
+    <name>notes</name>
+    <type>text</type>
+    <required>false</required>
+    <comment>Sales order notes</comment>
+    <html>
+      <label>Notes</label>
+      <type>RichTextEditor</type>
+    </html>
+  </field>
+
+  <field>
+    <name>total_before_tax</name>
+    <type>decimal</type>
+    <required>false</required>
+    <comment>Total amount of the sales order line items before tax deduction.</comment>
+    <html>
+      <type>Text</type>
+    </html>
+  </field>
+
+  <field>
+    <name>total_after_tax</name>
+    <type>decimal</type>
+    <required>false</required>
+    <comment>Total amount of the sales order line items after tax deduction.</comment>
+    <html>
+      <type>Text</type>
+    </html>
+  </field>
+
+  <field>
+    <name>quotation_date</name>
+    <type>timestamp</type>
+    <comment>Quotation date</comment>
+    <html>
+      <type>Select Date</type>
+    </html>
+  </field>
+
+  <field>
+    <name>created_at</name>
+    <type>timestamp</type>
+    <comment>Date the sales order is created</comment>
+    <default>CURRENT_TIMESTAMP</default>
+  </field>
+
+  <field>
+    <name>is_deleted</name>
+    <type>boolean</type>
+    <default>0</default>
+    <comment>Is this sales order deleted?</comment>
+  </field>
+</table>
