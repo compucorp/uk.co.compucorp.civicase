@@ -313,12 +313,12 @@ function _civicase_civix_civicrm_entityTypes(&$entityTypes) {
     'CRM_Civicase_DAO_CaseSalesOrder' => [
       'name' => 'CaseSalesOrder',
       'class' => 'CRM_Civicase_DAO_CaseSalesOrder',
-      'table' => 'civicrm_case_sales_order',
+      'table' => 'civicase_sales_order',
     ],
     'CRM_Civicase_DAO_CaseSalesOrderLine' => [
       'name' => 'CaseSalesOrderLine',
       'class' => 'CRM_Civicase_DAO_CaseSalesOrderLine',
-      'table' => 'civicrm_case_sales_order_line',
+      'table' => 'civicase_sales_order_line',
     ],
   ]);
 }

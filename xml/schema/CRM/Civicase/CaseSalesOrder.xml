@@ -3,7 +3,7 @@
 <table>
   <base>CRM/Civicase</base>
   <class>CaseSalesOrder</class>
-  <name>civicrm_case_sales_order</name>
+  <name>civicase_sales_order</name>
   <comment>Sales order that represents quotations</comment>
   <log>true</log>
 

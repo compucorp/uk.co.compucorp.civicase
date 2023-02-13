@@ -3,7 +3,7 @@
 <table>
   <base>CRM/Civicase</base>
   <class>CaseSalesOrderLine</class>
-  <name>civicrm_case_sales_order_line</name>
+  <name>civicase_sales_order_line</name>
   <comment>Sales order line items</comment>
   <log>true</log>
 
@@ -31,7 +31,7 @@
   </field>
   <foreignKey>
     <name>sales_order_id</name>
-    <table>civicrm_case_sales_order</table>
+    <table>civicase_sales_order</table>
     <key>id</key>
     <onDelete>CASCADE</onDelete>
   </foreignKey>

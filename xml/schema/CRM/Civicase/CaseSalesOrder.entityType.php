@@ -12,6 +12,6 @@ return [
   [
     'name' => 'CaseSalesOrder',
     'class' => 'CRM_Civicase_DAO_CaseSalesOrder',
-    'table' => 'civicrm_case_sales_order',
+    'table' => 'civicase_sales_order',
   ],
 ];
