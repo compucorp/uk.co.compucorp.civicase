@@ -15,6 +15,8 @@
 
 SET FOREIGN_KEY_CHECKS=0;
 
+DROP TABLE IF EXISTS `civicase_sales_order_line`;
+DROP TABLE IF EXISTS `civicase_sales_order`;
 DROP TABLE IF EXISTS `civicase_contactlock`;
 DROP TABLE IF EXISTS `civicrm_case_category_instance`;
 DROP TABLE IF EXISTS `civicrm_case_category_features`;

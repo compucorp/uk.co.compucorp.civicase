@@ -1,6 +1,7 @@
 <?php
 
 use CRM_Civicase_Setup_Manage_CaseTypeCategoryFeaturesManager as CaseTypeCategoryManager;
+use CRM_Civicase_Setup_Manage_CaseSalesOrderStatusManager as CaseSalesOrderStatusManager;
 
 /**
  * Update menus with new URL.
@@ -18,6 +19,7 @@ class CRM_Civicase_Upgrader_Steps_Step0019 {
     $upgrader->executeSqlFile('sql/auto_install.sql');
 
     (new CaseTypeCategoryManager())->create();
+    (new CaseSalesOrderStatusManager())->create();
 
     return TRUE;
   }
