@@ -47,10 +47,10 @@ class CRM_Civicase_Hook_PostProcess_SaveCaseCategoryFeature extends CRM_Civicase
     // Create new features link.
     $caseCategoryFeatures = new CRM_Civicase_Service_CaseTypeCategoryFeatures();
     foreach ($caseCategoryFeatures->getFeatures() as $feature) {
-      if (!empty($submittedValues['case_category_feature_' . $feature['id']])) {
+      if (!empty($submittedValues['case_category_feature_' . $feature['value']])) {
         CaseCategoryFeatures::create()
           ->addValue('category_id', $categoryId)
-          ->addValue('feature_id', $feature['id'])
+          ->addValue('feature_id', $feature['value'])
           ->execute();
       }
     }

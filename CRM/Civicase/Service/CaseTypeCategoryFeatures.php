@@ -16,7 +16,6 @@ class CRM_Civicase_Service_CaseTypeCategoryFeatures {
     $optionValues = OptionValue::get()
       ->addSelect('id', 'label', 'value', 'name', 'option_group_id')
       ->addWhere('option_group_id:name', '=', self::NAME)
-      ->setLimit(25)
       ->execute();
 
     return $optionValues;
