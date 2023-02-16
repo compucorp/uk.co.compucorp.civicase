@@ -29,6 +29,11 @@
     <access_arguments>administer CiviCase</access_arguments>
   </item>
   <item>
+    <path>civicrm/case-features/a</path>
+    <page_callback>CRM_Civicase_Page_CaseFeaturesAngular</page_callback>
+    <access_arguments>administer CiviCase</access_arguments>
+  </item>
+  <item>
     <path>civicrm/case/webforms</path>
     <page_callback>CRM_Civicase_Form_CaseWebforms</page_callback>
     <title>CaseWebforms</title>
