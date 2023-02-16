@@ -7,7 +7,7 @@ use CRM_Civicase_Helper_CaseUrl as CaseUrlHelper;
 /**
  * Class CRM_Civicase_Hook_Navigation_AlterForCaseMenu.
  */
-class CRM_Civicase_Hook_NavigationMenu_AlterForCaseMenu {
+class CRM_Civicase_Hook_NavigationMenu_AlterForCaseMenu extends CRM_Civicase_Hook_NavigationMenu_AbstractMenuAlter {
 
   /**
    * Case category Setting.
@@ -135,18 +135,7 @@ class CRM_Civicase_Hook_NavigationMenu_AlterForCaseMenu {
     $administerID = CRM_Core_DAO::getFieldValue('CRM_Core_DAO_Navigation', 'Administer', 'id', 'name');
     $civicaseSettings = &$menu[$administerID]['child'][$caseID];
 
-    $weight = $desiredWeight = 0;
-    $moveDown = FALSE;
-    foreach ($civicaseSettings['child'] as $key => &$value) {
-      if ($value['attributes']['name'] === 'Case Types') {
-        $weight = $desiredWeight = (int) $value['attributes']['weight'];
-        $moveDown = TRUE;
-      }
-
-      if ($moveDown) {
-        $value['attributes']['weight'] = ++$weight;
-      }
-    }
+    $desiredWeight = $this->moveMenuDown($civicaseSettings['child'], 'Case Types');
 
     $menu[$administerID]['child'][$caseID]['child'][] = [
       'attributes' => [
