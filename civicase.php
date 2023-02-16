@@ -408,6 +408,7 @@ function civicase_civicrm_check(&$messages) {
 function civicase_civicrm_navigationMenu(&$menu) {
   $hooks = [
     new CRM_Civicase_Hook_NavigationMenu_AlterForCaseMenu(),
+    new CRM_Civicase_Hook_NavigationMenu_CaseInstanceFeaturesMenu(),
   ];
 
   foreach ($hooks as $hook) {
