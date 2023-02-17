@@ -20,7 +20,7 @@ class CRM_Civicase_Page_CaseFeaturesAngular extends \CRM_Core_Page {
   public function run() {
     $loader = Civi::service('angularjs.loader');
     $loader->setPageName('civicrm/case-features/a');
-    $loader->addModules(['crmApp', 'case-features']);
+    $loader->addModules(['crmApp', 'civicase-features']);
     \Civi::resources()->addSetting([
       'crmApp' => [
         'defaultRoute' => '/',

@@ -19,11 +19,11 @@ use CRM_Civicase_Helper_GlobRecursive as GlobRecursive;
 function getFeaturesJsFiles() {
   return array_merge(
     [
-      'ang/case-features.js',
+      'ang/civicase-features.js',
     ],
     GlobRecursive::getRelativeToExtension(
       'uk.co.compucorp.civicase',
-      'ang/case-features/*.js'
+      'ang/civicase-features/*.js'
     )
   );
 }
@@ -46,6 +46,6 @@ return [
   'js' => getFeaturesJsFiles(),
   'requires' => $requires,
   'partials' => [
-    'ang/case-features',
+    'ang/civicase-features',
   ],
 ];
