@@ -7,6 +7,12 @@
   <comment>Sales order that represents quotations</comment>
   <log>true</log>
 
+  <paths>
+    <view>civicrm/case-features?reset=1&amp;action=view&amp;lid=[id]</view>
+    <update>civicrm/case-features?reset=1&amp;action=update&amp;lid=[id]</update>
+    <delete>civicrm/case-features/delete?reset=1&amp;lid=[id]</delete>
+  </paths>
+
   <field>
     <name>id</name>
     <type>int unsigned</type>
