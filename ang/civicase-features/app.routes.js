@@ -1,5 +1,5 @@
 (function (angular, $, _) {
-  var module = angular.module('case-features');
+  var module = angular.module('civicase-features');
 
   module.config(function ($routeProvider, UrlParametersProvider) {
     $routeProvider.when('/quotations', {

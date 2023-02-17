@@ -1,11 +1,11 @@
 (function (angular, _) {
-  var module = angular.module('case-features');
+  var module = angular.module('civicase-features');
 
   module.directive('quotationsList', function () {
     return {
       restrict: 'E',
       controller: 'quotationsListController',
-      templateUrl: '~/case-features/quotations/directives/quotations-list.directive.html',
+      templateUrl: '~/civicase-features/quotations/directives/quotations-list.directive.html',
       scope: {}
     };
   });
