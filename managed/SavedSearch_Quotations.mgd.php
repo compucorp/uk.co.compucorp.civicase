@@ -13,6 +13,7 @@ return [
     'update' => 'unmodified',
     'params' => [
       'version' => 4,
+      'match' => ['name', 'entity'],
       'values' => [
         'name' => 'Civicase_Quotations',
         'label' => 'Civicase Quotations',
@@ -58,6 +59,7 @@ return [
     'update' => 'unmodified',
     'params' => [
       'version' => 4,
+      'match' => ['name'],
       'values' => [
         'name' => 'Civicase_Quotations_Table',
         'label' => 'Quotations List',
