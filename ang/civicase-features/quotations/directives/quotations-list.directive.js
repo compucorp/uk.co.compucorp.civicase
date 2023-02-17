@@ -15,7 +15,7 @@
   /**
    * @param {object} $scope the controller scope
    */
-  function quotationsListController ($scope, $rootScope) {
-    
+  function quotationsListController ($scope) {
+
   }
 })(angular, CRM._);

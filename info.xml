@@ -34,6 +34,8 @@
   <requires>
     <ext>org.civicrm.shoreditch</ext>
     <ext>uk.co.compucorp.usermenu</ext>
+    <ext>org.civicrm.afform</ext>
+    <ext>org.civicrm.search_kit</ext>
   </requires>
   <mixins>
     <mixin>ang-php@1.0.0</mixin>
