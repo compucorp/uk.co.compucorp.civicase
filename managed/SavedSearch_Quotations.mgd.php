@@ -5,7 +5,7 @@
  * Civicase Quotations exported searhform.
  */
 
-return [
+return (CIVICRM_UF === 'UnitTests') ? [] : [
   [
     'name' => 'SavedSearch_Civicase_Quotations',
     'entity' => 'SavedSearch',
