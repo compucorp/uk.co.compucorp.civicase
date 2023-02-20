@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `civicrm_case_category_features` (
 -- * Sales order that represents quotations
 -- *
 -- *******************************************************/
-CREATE TABLE `civicase_sales_order` (
+CREATE TABLE IF NOT EXISTS `civicase_sales_order` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseSalesOrder ID',
   `client_id` int unsigned COMMENT 'FK to Contact',
   `owner_id` int unsigned COMMENT 'FK to Contact',
@@ -81,7 +81,7 @@ ENGINE=InnoDB;
 -- * Sales order line items
 -- *
 -- *******************************************************/
-CREATE TABLE `civicase_sales_order_line` (
+CREATE TABLE IF NOT EXISTS `civicase_sales_order_line` (
   `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseSalesOrderLine ID',
   `sales_order_id` int unsigned COMMENT 'FK to CaseSalesOrder',
   `financial_type_id` int unsigned COMMENT 'FK to CiviCRM Financial Type',
