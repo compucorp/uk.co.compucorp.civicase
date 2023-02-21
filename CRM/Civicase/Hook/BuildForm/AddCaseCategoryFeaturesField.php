@@ -35,10 +35,10 @@ class CRM_Civicase_Hook_BuildForm_AddCaseCategoryFeaturesField extends CRM_Civic
     $features = [];
 
     foreach ($caseCategoryFeatures->getFeatures() as $feature) {
-      $features[] = 'case_category_feature_' . $feature['id'];
+      $features[] = 'case_category_feature_' . $feature['value'];
       $form->add(
         'checkbox',
-        'case_category_feature_' . $feature['id'],
+        'case_category_feature_' . $feature['value'],
         $feature['label']
       );
     }
