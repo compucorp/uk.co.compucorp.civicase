@@ -3,6 +3,7 @@
 namespace Civi\Api4;
 
 use Civi\Api4\Generic\DAOEntity;
+use Civi\Api4\Action\CaseSalesOrder\ComputeTotalAction;
 use Civi\Api4\Action\CaseSalesOrder\SalesOrderSaveAction;
 
 /**
@@ -25,6 +26,20 @@ class CaseSalesOrder extends DAOEntity {
    */
   public static function save($checkPermissions = TRUE) {
     return (new SalesOrderSaveAction(__CLASS__, __FUNCTION__))
+      ->setCheckPermissions($checkPermissions);
+  }
+
+  /**
+   * Compute the sum of the line items value.
+   *
+   * @param bool $checkPermissions
+   *   Should permission be checked for the user.
+   *
+   * @return Civi\Api4\Action\CaseSalesOrder\SalesOrderSaveAction
+   *   returns save order action
+   */
+  public static function computeTotal($checkPermissions = FALSE) {
+    return (new ComputeTotalAction(__CLASS__, __FUNCTION__))
       ->setCheckPermissions($checkPermissions);
   }
 
