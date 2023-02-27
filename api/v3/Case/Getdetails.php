@@ -6,6 +6,7 @@
  */
 
 require_once 'api/v3/Case.php';
+require_once 'api/v3/CaseType.php';
 use CRM_Civicase_APIHelpers_CaseDetails as CaseDetailsQuery;
 
 /**
@@ -215,6 +216,16 @@ function civicrm_api3_case_getdetails(array $params) {
     if (in_array('related_case_ids', $toReturn)) {
       foreach ($result['values'] as &$case) {
         $case['related_case_ids'] = CRM_Case_BAO_Case::getRelatedCaseIds($case['id']);
+      }
+    }
+
+    // Get case type category.
+    if (in_array('case_type_category', $toReturn)) {
+      foreach ($result['values'] as $id => &$case) {
+        $caseType = civicrm_api3_case_type_get(['id' => $case['case_type_id']]);
+        if (!empty($caseType['values']) && is_array($caseType['values'])) {
+          $case['case_type_category'] = $caseType['values'][$case['case_type_id']]['case_type_category'];
+        }
       }
     }
     if (!empty($params['sequential'])) {
