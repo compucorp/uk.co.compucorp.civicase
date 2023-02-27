@@ -14,8 +14,16 @@
 
   /**
    * @param {object} $scope the controller scope
+   * @param {object} $window window object of the browser
    */
-  function quotationsListController ($scope) {
+  function quotationsListController ($scope, $window) {
+    $scope.redirectToQuotationCreationScreen = redirectToQuotationCreationScreen;
 
+    /**
+     * Redirect user to new quotation screen
+     */
+    function redirectToQuotationCreationScreen () {
+      $window.location.href = '/civicrm/case-features/a#/new';
+    }
   }
 })(angular, CRM._);

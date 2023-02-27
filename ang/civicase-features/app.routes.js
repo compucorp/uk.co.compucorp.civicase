@@ -10,5 +10,13 @@
         `;
       }
     });
+    $routeProvider.when('/new', {
+      template: function () {
+        var urlParams = UrlParametersProvider.parse(window.location.search);
+        return `
+          <quotations-create case-type-category=${urlParams.case_type_category}"> </quotations-create>
+        `;
+      }
+    });
   });
 })(angular, CRM.$, CRM._);
