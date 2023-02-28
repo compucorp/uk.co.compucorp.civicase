@@ -8,13 +8,13 @@ use Civi\Api4\Generic\Traits\DAOActionTrait;
 use CRM_Civicase_BAO_CaseSalesOrder as CaseSalesOrderBAO;
 
 /**
- * Computes the total of a sales order
+ * Computes the total of a sales order.
  */
 class ComputeTotalAction extends AbstractAction {
   use DAOActionTrait;
 
   /**
-   * Sales order line items
+   * Sales order line items.
    *
    * @var array
    * @required
@@ -25,9 +25,9 @@ class ComputeTotalAction extends AbstractAction {
    * {@inheritDoc}
    */
   public function _run(Result $result) { // phpcs:ignore
-   if (is_array($this->lineItems)) {
-    $result[] = CaseSalesOrderBAO::computeTotal($this->lineItems);
-   }
+    if (is_array($this->lineItems)) {
+      $result[] = CaseSalesOrderBAO::computeTotal($this->lineItems);
+    }
   }
 
 }

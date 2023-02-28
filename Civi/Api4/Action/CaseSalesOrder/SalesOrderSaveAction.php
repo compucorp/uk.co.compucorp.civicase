@@ -54,7 +54,7 @@ class SalesOrderSaveAction extends AbstractSaveAction {
           array_walk($lineItems, function (&$lineItem) use ($result, $caseSalesOrderLineAPI) {
             $lineItem['sales_order_id'] = $result['id'];
             $caseSalesOrderLineAPI->addRecord($lineItem);
-        });
+          });
 
           $result['items'] = $caseSalesOrderLineAPI->execute()->jsonSerialize();
         }
