@@ -47,7 +47,8 @@ class SalesOrderSaveAction extends AbstractSaveAction {
         $total = CaseSalesOrderBAO::computeTotal($lineItems);
         $salesOrder['total_before_tax'] = $total['totalBeforeTax'];
         $salesOrder['total_after_tax'] = $total['totalAfterTax'];
-        $result = array_pop($this->writeObjects([$salesOrder]));
+        $salesOrders = $this->writeObjects([$salesOrder]);
+        $result = array_pop($salesOrders);
 
         $caseSalesOrderLineAPI = CaseSalesOrderLine::save();
         if (!empty($result) && !empty($lineItems)) {
