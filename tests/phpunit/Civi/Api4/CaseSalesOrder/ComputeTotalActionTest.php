@@ -91,4 +91,24 @@ class Civi_Api4_CaseSalesOrder_ComputeTotalActionTest extends BaseHeadlessTest {
     $this->assertEquals($computedTotal['taxRates'][1]['value'], 10);
   }
 
+  /**
+   * Test compute action doesn't throw error for empty line items.
+   */
+  public function testComputeTotalActionReturnsEmptyResultForEmptyLineItems() {
+    $items = [];
+
+    $computedTotal = CaseSalesOrder::computeTotal()
+      ->setLineItems($items)
+      ->execute()
+      ->jsonSerialize()[0];
+
+    $this->assertArrayHasKey('taxRates', $computedTotal);
+    $this->assertArrayHasKey('totalBeforeTax', $computedTotal);
+    $this->assertArrayHasKey('totalAfterTax', $computedTotal);
+
+    $this->assertEmpty($computedTotal['taxRates']);
+    $this->assertEmpty($computedTotal['totalAfterTax']);
+    $this->assertEmpty($computedTotal['totalBeforeTax']);
+  }
+
 }

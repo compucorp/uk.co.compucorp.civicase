@@ -17,7 +17,6 @@ class ComputeTotalAction extends AbstractAction {
    * Sales order line items.
    *
    * @var array
-   * @required
    */
   protected $lineItems;
 
