@@ -21,8 +21,9 @@
    * @param {object} crmApi4 api V4 service
    * @param {object} FeatureCaseTypes FeatureCaseTypes service
    * @param {object} SalesOrderStatus SalesOrderStatus service
+   * @param {object} CaseUtils case utility service
    */
-  function quotationsCreateController ($scope, $window, CurrencyCodes, civicaseCrmApi, Contact, crmApi4, FeatureCaseTypes, SalesOrderStatus) {
+  function quotationsCreateController ($scope, $window, CurrencyCodes, civicaseCrmApi, Contact, crmApi4, FeatureCaseTypes, SalesOrderStatus, CaseUtils) {
     const defaultCurrency = 'GBP';
     const productsCache = new Map();
     const financialTypesCache = new Map();
@@ -251,14 +252,9 @@
         $window.location.href = 'a#/quotations';
       }
 
-      const params = { id: $scope.salesOrder.case_id, return: ['case_type_category', 'case_type_id'] };
-      civicaseCrmApi('Case', 'getdetails', params)
-        .then(function (result) {
-          const categoryId = result.values[$scope.salesOrder.case_id].case_type_category;
-          $window.location.href = `../case/a/case_type_category=${categoryId}` +
-          `#/case/list?caseId=${$scope.salesOrder.case_id}&` +
-          `cf=%7B"case_type_category":"${categoryId}"%7D`;
-        });
+      CaseUtils.getDashboardLink($scope.salesOrder.case_id).then(link => {
+        $window.location.href = link;
+      });
     }
 
     /**
