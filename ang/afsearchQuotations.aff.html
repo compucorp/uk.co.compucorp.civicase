@@ -22,5 +22,5 @@
     <af-field name="status_id" defn="{input_attrs: {multiple: true}}" class="col-sm-3" />
     <af-field name="quotation_date" defn="{input_attrs: {time: false}, search_range: true, label: 'Date'}" class="col-sm-3 civicase__ui-range" />
   </div>
-  <crm-search-display-table search-name="Civicase_Quotations" display-name="Civicase_Quotations_Table"></crm-search-display-table>
+  <crm-search-display-table search-name="Civicase_Quotations" display-name="Civicase_Quotations_Table" filters="{case_id: routeParams.caseId}"></crm-search-display-table>
 </div>
