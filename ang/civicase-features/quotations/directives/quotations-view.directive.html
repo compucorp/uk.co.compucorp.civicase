@@ -1,0 +1,135 @@
+<div id="bootstrap-theme" class="civicase__container">
+  <h1 crm-page-title>{{ ts('Quotations') }}</h1>
+
+  <div class="row">
+    <div class="col-md-12">
+      <h2 class="text-center" style="margin: 2em;"><strong>View Quotation</strong></h2>
+    </div>
+
+      <div class="panel panel-default">
+        <div class="panel-body" style="background: none; padding: 2em;">
+          <div class="row">
+            <div class="col-md-6 col-sm-12" style="border: 1px solid; padding: 2em; background: #fff;">
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <td>Quotatioin Id</td>
+                    <td>{{salesOrder.id}}</td>
+                  </tr>
+                  <tr>
+                    <td>Client</td>
+                    <td>{{salesOrder['client_id.display_name']}}</td>
+                  </tr>
+                  <tr>
+                    <td>Date</td>
+                    <td>{{salesOrder.quotation_date}}</td>
+                  </tr>
+                  <tr>
+                    <td>Description</td>
+                    <td ng-bind-html="salesOrder.description"></td>
+                  </tr>
+                </tbody>
+                <tbody ng-if="hasCase">
+                  <tr>
+                    <td colspan="2"><strong>Case/Opportunity</strong></td>
+                  </tr>
+                  <tr>
+                    <th>Case Id</th>
+                    <th><a href="{{dashboardLink}}" target="_blank">{{salesOrder.case_id}}</a></th>
+                  </tr>
+                  <tr>
+                    <th>Case Type</th>
+                    <th>{{salesOrder['case_id.case_type_id:label']}}</th>
+                  </tr>
+                  <tr>
+                    <th>Case Subject</th>
+                    <th>{{salesOrder['case_id.subject']}}</th>
+                  </tr>
+                </tbody>
+
+                <tbody>
+                  <tr>
+                    <td>Owner</td>
+                    <td>{{salesOrder['owner_id.display_name']}}</td>
+                  </tr>
+                  <tr>
+                    <td>Status</td>
+                    <td>{{salesOrder['status_id:label']}}</td>
+                  </tr>
+                  <tr>
+                    <td>Currency</td>
+                    <td>{{salesOrder.currency}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12" style="margin: 1em 0em;">
+              <h3><strong>Items Overview</strong></h3>
+            </div>
+            <div class="col-md-12" style="border: 1px solid; padding: 2em; background: #fff;">
+              <table class="table table-bordered">
+                <tr>
+                  <th>Product</th>
+                  <th>Item Description </th>
+                  <th>Financial Type</th>
+                  <th>Unit Price</th>
+                  <th>Quantity</th>
+                  <th>Discount %</th>
+                  <th>Tax %</th>
+                  <th>Subtotal</th>
+                </tr>
+                <tr ng-repeat="item in salesOrder.items track by $index">
+                  <td>{{ item["product_id.name"] }}</td>
+                  <td>{{ item["item_description"] }}</td>
+                  <td>{{ item["financial_type_id.name"] }}</td>
+                  <td>{{ item["unit_price"] || 0 }}</td>
+                  <td>{{ item["quantity"] || 0 }}</td>
+                  <td>{{ item["discounted_percentage"] || 0 }}</td>
+                  <td>{{ item["tax_rate"] || 0 }}</td>
+                  <td>{{ item["subtotal_amount"] }}</td>
+                </tr>
+                </table>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12" style="margin: 1em 0em;">
+              <h3><strong>Amount Summary</strong></h3>
+            </div>
+            <div class="col-md-6 col-sm-12" style="border: 1px solid; padding: 2em; background: #fff;">
+              <table class="table">
+                <tr>
+                  <td>Total</td>
+                  <td>{{ currencySymbol }} {{ salesOrder.total_before_tax }}</td>
+                </tr>
+                  <tr ng-repeat="i in salesOrder.taxRates track by $index">
+                    <td>Tax @ {{ i.rate }}%</td>
+                    <td>{{ currencySymbol }} {{ i.value }}</td>
+                  </tr>
+                <tr>
+                  <td>Grand Total</td>
+                  <td>{{ currencySymbol }} {{salesOrder.total_after_tax}}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12" style="margin: 1em 0em;">
+              <h3><strong>Notes</strong></h3>
+            </div>
+          </div>
+          <div class="col-md-6 col-sm-12" style="border: 1px solid; padding: 2em; background: #fff;">
+            <p>
+              {{salesOrder.notes}}
+            </p>
+          </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
