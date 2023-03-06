@@ -14,16 +14,23 @@
 
   /**
    * @param {object} $scope the controller scope
+   * @param {object} $location the location service
    * @param {object} $window window object of the browser
    */
-  function quotationsListController ($scope, $window) {
+  function quotationsListController ($scope, $location, $window) {
     $scope.redirectToQuotationCreationScreen = redirectToQuotationCreationScreen;
 
     /**
      * Redirect user to new quotation screen
      */
     function redirectToQuotationCreationScreen () {
-      $window.location.href = '/civicrm/case-features/a#/new';
+      let url = '/civicrm/case-features/a#/new';
+      const caseId = $location.search().caseId;
+      if (caseId) {
+        url += `?caseId=${caseId}`;
+      }
+
+      $window.location.href = url;
     }
   }
 })(angular, CRM._);

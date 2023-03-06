@@ -14,6 +14,7 @@
 
   /**
    * @param {object} $scope the controller scope
+   * @param {object} $location the location service
    * @param {object} $window window object of the browser
    * @param {object} CurrencyCodes CurrencyCodes service
    * @param {Function} civicaseCrmApi crm api service
@@ -23,7 +24,7 @@
    * @param {object} SalesOrderStatus SalesOrderStatus service
    * @param {object} CaseUtils case utility service
    */
-  function quotationsCreateController ($scope, $window, CurrencyCodes, civicaseCrmApi, Contact, crmApi4, FeatureCaseTypes, SalesOrderStatus, CaseUtils) {
+  function quotationsCreateController ($scope, $location, $window, CurrencyCodes, civicaseCrmApi, Contact, crmApi4, FeatureCaseTypes, SalesOrderStatus, CaseUtils) {
     const defaultCurrency = 'GBP';
     const productsCache = new Map();
     const financialTypesCache = new Map();
@@ -38,6 +39,7 @@
     $scope.handleProductChange = handleProductChange;
     $scope.handleCurrencyChange = handleCurrencyChange;
     $scope.salesOrderStatus = SalesOrderStatus.getAll();
+    $scope.defaultCaseId = $location.search().caseId || null;
     $scope.handleFinancialTypeChange = handleFinancialTypeChange;
     $scope.currencySymbol = CurrencyCodes.getSymbol(defaultCurrency);
 
@@ -70,7 +72,8 @@
           subtotal_amount: 0
         }],
         total: 0,
-        grandTotal: 0
+        grandTotal: 0,
+        case_id: $scope.defaultCaseId
       };
       $scope.total = 0;
       $scope.taxRates = [];
@@ -253,7 +256,7 @@
       }
 
       CaseUtils.getDashboardLink($scope.salesOrder.case_id).then(link => {
-        $window.location.href = link;
+        $window.location.href = `${link}&tab=Quotations`;
       });
     }
 
