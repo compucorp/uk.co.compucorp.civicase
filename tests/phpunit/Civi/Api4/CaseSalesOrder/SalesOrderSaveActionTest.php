@@ -1,7 +1,7 @@
 <?php
 
-use Civi\Api4\CaseSalesOrderLine;
 use Civi\Api4\CaseSalesOrder;
+use Civi\Api4\CaseSalesOrderLine;
 use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
 
 /**
@@ -92,6 +92,74 @@ class Civi_Api4_CaseSalesOrder_SalesOrderSaveActionTest extends BaseHeadlessTest
 
     $this->assertEquals($salesOrder['total_before_tax'], 150);
     $this->assertEquals($salesOrder['total_after_tax'], 160);
+  }
+
+  /**
+   * Test Case Sales Order save action updates sales order as expected.
+   */
+  public function testCaseSalesOrderIsUpdatedWithSaveAction() {
+    $salesOrderData = $this->getCaseSalesOrderData();
+    $salesOrderData['items'][] = $this->getCaseSalesOrderLineData();
+    $salesOrderData['items'][] = $this->getCaseSalesOrderLineData();
+
+    // Create sales order.
+    $salesOrder = CaseSalesOrder::save()
+      ->addRecord($salesOrderData)
+      ->execute()
+      ->jsonSerialize()[0];
+
+    // Update Sales order.
+    $salesOrderData['id'] = $salesOrder['id'];
+    $salesOrderData['items'] = $salesOrder['items'];
+    $salesOrderData['notes'] = substr(md5(mt_rand()), 0, 7);
+    $salesOrderData['description'] = substr(md5(mt_rand()), 0, 7);
+    CaseSalesOrder::save()
+      ->addRecord($salesOrderData)
+      ->execute()
+      ->jsonSerialize()[0];
+
+    // Assert that sales order was updated.
+    $updatedSalesOrder = CaseSalesOrder::get()
+      ->addWhere('id', '=', $salesOrder['id'])
+      ->execute()
+      ->jsonSerialize()[0];
+
+    $this->assertEquals($salesOrderData['id'], $updatedSalesOrder['id']);
+    $this->assertEquals($salesOrderData['notes'], $updatedSalesOrder['notes']);
+    $this->assertEquals($salesOrderData['description'], $updatedSalesOrder['description']);
+  }
+
+  /**
+   * Test line items not included in case sales order update data are removed.
+   */
+  public function testDetachedLineItemsAreRemovedFromSalesOrderOnUpdate() {
+    $salesOrderData = $this->getCaseSalesOrderData();
+    $salesOrderData['items'][] = $this->getCaseSalesOrderLineData();
+    $salesOrderData['items'][] = $this->getCaseSalesOrderLineData();
+
+    $salesOrder = CaseSalesOrder::save()
+      ->addRecord($salesOrderData)
+      ->execute()
+      ->jsonSerialize()[0];
+
+    $this->assertCount(2, $salesOrder['items']);
+
+    // Perform update with single line item.
+    $salesOrderData['id'] = $salesOrder['id'];
+    $salesOrderData['items'] = [$salesOrder['items'][0]];
+    CaseSalesOrder::save()
+      ->addRecord($salesOrderData)
+      ->execute()
+      ->jsonSerialize()[0];
+
+    // Assert that sales order has only one line item.
+    $salesOrderLine = CaseSalesOrderLine::get()
+      ->addWhere('sales_order_id', '=', $salesOrder['id'])
+      ->execute()
+      ->jsonSerialize();
+
+    $this->assertCount(1, $salesOrderLine);
+    $this->assertEquals($salesOrder['items'][0]['id'], $salesOrderLine[0]['id']);
   }
 
 }

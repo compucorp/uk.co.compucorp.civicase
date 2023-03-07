@@ -77,6 +77,26 @@
       };
       $scope.total = 0;
       $scope.taxRates = [];
+
+      prefillSalesOrderForUpdate();
+    }
+
+    /**
+     * Pre-fill sales order when updating sales order.
+     */
+    function prefillSalesOrderForUpdate () {
+      const salesOrderId = $location.search().id;
+
+      if (!salesOrderId) {
+        return;
+      }
+
+      CaseUtils.getSalesOrderAndLineItems(salesOrderId).then((result) => {
+        $scope.salesOrder = result;
+        $scope.salesOrder.status_id = (result.status_id).toString();
+        CRM.wysiwyg.setVal('#sales-order-description', $scope.salesOrder.description);
+        $scope.$emit('totalChange');
+      });
     }
 
     /**
@@ -86,6 +106,7 @@
      */
     function removeSalesOrderItem (index) {
       $scope.salesOrder.items.splice(index, 1);
+      $scope.$emit('totalChange');
     }
 
     /**
