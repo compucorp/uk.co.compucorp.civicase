@@ -10,7 +10,7 @@
   <paths>
     <view>civicrm/case-features/quotations/view?reset=1&amp;id=[id]</view>
     <update>civicrm/case-features?reset=1&amp;action=update&amp;lid=[id]</update>
-    <delete>civicrm/case-features/delete?reset=1&amp;lid=[id]</delete>
+    <delete>civicrm/case-features/quotations/delete?reset=1&amp;id=[id]</delete>
   </paths>
 
   <field>
