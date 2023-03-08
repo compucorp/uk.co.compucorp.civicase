@@ -176,6 +176,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
     new CRM_Civicase_Hook_BuildForm_PdfFormButtonsLabelChange(),
     new CRM_Civicase_Hook_BuildForm_AddScriptToCreatePdfForm(),
     new CRM_Civicase_Hook_BuildForm_AddCaseCategoryFeaturesField(),
+    new CRM_Civicase_Hook_BuildForm_AddQuotationsNotesToContributionSettings(),
   ];
 
   foreach ($hooks as $hook) {
@@ -292,6 +293,7 @@ function civicase_civicrm_postProcess($formName, &$form) {
     new CRM_Civicase_Hook_PostProcess_HandleDraftActivity(),
     new CRM_Civicase_Hook_PostProcess_SaveCaseCategoryCustomFields(),
     new CRM_Civicase_Hook_PostProcess_SaveCaseCategoryFeature(),
+    new CRM_Civicase_Hook_PostProcess_SaveQuotationsNotesSettings(),
   ];
 
   foreach ($hooks as $hook) {
