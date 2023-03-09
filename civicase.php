@@ -547,3 +547,15 @@ function civicase_civicrm_alterMailParams(&$params, $context) {
     $hook->run($params, $context);
   }
 }
+
+/**
+ * Implements hook_civicrm_searchKitTasks().
+ */
+function civicase_civicrm_searchKitTasks(array &$tasks, bool $checkPermissions, ?int $userID) {
+  $tasks['CaseSalesOrder']['add_discount'] = [
+    'module' => 'civicase-features',
+    'icon'  => 'fa-percent',
+    'title' => ts('Add Discount'),
+    'uiDialog' => ['templateUrl' => '~/civicase-features/quotations/directives/quotations-discount.directive.html'],
+  ];
+}
