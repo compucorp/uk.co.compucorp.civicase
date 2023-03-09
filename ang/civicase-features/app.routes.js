@@ -10,7 +10,7 @@
         `;
       }
     });
-    $routeProvider.when('/new', {
+    $routeProvider.when('/quotations/new', {
       template: function () {
         var urlParams = UrlParametersProvider.parse(window.location.search);
         return `

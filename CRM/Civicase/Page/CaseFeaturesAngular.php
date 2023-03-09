@@ -23,7 +23,7 @@ class CRM_Civicase_Page_CaseFeaturesAngular extends \CRM_Core_Page {
     $loader->addModules(['crmApp', 'civicase-features']);
     \Civi::resources()->addSetting([
       'crmApp' => [
-        'defaultRoute' => '/',
+        'defaultRoute' => '/quotations',
       ],
     ]);
 

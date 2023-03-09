@@ -51,6 +51,7 @@ class SalesOrderSaveAction extends AbstractSaveAction {
         $result = array_pop($salesOrders);
 
         $caseSalesOrderLineAPI = CaseSalesOrderLine::save();
+        $this->removeStaleLineItems($salesOrder);
         if (!empty($result) && !empty($lineItems)) {
           array_walk($lineItems, function (&$lineItem) use ($result, $caseSalesOrderLineAPI) {
             $lineItem['sales_order_id'] = $result['id'];
@@ -70,6 +71,25 @@ class SalesOrderSaveAction extends AbstractSaveAction {
 
       throw $e;
     }
+  }
+
+  /**
+   * Delete line items that have been detached.
+   *
+   * @param array $salesOrder
+   *   Array of the salesorder to remove stale line items for.
+   */
+  public function removeStaleLineItems(array $salesOrder) {
+    if (empty($salesOrder['id'])) {
+      return;
+    }
+
+    $lineItemsInUse = array_column($salesOrder['items'], 'id');
+
+    CaseSalesOrderLine::delete()
+      ->addWhere('sales_order_id', '=', $salesOrder['id'])
+      ->addWhere('id', 'NOT IN', $lineItemsInUse)
+      ->execute();
   }
 
 }

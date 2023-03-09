@@ -38,7 +38,7 @@ class CRM_Civicase_DAO_CaseSalesOrder extends CRM_Core_DAO {
    */
   protected static $_paths = [
     'view' => 'civicrm/case-features/quotations/view?reset=1&id=[id]',
-    'update' => 'civicrm/case-features?reset=1&action=update&lid=[id]',
+    'update' => 'civicrm/case-features/a#/quotations/new?reset=1&id=[id]',
     'delete' => 'civicrm/case-features/quotations/delete?reset=1&id=[id]',
   ];
 
