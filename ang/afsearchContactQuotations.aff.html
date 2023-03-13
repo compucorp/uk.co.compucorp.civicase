@@ -1,0 +1,23 @@
+<div af-fieldset="">
+  <div class="af-container af-layout-inline civicase__case-filter-form-elements civicase__features-filters">
+    <af-field name="id" defn="{label: 'Quotation Id', input_attrs: {}}" />
+    <button class="btn btn-primary btn-sm civicase__case-filter-panel__button" ng-click="expanded = !expanded">
+    <span ng-if="expanded">
+      {{ ts('Hide Filter') }}
+      <i class="fa fa-chevron-up"/>
+    </span>
+    <span ng-if="!expanded">
+      {{ ts('Show Filter') }}
+      <i class="fa fa-chevron-down"/>
+    </span>
+    </button>
+  </div>
+  <div class="af-container row civicase__case-filter-form-elements" ng-show="expanded">
+    <af-field name="owner_id" class="col-sm-3" />
+  </div>
+  <div class="af-container row civicase__case-filter-form-elements" ng-show="expanded">
+    <af-field name="status_id" defn="{input_attrs: {multiple: true}}" class="col-sm-3" />
+    <af-field name="quotation_date" defn="{input_attrs: {time: false}, search_range: true, label: 'Date'}" class="col-sm-3 civicase__ui-range" />
+  </div>
+  <crm-search-display-table search-name="Civicase_Quotations" display-name="Civicase_Contact_Quotations_Table" filters="{client_id: routeParams.cid}"></crm-search-display-table>
+</div>

@@ -71,6 +71,7 @@ $requires = [
   'civicase',
   'civicase-base',
   'afsearchQuotations',
+  'afsearchContactQuotations',
 ];
 
 return [

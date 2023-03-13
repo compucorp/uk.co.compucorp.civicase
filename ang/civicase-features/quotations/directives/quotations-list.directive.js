@@ -6,7 +6,10 @@
       restrict: 'E',
       controller: 'quotationsListController',
       templateUrl: '~/civicase-features/quotations/directives/quotations-list.directive.html',
-      scope: {}
+      scope: {
+        view: '@',
+        contactId: '@'
+      }
     };
   });
 
@@ -20,6 +23,11 @@
   function quotationsListController ($scope, $location, $window) {
     $scope.redirectToQuotationCreationScreen = redirectToQuotationCreationScreen;
 
+    (function init () {
+      if ($scope.contactId) {
+        $location.search().cid = $scope.contactId;
+      }
+    }());
     /**
      * Redirect user to new quotation screen
      */

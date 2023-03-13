@@ -1,5 +1,5 @@
 <div id="bootstrap-theme" class="civicase__container">
-  <h1 crm-page-title>{{ ts('Manage Quotations') }}</h1>
+  <h1 ng-if="view !== 'contact'" crm-page-title>{{ ts('Manage Quotations') }}</h1>
 
     <a
       ng-click="redirectToQuotationCreationScreen()"
@@ -10,7 +10,11 @@
 
   <div class="panel panel-default">
     <div class="panel-body">
-      <afsearch-quotations class="ng-isolate-scope"> </afsearch-quotations>
+      <div ng-switch="view">
+        <afsearch-contact-quotations ng-switch-when="contact"> </afsearch-contact-quotations>
+        <afsearch-quotations ng-switch-default> </afsearch-quotations>
+      </div>
+      
     </div>
   </div>
 </div>
