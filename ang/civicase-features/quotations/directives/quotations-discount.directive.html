@@ -1,0 +1,51 @@
+<div id="bootstrap-theme" class="civicase__container" crm-dialog="crmSearchTask">
+  <h1 class="text-center" style="margin-bottom: 2em">Apply Discount</h1>
+
+  <form name="bulkDiscount" class="form-horizontal" ng-controller="quotationsDiscountController as $ctrl">
+
+    <div class="row">
+      <div ng-show="$ctrl.stage === 'done'">{{$ctrl.completedMessage}}</div>
+    </div>
+
+    <div class="form-group row" style="margin-bottom: 2em; display: flex; justify-content: center;">
+      <label class="col-sm-2 control-label required-mark">
+        Select Product
+      </label>
+      <div class="col-sm-5">
+        <input class="form-control"
+          ng-model="$ctrl.products"
+          placeholder="Product"
+          crm-entityref="{
+            entity: 'Product',
+            create: true,
+            select: { allowClear: true, 'minimumInputLength': 0, create: true, multiple: true }
+          }"
+          ng-minlength="1"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="form-group row" style="margin-bottom: 2em; display: flex; justify-content: center;">
+      <label class="col-sm-2 control-label required-mark">
+        Discount (%)
+      </label>
+      <div class="col-sm-5">
+        <div class="input-group" style="width: 100%;">
+          <input required type="number" min="0" max="100" name="discount" placeholder="Discount" ng-model="$ctrl.discount" class="form-control" />
+        </div>
+      </div>
+    </div>
+
+
+    <div class="form-group row">
+      <div class="col-sm-12">
+        <div class="clearfix">
+          <crm-dialog-button text="ts('Confirm')" icons="{primary: $ctrl.run ? 'fa-spin fa-spinner' : 'fa-file-text'}" on-click="$ctrl.applyDiscount()" disabled="$ctrl.run || $ctrl.stage === 'done' || !bulkDiscount.$valid" ></crm-dialog-button>
+          <crm-dialog-button text="ts(($ctrl.stage === 'done') ? 'Close' : 'Cancel')" icons="{primary: 'fa-times'}" on-click="$ctrl.cancel()" disabled="$ctrl.run" ></crm-dialog-button>
+        </div>
+      </div>
+    </div>
+
+  </form>
+</div>

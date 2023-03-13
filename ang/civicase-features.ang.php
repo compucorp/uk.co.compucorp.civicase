@@ -67,6 +67,7 @@ function set_case_sales_order_status(&$options) {
 
 $requires = [
   'api4',
+  'crmUi',
   'crmUtil',
   'civicase',
   'civicase-base',
