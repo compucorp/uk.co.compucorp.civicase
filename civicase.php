@@ -28,7 +28,7 @@ function civicase_civicrm_tabset($tabsetName, &$tabs, $context) {
 
   if ($useAng) {
     $loader = Civi::service('angularjs.loader');
-    $loader->addModules('civicase');
+    $loader->addModules(['civicase', 'civicase-features']);
   }
 }
 

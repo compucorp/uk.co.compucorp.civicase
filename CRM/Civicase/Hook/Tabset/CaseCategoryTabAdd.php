@@ -9,6 +9,13 @@ use CRM_Civicase_Service_CaseCategoryPermission as CaseCategoryPermission;
 class CRM_Civicase_Hook_Tabset_CaseCategoryTabAdd {
 
   /**
+   * Case tab last weight.
+   *
+   * @var int
+   */
+  public $caseTabWeight;
+
+  /**
    * Determines what happens if the hook is handled.
    *
    * @param string $tabsetName
@@ -26,6 +33,8 @@ class CRM_Civicase_Hook_Tabset_CaseCategoryTabAdd {
     }
 
     $this->addCaseCategoryContactTabs($tabs, $context['contact_id'], $useAng);
+    $caseSalesOrdertab = new CRM_Civicase_Hook_Tabset_CaseSalesOrderTabAdd();
+    $caseSalesOrdertab->addCaseSalesOrderTab($tabs, $context['contact_id'], $this->caseTabWeight++);
   }
 
   /**
@@ -49,7 +58,7 @@ class CRM_Civicase_Hook_Tabset_CaseCategoryTabAdd {
     }
 
     $permissionService = new CaseCategoryPermission();
-    $caseTabWeight = $this->getCaseTabWeight($tabs);
+    $this->caseTabWeight = $this->getCaseTabWeight($tabs);
     foreach ($result['values'] as $caseCategory) {
       $caseCategoryPermissions = $permissionService->get($caseCategory['name']);
       $permissionsToCheck = $this->getBasicCaseCategoryPermissions($caseCategoryPermissions);
@@ -57,7 +66,7 @@ class CRM_Civicase_Hook_Tabset_CaseCategoryTabAdd {
         continue;
       }
 
-      $caseTabWeight++;
+      $this->caseTabWeight++;
       $useAng = TRUE;
       $icon = !empty($caseCategory['icon']) ? "crm-i {$caseCategory['icon']}" : '';
       $tabs[] = [
@@ -67,7 +76,7 @@ class CRM_Civicase_Hook_Tabset_CaseCategoryTabAdd {
           'case_type_category' => $caseCategory['value'],
         ]),
         'title' => ucfirst(strtolower($caseCategory['label'])),
-        'weight' => $caseTabWeight,
+        'weight' => $this->caseTabWeight,
         'count' => CaseCategoryHelper::getCaseCount($caseCategory['name'], $contactID),
         'class' => 'livePage',
         'icon' => $icon,

@@ -53,7 +53,6 @@ $requires = [
   'uibTabsetClass',
   'dialogService',
   'civicase-base',
-  'civicase-features',
 ];
 $requires = CRM_Civicase_Hook_addDependentAngularModules::invoke($requires);
 
