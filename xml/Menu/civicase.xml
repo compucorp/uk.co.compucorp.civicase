@@ -49,6 +49,16 @@
     <access_arguments>administer CiviCase</access_arguments>
   </item>
   <item>
+    <path>civicrm/case-features/quotations/download-pdf</path>
+    <page_callback>CRM_Civicase_Form_CaseSalesOrderInvoice::download</page_callback>
+    <access_arguments>administer CiviCase</access_arguments>
+  </item>
+  <item>
+    <path>civicrm/case-features/quotations/email</path>
+    <page_callback>CRM_Civicase_Form_CaseSalesOrderInvoice</page_callback>
+    <access_arguments>administer CiviCase</access_arguments>
+  </item>
+  <item>
     <path>civicrm/case/webforms</path>
     <page_callback>CRM_Civicase_Form_CaseWebforms</page_callback>
     <title>CaseWebforms</title>
