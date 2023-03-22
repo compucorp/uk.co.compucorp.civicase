@@ -7,7 +7,7 @@
 </head>
 
 <body>
-  <div style="color: black; margin:16px">
+  <div style="color: black; margin:16px; font-family: Arial, Verdana, sans-serif;">
     <table style="width:100%; margin-bottom: 14px;">
       <tbody>
         <tr>
