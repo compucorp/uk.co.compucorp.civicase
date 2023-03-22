@@ -72,15 +72,18 @@ trait Helpers_CaseSalesOrderTrait {
    */
   public function getCaseSalesOrderLineData(array $default = []) {
     $product = ProductFabricator::fabricate();
+    $quantity = rand(2, 9);
+    $unitPrice = rand(50, 1000);
+
     return array_merge([
       'financial_type_id' => 1,
       'product_id' => $product['id'],
       'item_description' => 'test',
-      'quantity' => 1,
-      'unit_price' => 50,
+      'quantity' => $quantity,
+      'unit_price' => $unitPrice,
       'tax_rate' => NULL,
       'discounted_percentage' => NULL,
-      'subtotal_amount' => 50,
+      'subtotal_amount' => $quantity * $unitPrice,
     ], $default);
   }
 

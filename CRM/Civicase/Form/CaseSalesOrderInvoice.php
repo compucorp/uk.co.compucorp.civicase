@@ -173,7 +173,7 @@ class CRM_Civicase_Form_CaseSalesOrderInvoice extends CRM_Core_Form {
       ->execute()
       ->first();
 
-    if (!empty($caseSalesOrder['client']['addressee_id'])) {
+    if (!empty($caseSalesOrder['client_id'])) {
       $caseSalesOrder['clientAddress'] = Address::get()
         ->addWhere('contact_id', '=', $caseSalesOrder['client_id'])
         ->execute()
