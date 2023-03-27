@@ -187,6 +187,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
     new CRM_Civicase_Hook_BuildForm_AddScriptToCreatePdfForm(),
     new CRM_Civicase_Hook_BuildForm_AddCaseCategoryFeaturesField(),
     new CRM_Civicase_Hook_BuildForm_AddQuotationsNotesToContributionSettings(),
+    new CRM_Civicase_Hook_BuildForm_CreateSalesOrderContribution(),
   ];
 
   foreach ($hooks as $hook) {
@@ -279,6 +280,7 @@ function civicase_civicrm_validateForm($formName, &$fields, &$files, &$form, &$e
  */
 function civicase_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   $hooks = [
+    new CRM_Civicase_Hook_Post_CreateSalesOrderContribution(),
     new CRM_Civicase_Hook_Post_PopulateCaseCategoryForCaseType(),
     new CRM_Civicase_Hook_Post_CaseCategoryCustomGroupSaver(),
     new CRM_Civicase_Hook_Post_UpdateCaseTypeListForCaseCategoryCustomGroup(),
