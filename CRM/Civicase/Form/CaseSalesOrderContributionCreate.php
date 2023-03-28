@@ -17,6 +17,9 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
    */
   public $id;
 
+  const INVOICE_PERCENT = 'percent';
+  const INVOICE_REMAIN = 'remain';
+
   /**
    * {@inheritDoc}
    */
@@ -31,7 +34,7 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
    */
   public function buildQuickForm() {
     $this->addElement('radio', 'to_be_invoiced', '', ts('Enter % to be invoiced ?'),
-      'percent', [
+      self::INVOICE_PERCENT, [
         'id' => 'invoice_percent',
       ]);
     $this->add('text', 'percent_value', '', [
@@ -39,10 +42,10 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
       'placeholder' => 'Percentage to be invoiced',
       'class' => 'form-control',
       'min' => 1,
-      'max' => 10,
+      'max' => 100,
     ], FALSE);
     $this->addElement('radio', 'to_be_invoiced', '', ts('Remaining Balance'),
-      'remain',
+      self::INVOICE_REMAIN,
       ['id' => 'invoice_remain']
     );
     $this->addRule('to_be_invoiced', ts('Invoice value is required'), 'required');
@@ -107,8 +110,12 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
   public function formRule(array $values) {
     $errors = [];
 
-    if ($values['to_be_invoiced'] == 'percent' && empty(floatval($values['percent_value']))) {
+    if ($values['to_be_invoiced'] == self::INVOICE_PERCENT && empty(floatval($values['percent_value']))) {
       $errors['percent_value'] = 'Percentage value is required';
+    }
+
+    if ($values['to_be_invoiced'] == self::INVOICE_PERCENT && $values['percent_value'] > 100) {
+      $errors['percent_value'] = 'Percentage value cannot exceed 100 ';
     }
 
     return $errors ?: TRUE;
@@ -120,8 +127,8 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
   public function postProcess() {
     $values = $this->getSubmitValues();
 
-    if (!empty($this->id) && $values['to_be_invoiced'] == 'percent') {
-      $this->createPercentageContribution($values);
+    if (!empty($this->id) && !empty($values['to_be_invoiced'])) {
+      $this->createContribution($values);
     }
   }
 
@@ -131,14 +138,16 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
    * This contribution page will have the line items
    * prefilled from the sales order line items.
    */
-  public function createPercentageContribution(array $values) {
+  public function createContribution(array $values) {
     $query = [
       'action' => 'add',
       'reset' => 1,
       'context' => 'standalone',
       'sales_order' => $this->id,
       'sales_order_status_id' => $values['status'],
-      'percent_amount' => floatval($values['percent_value']),
+      'to_be_invoiced' => $values['to_be_invoiced'],
+      'percent_value' => $values['to_be_invoiced'] ==
+      self::INVOICE_PERCENT ? floatval($values['percent_value']) : 0,
     ];
 
     $url = CRM_Utils_System::url('civicrm/contribute/add', $query);

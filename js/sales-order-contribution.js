@@ -6,6 +6,7 @@
     const percentValue = params.percent_value;
     const toBeInvoiced = params.to_be_invoiced;
     const PERCENT = 'percent';
+    const REMAIN = 'remain';
     let count = 0;
 
     if ($('input[name="sales_order"]').length) { $('#totalAmount, #totalAmountORaddLineitem, #totalAmountORPriceSet, #price_set_id').hide(); }
@@ -38,6 +39,15 @@
 
       prefillLineItemsFromCaseSalesOrder(caseSalesOrder);
 
+      if (toBeInvoiced === REMAIN) {
+        // For remaining invoice, we need to subtract previously created invoice from it.
+        // get previous contribution associated with this sales order
+        // loop through its line items and create them as a negative value
+        // check if the total is still greater than zero.
+
+        prefilLineItemsFromPreviousContribution(caseSalesOrder);
+      }
+
       $(`<input type="hidden" value="${salesOrderId}" name="sales_order" />`).insertBefore('#source');
       $(`<input type="hidden" value="${toBeInvoiced}" name="to_be_invoiced" />`).insertBefore('#source');
       $(`<input type="hidden" value="${percentValue}" name="percent_value" />`).insertBefore('#source');
@@ -63,6 +73,39 @@
         }
 
         $('input[id="total_amount"]', 'form.CRM_Contribute_Form_Contribution').trigger('change');
+      });
+    }
+
+    /**
+     * Prefills the contribution form with the line items from previous contribution.
+     *
+     * This value of this line items will be added as negative value, hence they
+     * will be deducted from the total value of the current invoice.
+     *
+     * @param {object} caseSalesOrder The case sales order object
+     */
+    function prefilLineItemsFromPreviousContribution (caseSalesOrder) {
+      CRM.api4({
+        caseSalesOrderContributions: ['CaseSalesOrderContribution', 'get', {
+          select: ['contribution_id'],
+          where: [['case_sales_order_id.id', '=', caseSalesOrder.id]],
+          chain: { items: ['LineItem', 'get', { where: [['contribution_id', '=', '$contribution_id']] }] }
+        }]
+      }).then(function (batch) {
+        if (Array.isArray(batch.caseSalesOrderContributions)) {
+          batch.caseSalesOrderContributions.forEach(previousContribution => {
+            if (!previousContribution.items || !Array.isArray(previousContribution.items) || previousContribution.items.length < 1) {
+              return;
+            }
+
+            previousContribution.items.forEach(item => {
+              addLineItem(item.qty, -item.unit_price, item.label, item.financial_type_id, { amount: item.tax_amount });
+            });
+
+            $('input[id="total_amount"]', 'form.CRM_Contribute_Form_Contribution').trigger('change');
+          });
+        }
+      }, function (failure) {
       });
     }
 
