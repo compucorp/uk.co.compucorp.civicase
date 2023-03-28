@@ -14,7 +14,7 @@ class CRM_Civicase_Hook_PostProcess_SaveQuotationsNotesSettings {
    *   Form Class object.
    */
   public function run($formName, CRM_Core_Form $form) {
-    if (!$this->shouldRun($form, $formName)) {
+    if (!$this->shouldRun($formName)) {
       return;
     }
 

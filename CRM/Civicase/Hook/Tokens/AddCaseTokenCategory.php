@@ -34,6 +34,12 @@ class CRM_Civicase_Hook_Tokens_AddCaseTokenCategory {
    *   Available tokens.
    */
   private function setCaseTokenCategory(array &$tokens) {
+    if (CIVICRM_UF === 'UnitTests') {
+      // For unit tests where AddCaseCustomFieldsTokenValues might not be called
+      // using an empty key breaks the code.
+      return $tokens['case_cf'] = [];
+    }
+
     $tokens['case_cf'][''] = '';
   }
 

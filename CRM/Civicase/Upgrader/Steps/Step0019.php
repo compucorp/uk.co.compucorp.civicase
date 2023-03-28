@@ -1,5 +1,6 @@
 <?php
 
+use CRM_Civicase_Setup_Manage_QuotationTemplateManager as QuotationTemplateManager;
 use CRM_Civicase_Setup_Manage_CaseTypeCategoryFeaturesManager as CaseTypeCategoryManager;
 use CRM_Civicase_Setup_Manage_CaseSalesOrderStatusManager as CaseSalesOrderStatusManager;
 
@@ -15,11 +16,22 @@ class CRM_Civicase_Upgrader_Steps_Step0019 {
    *   Return value in boolean.
    */
   public function apply() {
-    $upgrader = CRM_Civicase_Upgrader_Base::instance();
-    $upgrader->executeSqlFile('sql/auto_install.sql');
+    try {
+      $upgrader = CRM_Civicase_Upgrader_Base::instance();
+      $upgrader->executeSqlFile('sql/auto_install.sql');
 
-    (new CaseTypeCategoryManager())->create();
-    (new CaseSalesOrderStatusManager())->create();
+      (new QuotationTemplateManager())->create();
+      (new CaseTypeCategoryManager())->create();
+      (new CaseSalesOrderStatusManager())->create();
+    }
+    catch (\Throwable $th) {
+      \Civi::log()->error('Error upgrading Civicase', [
+        'context' => [
+          'backtrace' => $th->getTraceAsString(),
+          'message' => $th->getMessage(),
+        ],
+      ]);
+    }
 
     return TRUE;
   }

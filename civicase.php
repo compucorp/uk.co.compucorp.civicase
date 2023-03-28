@@ -79,6 +79,16 @@ function civicase_civicrm_config(&$config) {
     'hook_civicrm_buildAsset',
     ['CRM_Civicase_Event_Listener_AssetBuilder', 'addWordReplacements']
   );
+
+  Civi::dispatcher()->addListener(
+    'civi.token.list',
+    ['CRM_Civicase_Hook_Tokens_SalesOrderTokens', 'listSalesOrderTokens']
+  );
+
+  Civi::dispatcher()->addListener(
+    'civi.token.eval',
+    ['CRM_Civicase_Hook_Tokens_SalesOrderTokens', 'evaluateSalesOrderTokens']
+  );
 }
 
 /**
