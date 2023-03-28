@@ -21,6 +21,8 @@ class CRM_Civicase_Hook_Post_CreateSalesOrderContribution {
    *   Object reference.
    */
   public function run($op, $objectName, $objectId, &$objectRef) {
+    $toBeInvoiced = CRM_Utils_Request::retrieve('to_be_invoiced', 'String');
+    $percentValue = CRM_Utils_Request::retrieve('percent_value', 'Float');
     $salesOrderId = CRM_Utils_Request::retrieve('sales_order', 'Integer');
     $salesOrderStatusId = CRM_Utils_Request::retrieve('sales_order_status_id', 'Integer');
 
@@ -30,6 +32,8 @@ class CRM_Civicase_Hook_Post_CreateSalesOrderContribution {
 
     CaseSalesOrderContribution::create()
       ->addValue('case_sales_order_id', $salesOrderId)
+      ->addValue('to_be_invoiced', $toBeInvoiced)
+      ->addValue('percent_value', $percentValue)
       ->addValue('contribution_id', $objectId)
       ->execute();
 
