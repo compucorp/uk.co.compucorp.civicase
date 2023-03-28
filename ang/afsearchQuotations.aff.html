@@ -17,6 +17,7 @@
   <div class="af-container row civicase__case-filter-form-elements" ng-show="expanded">
     <af-field name="client_id" class="col-sm-3" />
     <af-field name="owner_id" class="col-sm-3" />
+    <af-field name="description" class="col-sm-3" />
   </div>
   <div class="af-container row civicase__case-filter-form-elements" ng-show="expanded">
     <af-field name="status_id" defn="{input_attrs: {multiple: true}}" class="col-sm-3" />
@@ -24,3 +25,9 @@
   </div>
   <crm-search-display-table search-name="Civicase_Quotations" display-name="Civicase_Quotations_Table" filters="{case_id: routeParams.caseId}"></crm-search-display-table>
 </div>
+<style>
+  #description-3 {
+    height: 30px;
+    padding: 4px 10px;
+  }
+</style>
