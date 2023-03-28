@@ -93,6 +93,7 @@
 
       CaseUtils.getSalesOrderAndLineItems(salesOrderId).then((result) => {
         $scope.salesOrder = result;
+        $scope.salesOrder.quotation_date = $.datepicker.formatDate('yy-mm-dd', new Date(result.quotation_date));
         $scope.salesOrder.status_id = (result.status_id).toString();
         CRM.wysiwyg.setVal('#sales-order-description', $scope.salesOrder.description);
         $scope.$emit('totalChange');
