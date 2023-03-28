@@ -44,19 +44,19 @@
 <script language="javascript" type="text/javascript">
 
   CRM.$(function ($) {
-    CRM.$('input[name="percent_amount"]').hide();
+    CRM.$('input[name="percent_value"]').hide();
     if ( CRM.$('input[name="to_be_invoiced"]').val() == 'percent') {
       $('input[name="to_be_invoiced"]#invoice_percent').prop("checked", true);
-      CRM.$('input[name="percent_amount"]').show();
+      CRM.$('input[name="percent_value"]').show();
     }
 
     CRM.$('input[name="to_be_invoiced"]').on('input', (e) => {
       if (e.target.value == 'percent') {
-        CRM.$('input[name="percent_amount"]').show();
+        CRM.$('input[name="percent_value"]').show();
         return
       }
 
-      CRM.$('input[name="percent_amount"]').hide();
+      CRM.$('input[name="percent_value"]').hide();
     });
   });
 </script>
