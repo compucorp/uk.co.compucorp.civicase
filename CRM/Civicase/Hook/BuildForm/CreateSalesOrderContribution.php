@@ -1,5 +1,7 @@
 <?php
 
+use CRM_Civicase_ExtensionUtil as E;
+
 /**
  * Adds the neccessary script to get sales order line items.
  */
@@ -15,13 +17,22 @@ class CRM_Civicase_Hook_BuildForm_CreateSalesOrderContribution {
    */
   public function run(CRM_Core_Form &$form, $formName) {
     $salesOrderId = CRM_Utils_Request::retrieve('sales_order', 'Integer');
+    $status = CRM_Utils_Request::retrieve('sales_order_status_id', 'Integer');
+    $toBeInvoiced = CRM_Utils_Request::retrieve('to_be_invoiced', 'String');
+    $percentValue = CRM_Utils_Request::retrieve('percent_value', 'Float');
 
     if (!$this->shouldRun($form, $formName, $salesOrderId)) {
       return;
     }
 
     CRM_Core_Resources::singleton()
-      ->addScriptFile('uk.co.compucorp.civicase', 'js/sales-order-contribution.js');
+      ->addScriptFile(E::LONG_NAME, 'js/sales-order-contribution.js')
+      ->addVars(E::LONG_NAME, [
+        'sales_order' => $salesOrderId,
+        'sales_order_status_id' => $status,
+        'to_be_invoiced' => $toBeInvoiced,
+        'percent_value' => $percentValue,
+      ]);
   }
 
   /**
