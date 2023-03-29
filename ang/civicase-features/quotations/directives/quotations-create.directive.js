@@ -29,6 +29,7 @@
     const productsCache = new Map();
     const financialTypesCache = new Map();
 
+    $scope.isUpdate = false;
     $scope.formValid = true;
     $scope.roundTo = roundTo;
     $scope.submitInProgress = false;
@@ -92,7 +93,9 @@
       }
 
       CaseUtils.getSalesOrderAndLineItems(salesOrderId).then((result) => {
+        $scope.isUpdate = true;
         $scope.salesOrder = result;
+        $scope.salesOrder.quotation_date = $.datepicker.formatDate('yy-mm-dd', new Date(result.quotation_date));
         $scope.salesOrder.status_id = (result.status_id).toString();
         CRM.wysiwyg.setVal('#sales-order-description', $scope.salesOrder.description);
         $scope.$emit('totalChange');
@@ -262,7 +265,8 @@
      * Show Quotation success create notification
      */
     function showSucessNotification () {
-      CRM.alert('Your Quotation has been generated successfully.', ts('Saved'), 'success');
+      const msg = !$scope.isUpdate ? 'Your Quotation has been generated successfully.' : 'Details updated successfully';
+      CRM.alert(msg, ts('Saved'), 'success');
     }
 
     /**
