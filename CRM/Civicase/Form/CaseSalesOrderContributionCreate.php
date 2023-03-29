@@ -1,5 +1,7 @@
 <?php
 
+use Civi\Api4\CaseSalesOrderContribution;
+use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\OptionValue;
 use CRM_Certificate_ExtensionUtil as E;
 
@@ -92,6 +94,7 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
    */
   public function addRules() {
     $this->addFormRule([$this, 'formRule']);
+    $this->addFormRule([$this, 'validateAmount']);
   }
 
   /**
@@ -116,6 +119,62 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
 
     if ($values['to_be_invoiced'] == self::INVOICE_PERCENT && $values['percent_value'] > 100) {
       $errors['percent_value'] = 'Percentage value cannot exceed 100 ';
+    }
+
+    return $errors ?: TRUE;
+  }
+
+  /**
+   * Validate Invoice value.
+   *
+   * Ensures that percent amount entered by user or
+   * calculated as part of other remaining balance
+   * selection is correct and  not exceeding the
+   * balance amount.
+   *
+   * e.g. If a sales_order total_amount is 1000,
+   * and has  the following contributions
+   * contribution 1 with value - 500
+   * contribution 2 with value - 250
+   * the amount owed is 250, so any new contribution
+   * that will exceed this amount should return an error.
+   *
+   * @param array $values
+   *   Array of submitted values.
+   *
+   * @return array|bool
+   *   Returns the form errors if form is invalid
+   */
+  public function validateAmount(array $values) {
+    $errors = [];
+
+    $caseSalesOrder = CaseSalesOrder::get()
+      ->addSelect('total_after_tax')
+      ->addWhere('id', '=', $this->id)
+      ->setLimit(1)
+      ->execute()
+      ->first();
+    if (empty($caseSalesOrder)) {
+      throw new CRM_Core_Exception("The specified case sales order doesn't exist");
+    }
+
+    // Get all the previous contributions.
+    $caseSalesOrderContributions = CaseSalesOrderContribution::get()
+      ->addSelect('contribution_id', 'contribution_id.total_amount')
+      ->addWhere('case_sales_order_id.id', '=', $this->id)
+      ->execute()
+      ->jsonSerialize();
+
+    $paidTotal = array_sum(array_column($caseSalesOrderContributions, 'contribution_id.total_amount'));
+    $paidPercent = ($paidTotal * 100) / $caseSalesOrder['total_after_tax'];
+    $remainPercent = 100 - $paidPercent;
+
+    if ($remainPercent <= 0) {
+      $errors['to_be_invoiced'] = 'Contribution amount cannot exceed the total sales order amount';
+    }
+
+    if ($values['to_be_invoiced'] == self::INVOICE_PERCENT && $values['percent_value'] > $remainPercent) {
+      $errors['percent_value'] = 'Percentage value cannot exceed ' . $remainPercent;
     }
 
     return $errors ?: TRUE;
