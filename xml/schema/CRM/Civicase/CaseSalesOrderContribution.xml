@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="iso-8859-1" ?>
+
+<table>
+  <base>CRM/Civicase</base>
+  <class>CaseSalesOrderContribution</class>
+  <name>civicase_sales_order_contribution</name>
+  <comment>Relationship between Case Sales Order and Contribution entity.</comment>
+  <log>true</log>
+
+  <field>
+    <name>id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>Unique CaseSalesOrderContribution ID</comment>
+    <html>
+      <type>Number</type>
+    </html>
+  </field>
+  <primaryKey>
+    <name>id</name>
+    <autoincrement>true</autoincrement>
+  </primaryKey>
+
+  <field>
+    <name>case_sales_order_id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>FK to Case Sales Order</comment>
+  </field>
+  <foreignKey>
+    <name>case_sales_order_id</name>
+    <table>civicase_sales_order</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>contribution_id</name>
+    <type>int unsigned</type>
+    <required>true</required>
+    <comment>ID of Contribution</comment>
+  </field>
+  <foreignKey>
+    <name>contribution_id</name>
+    <table>civicrm_contribution</table>
+    <key>id</key>
+    <onDelete>CASCADE</onDelete>
+  </foreignKey>
+
+  <field>
+    <name>to_be_invoiced</name>
+    <type>varchar</type>
+    <length>20</length>
+    <required>true</required>
+    <comment>Either percent ,i.e. certain percentage of the total_amount or remain, i.e. the remaining amount to be paid</comment>
+  </field>
+
+  <field>
+    <name>percent_value</name>
+    <type>decimal</type>
+    <required>false</required>
+    <default>0</default>
+    <comment>The percentage value if to_be_invoiced is percent</comment>
+  </field>
+</table>

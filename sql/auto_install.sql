@@ -98,3 +98,22 @@ CREATE TABLE IF NOT EXISTS `civicase_sales_order_line` (
   CONSTRAINT FK_civicase_sales_order_line_product_id FOREIGN KEY (`product_id`) REFERENCES `civicrm_product`(`id`) ON DELETE SET NULL
 )
 ENGINE=InnoDB;
+
+-- /*******************************************************
+-- *
+-- * civicase_sales_order_contribution
+-- *
+-- * Relationship between Case Sales Order and Contribution entity.
+-- *
+-- *******************************************************/
+CREATE TABLE IF NOT EXISTS `civicase_sales_order_contribution` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Unique CaseSalesOrderContribution ID',
+  `case_sales_order_id` int unsigned NOT NULL COMMENT 'FK to Case Sales Order',
+  `contribution_id` int unsigned NOT NULL COMMENT 'ID of Contribution',
+  `to_be_invoiced` varchar(20) NOT NULL COMMENT 'Either percent ,i.e. certain percentage of the total_amount or remain, i.e. the remaining amount to be paid',
+  `percent_value` decimal(20,2) NULL DEFAULT 0 COMMENT 'The percentage value if to_be_invoiced is percent',
+  PRIMARY KEY (`id`),
+  CONSTRAINT FK_civicase_sales_order_contribution_case_sales_order_id FOREIGN KEY (`case_sales_order_id`) REFERENCES `civicase_sales_order`(`id`) ON DELETE CASCADE,
+  CONSTRAINT FK_civicase_sales_order_contribution_contribution_id FOREIGN KEY (`contribution_id`) REFERENCES `civicrm_contribution`(`id`) ON DELETE CASCADE
+)
+ENGINE=InnoDB;
