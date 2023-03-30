@@ -9,7 +9,7 @@
     const REMAIN = 'remain';
     let count = 0;
 
-    if ($('input[name="sales_order"]').length) { $('#totalAmount, #totalAmountORaddLineitem, #totalAmountORPriceSet, #price_set_id').hide(); }
+    $('#totalAmount, #totalAmountORaddLineitem, #totalAmountORPriceSet, #price_set_id, #choose-manual, .remove_item').hide();
     $('#total_amount').val(0);
 
     const apiRequest = {};
@@ -99,7 +99,7 @@
             }
 
             previousContribution.items.forEach(item => {
-              addLineItem(item.qty, -item.unit_price, item.label, item.financial_type_id, { amount: item.tax_amount });
+              addLineItem(-item.qty, item.unit_price, item.label, item.financial_type_id, { amount: item.tax_amount });
             });
 
             $('input[id="total_amount"]', 'form.CRM_Contribute_Form_Contribution').trigger('change');
