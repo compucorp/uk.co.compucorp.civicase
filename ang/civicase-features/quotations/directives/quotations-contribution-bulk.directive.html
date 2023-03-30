@@ -1,0 +1,85 @@
+<div id="bootstrap-theme" class="civicase__container" crm-dialog="crmSearchTask">
+
+  <form name="contributionForm" class="form-horizontal" ng-controller="quotationContributionBulkController as $ctrl">
+
+    <div class="row">
+      <div ng-show="$ctrl.stage === 'done'">{{$ctrl.completedMessage}}</div>
+    </div>
+
+    <div class="form-group">
+      <div class="col-sm-12">
+        <input type="radio" name="toBeInvoiced" value="percent" id="percent_toBeInvoiced" ng-model="$ctrl.data.toBeInvoiced" max="100" />
+        <label for="percent_toBeInvoiced">Enter % to be invoiced ?</label>
+      </div>
+      <div class="col-sm-5" ng-show="$ctrl.data.toBeInvoiced == 'percent'">
+        <input type="number" max="100" name="percentValue" class="form-control" ng-model="$ctrl.data.percentValue" ng-disabled="$ctrl.data.toBeInvoiced !== 'percent'" ng-required="$ctrl.data.toBeInvoiced == 'percent'" />
+        <span class="crm-inline-error" ng-show="contributionForm.percentValue.$dirty && contributionForm.percentValue.$invalid && contributionForm.percentValue.$error.required">Amount is required</span>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom: 3em;">
+      <div class="col-sm-12">
+        <input type="radio" name="toBeInvoiced" value="remain" id="remain_toBeInvoiced" ng-model="$ctrl.data.toBeInvoiced" />
+        <label for="remain_toBeInvoiced">Remaining Balance</label>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label required-mark">
+        Financial Type
+      </label>
+      <div class="col-sm-5 civicase__ui-range">
+        <input class="form-control"
+            ng-model="$ctrl.data.financialTypeId"
+            name="financial_type"
+            placeholder="Financial Type"
+            crm-entityref="{
+              entity: 'Financial Type',
+              select: { allowClear: true, 'minimumInputLength': 0 }
+            }"
+            required
+            ng-minlength="1"
+          />
+          <span class="crm-inline-error" ng-show="contributionForm.financial_type.$dirty && contributionForm.financial_type.$invalid">Financial type is required</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label required-mark">
+        Date
+      </label>
+      <div class="col-sm-5 civicase__ui-range">
+          <input
+            class="form-control" crm-ui-datepicker="{time: false}" id="date"
+            ng-model="$ctrl.data.date" placeholder="Date" name="date" required/>
+            <span class="crm-inline-error" ng-show="contributionForm.date.$dirty && contributionForm.date.$invalid && contributionForm.date.$error.required">Date is required</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="col-sm-2 control-label required-mark">
+        {{ts('Status')}}
+      </label>
+      <div class="col-sm-5">
+        <select class="form-control"
+          ng-model="$ctrl.data.statusId"
+          name="status"
+          required
+        >
+          <option value="">{{ ts('Status') }}</option>
+          <option ng-repeat="stauts in $ctrl.salesOrderStatus track by $index" value="{{ $ctrl.salesOrderStatus[$index].value }}">{{ $ctrl.salesOrderStatus[$index].label }}</option>
+        </select>
+        <span class="crm-inline-error" ng-show="contributionForm.status.$dirty && contributionForm.status.$invalid && contributionForm.status.$error.required">Status is required</span>
+      </div>
+    </div>
+    
+    <div class="form-group row">
+      <div class="col-sm-12">
+        <div class="clearfix">
+          <crm-dialog-button text="ts('Confirm')" icons="{primary: $ctrl.run ? 'fa-spin fa-spinner' : 'fa-file-text'}" on-click="$ctrl.createBulkContribution()" disabled="$ctrl.run || $ctrl.stage === 'done' || !contributionForm.$valid" ></crm-dialog-button>
+          <crm-dialog-button text="ts(($ctrl.stage === 'done') ? 'Close' : 'Cancel')" icons="{primary: 'fa-times'}" on-click="$ctrl.cancel()" disabled="$ctrl.run" ></crm-dialog-button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
