@@ -8,12 +8,11 @@ use Civi\Api4\PriceField;
 use Civi\Api4\PriceSet;
 use CRM_Core_Transaction;
 use Civi\Api4\Generic\Result;
-use Civi\Api4\CaseSalesOrderLine;
 use Civi\Api4\Generic\AbstractAction;
 use Civi\Api4\Generic\Traits\DAOActionTrait;
 use CRM_Contribute_BAO_Contribution as Contribution;
 use CRM_Civicase_Service_CaseSalesOrderContribution as CaseSalesOrderContribution;
-use CRM_Utils_SQL_Insert;
+use Civi\Api4\CaseSalesOrderContribution as Api4CaseSalesOrderContribution;
 
 /**
  * Creates contribution for multiple sales orders.
@@ -77,98 +76,109 @@ class ContributionCreateAction extends AbstractAction {
    */
   protected function createContribution() {
     $transaction = CRM_Core_Transaction::create();
-    $salesOrderContributions = [];
+    $priceField = $this->getDefaultContributionPriceField();
 
-    try {
-      $priceSet = PriceSet::get()
-        ->addWhere('name', '=', 'default_contribution_amount')
-        ->addWhere('is_quick_config', '=', 1)
-        ->execute()
-        ->first();
-      $priceField = PriceField::get()
-        ->addWhere('price_set_id', '=', $priceSet['id'])
-        ->addChain('price_field_value', PriceFieldValue::get()
-          ->addWhere('price_field_id', '=', '$id')
-        )->execute();
-      foreach ($this->ids as $id) {
-        $salesOrderContribution = new CaseSalesOrderContribution($id, $this->toBeInvoiced, $this->percentValue);
-        $lineItems = $salesOrderContribution->generateLineItems();
-
-        $taxAmount = $lineTotal = 0;
-        $allLineItems = [];
-        foreach ($lineItems as $index => &$lineItem) {
-          $lineItem['price_field_id'] = $priceField[$index]['id'];
-          $lineItem['price_field_value_id'] = $priceField[$index]['price_field_value'][0]['id'];
-          $priceSetID = \CRM_Core_DAO::getFieldValue('CRM_Price_BAO_PriceField', $priceField[$index]['id'], 'price_set_id');
-          $allLineItems[$priceSetID][$priceField[$index]['id']] = $lineItem;
-          $taxAmount += (float) ($lineItem['tax_amount'] ?? 0);
-          $lineTotal += (float) ($lineItem['line_total'] ?? 0);
-        }
-        $totalAmount = $lineTotal + $taxAmount;
-
-        $params = [
-          'source' => "Quotation {$id}",
-          'line_item' => $allLineItems,
-          'total_amount' => $totalAmount,
-          'tax_amount' => $taxAmount,
-          'financial_type_id' => $this->financialTypeId,
-          'receive_date' => $this->date,
-          'contact_id' => $salesOrderContribution->salesOrder['client_id'],
-        ];
-
-        $contribution = Contribution::create($params)->toArray();
-        $salesOrderContributions[] = [
-          'case_sales_order_id' => $id,
-          'to_be_invoiced' => $this->toBeInvoiced,
-          'percent_value' => $this->percentValue,
-          'contribution_id' => $contribution['id'],
-        ];
+    foreach ($this->ids as $id) {
+      try {
+        $contribution = $this->createContributionWithLineItems($id, $priceField);
+        $this->linkCaseSalesOrderToContribution($id, $contribution['id']);
+        $this->updateCaseSalesOrderStatus($id);
       }
-
-      $this->postCreateAction($salesOrderContributions);
+      catch (\Exception $e) {
+        $transaction->rollback();
+      }
     }
-    catch (\Exception $e) {
-      $transaction->rollback();
 
-      throw $e;
-    }
     return [];
   }
 
   /**
-   * Delete line items that have been detached.
+   * Creates sales order contribution with associated line items.
    *
-   * @param array $salesOrder
-   *   Array of the salesorder to remove stale line items for.
+   * @param int $salesOrderId
+   *   Sales Order ID.
+   * @param array $priceField
+   *   Array of price fields.
    */
-  public function removeStaleLineItems(array $salesOrder) {
-    if (empty($salesOrder['id'])) {
-      return;
+  public function createContributionWithLineItems(int $salesOrderId, array $priceField): array {
+    $salesOrderContribution = new CaseSalesOrderContribution($salesOrderId, $this->toBeInvoiced, $this->percentValue);
+    $lineItems = $salesOrderContribution->generateLineItems();
+
+    $taxAmount = $lineTotal = 0;
+    $allLineItems = [];
+    foreach ($lineItems as $index => &$lineItem) {
+      $lineItem['price_field_id'] = $priceField[$index]['id'];
+      $lineItem['price_field_value_id'] = $priceField[$index]['price_field_value'][0]['id'];
+      $priceSetID = \CRM_Core_DAO::getFieldValue('CRM_Price_BAO_PriceField', $priceField[$index]['id'], 'price_set_id');
+      $allLineItems[$priceSetID][$priceField[$index]['id']] = $lineItem;
+      $taxAmount += (float) ($lineItem['tax_amount'] ?? 0);
+      $lineTotal += (float) ($lineItem['line_total'] ?? 0);
     }
+    $totalAmount = $lineTotal + $taxAmount;
 
-    $lineItemsInUse = array_column($salesOrder['items'], 'id');
+    $params = [
+      'source' => "Quotation {$salesOrderId}",
+      'line_item' => $allLineItems,
+      'total_amount' => $totalAmount,
+      'tax_amount' => $taxAmount,
+      'financial_type_id' => $this->financialTypeId,
+      'receive_date' => $this->date,
+      'contact_id' => $salesOrderContribution->salesOrder['client_id'],
+    ];
 
-    CaseSalesOrderLine::delete()
-      ->addWhere('sales_order_id', '=', $salesOrder['id'])
-      ->addWhere('id', 'NOT IN', $lineItemsInUse)
+    return Contribution::create($params)->toArray();
+  }
+
+  /**
+   * Returns default contribution price set fields.
+   *
+   * @return array
+   *   Array of price fields
+   */
+  public function getDefaultContributionPriceField(): array {
+    $priceSet = PriceSet::get()
+      ->addWhere('name', '=', 'default_contribution_amount')
+      ->addWhere('is_quick_config', '=', 1)
+      ->execute()
+      ->first();
+
+    return PriceField::get()
+      ->addWhere('price_set_id', '=', $priceSet['id'])
+      ->addChain('price_field_value', PriceFieldValue::get()
+        ->addWhere('price_field_id', '=', '$id')
+      )->execute()
+      ->getArrayCopy();
+  }
+
+  /**
+   * Links sales order with contirbution.
+   *
+   * This is done by inserting new row into the
+   * pivot table CaseSalesOrderContribution.
+   *
+   * @param int $salesOrderId
+   *   Sales Order Id.
+   * @param int $contributionId
+   *   Contribution ID.
+   */
+  public function linkCaseSalesOrderToContribution(int $salesOrderId, int $contributionId): void {
+    Api4CaseSalesOrderContribution::create()
+      ->addValue('case_sales_order_id', $salesOrderId)
+      ->addValue('to_be_invoiced', $this->toBeInvoiced)
+      ->addValue('percent_value', $this->percentValue)
+      ->addValue('contribution_id', $contributionId)
       ->execute();
   }
 
   /**
    * Updates Sales Order status.
    *
-   * Also creates SalesOrdeContribution.
-   *
-   * @param array $salesOrderContributions
-   *   Sales Order COntribution values.
+   * @param int $salesOrderId
+   *   Sales Order Id.
    */
-  public function postCreateAction(array $salesOrderContributions) {
-    $insert = CRM_Utils_SQL_Insert::into(\CRM_Civicase_BAO_CaseSalesOrderContribution::$_tableName)
-      ->rows($salesOrderContributions);
-    \CRM_Core_DAO::executeQuery($insert->toSQL());
-
+  public function updateCaseSalesOrderStatus(int $salesOrderId): void {
     CaseSalesOrder::update()
-      ->addWhere('id', 'IN', $this->ids)
+      ->addWhere('id', '=', $salesOrderId)
       ->addValue('status_id', $this->statusId)
       ->execute();
   }
