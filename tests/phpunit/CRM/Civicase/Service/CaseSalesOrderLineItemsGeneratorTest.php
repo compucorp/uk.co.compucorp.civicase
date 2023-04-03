@@ -1,14 +1,14 @@
 <?php
 
 use Civi\Api4\CaseSalesOrder;
-use CRM_Civicase_Service_CaseSalesOrderContribution as SalesOrderService;
+use CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator as SalesOrderService;
 
 /**
- * Runs tests on CRM_Civicase_Service_CaseSalesOrderContribution Service tests.
+ * Runs tests on CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator Service tests.
  *
  * @group headless
  */
-class CRM_Civicase_Service_CRM_Civicase_Service_CaseSalesOrderContributionsTest extends BaseHeadlessTest {
+class CRM_Civicase_Service_CaseSalesOrderLineItemsGeneratorsTest extends BaseHeadlessTest {
   use Helpers_PriceFieldTrait;
   use Helpers_CaseSalesOrderTrait;
 

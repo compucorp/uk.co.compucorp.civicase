@@ -11,7 +11,7 @@ use Civi\Api4\Generic\Result;
 use Civi\Api4\Generic\AbstractAction;
 use Civi\Api4\Generic\Traits\DAOActionTrait;
 use CRM_Contribute_BAO_Contribution as Contribution;
-use CRM_Civicase_Service_CaseSalesOrderContribution as CaseSalesOrderContribution;
+use CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator as salesOrderlineItemGenerator;
 use Civi\Api4\CaseSalesOrderContribution as Api4CaseSalesOrderContribution;
 
 /**
@@ -101,7 +101,7 @@ class ContributionCreateAction extends AbstractAction {
    *   Array of price fields.
    */
   public function createContributionWithLineItems(int $salesOrderId, array $priceField): array {
-    $salesOrderContribution = new CaseSalesOrderContribution($salesOrderId, $this->toBeInvoiced, $this->percentValue);
+    $salesOrderContribution = new salesOrderlineItemGenerator($salesOrderId, $this->toBeInvoiced, $this->percentValue);
     $lineItems = $salesOrderContribution->generateLineItems();
 
     $taxAmount = $lineTotal = 0;

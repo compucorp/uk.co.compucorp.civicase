@@ -8,7 +8,7 @@ use Civi\Api4\CaseSalesOrder;
 /**
  * Service class to generate sales order line items.
  */
-class CRM_Civicase_Service_CaseSalesOrderContribution {
+class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
 
   const INVOICE_PERCENT = 'percent';
   const INVOICE_REMAIN = 'remain';
@@ -24,6 +24,13 @@ class CRM_Civicase_Service_CaseSalesOrderContribution {
    * Constructs CaseSalesOrderContribution service.
    */
   public function __construct(private int $salesOrderId, private string $type, private string $percentValue) {
+    $this->setSalesOrder();
+  }
+
+  /**
+   * Sets the sales order value.
+   */
+  private function setSalesOrder(): void {
     $this->salesOrder = CaseSalesOrder::get()
       ->addSelect('*')
       ->addWhere('id', '=', $this->salesOrderId)

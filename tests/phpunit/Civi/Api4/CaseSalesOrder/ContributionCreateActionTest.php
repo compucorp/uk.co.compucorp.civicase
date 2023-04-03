@@ -3,7 +3,7 @@
 use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\CaseSalesOrderContribution as Api4CaseSalesOrderContribution;
 use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
-use CRM_Civicase_Service_CaseSalesOrderContribution as CaseSalesOrderContribution;
+use CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator as CaseSalesOrderContribution;
 
 /**
  * CaseSalesOrder.ContributionCreateAction API Test Case.
