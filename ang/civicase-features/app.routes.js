@@ -18,5 +18,13 @@
         `;
       }
     });
+    $routeProvider.when('/invoices', {
+      template: function () {
+        var urlParams = UrlParametersProvider.parse(window.location.search);
+        return `
+          <invoices-list case-type-category= ${urlParams.case_type_category}"> </invoices-list>
+        `;
+      }
+    });
   });
 })(angular, CRM.$, CRM._);
