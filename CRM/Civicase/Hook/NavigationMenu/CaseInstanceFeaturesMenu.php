@@ -15,6 +15,7 @@ class CRM_Civicase_Hook_NavigationMenu_CaseInstanceFeaturesMenu extends CRM_Civi
    */
   const FEATURES_WITH_MENU = [
     'quotations',
+    'invoices',
   ];
 
   /**
