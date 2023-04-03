@@ -29,11 +29,15 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
    * Ensures contribution create action updates status successfully.
    */
   public function testContributionCreateActionWillUpdateSalesOrderStatus() {
-    ['id' => $id] = $this->createCaseSalesOrder();
+    $ids = [];
+
+    for ($i = 0; $i < rand(5, 11); $i++) {
+      $ids[] = $this->createCaseSalesOrder()['id'];
+    }
 
     $newStatus = $this->getCaseSalesOrderStatus()[1]['value'];
     CaseSalesOrder::contributionCreateAction()
-      ->setId($id)
+      ->setIds($ids)
       ->setStatusId($newStatus)
       ->setToBeInvoiced('percent')
       ->setPercentValue('100')
@@ -42,11 +46,47 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
       ->execute();
 
     $results = CaseSalesOrder::get()
-      ->addWhere('id', '=', $id)
-      ->execute()
-      ->first();
+      ->addWhere('id', 'IN', $ids)
+      ->execute();
 
-    $this->assertEquals($newStatus, $results['status_id']);
+    $iterator = $results->getIterator();
+    while ($iterator->valid()) {
+      $this->assertEquals($newStatus, $iterator->current()['status_id']);
+      $iterator->next();
+    }
+  }
+
+  /**
+   * Ensures contribution create action will create expeted pivot row.
+   *
+   * I.e.
+   * Inserts a new row for each of the case sales order contribution.
+   */
+  public function testContributionCreateActionWillInsertPivotRow() {
+    $ids = [];
+
+    for ($i = 0; $i < rand(5, 11); $i++) {
+      $ids[] = $this->createCaseSalesOrder()['id'];
+    }
+
+    $newStatus = $this->getCaseSalesOrderStatus()[1]['value'];
+    CaseSalesOrder::contributionCreateAction()
+      ->setIds($ids)
+      ->setStatusId($newStatus)
+      ->setToBeInvoiced('percent')
+      ->setPercentValue('100')
+      ->setDate('2020-2-12')
+      ->setFinancialTypeId('1')
+      ->execute();
+
+    $salesOrderContributions = Api4CaseSalesOrderContribution::get()
+      ->addSelect('case_sales_order_id')
+      ->addWhere('case_sales_order_id.id', 'IN', $ids)
+      ->execute()
+      ->jsonSerialize();
+
+    $this->assertCount(count($ids), $salesOrderContributions);
+    $this->assertEmpty(array_diff(array_column($salesOrderContributions, 'case_sales_order_id'), $ids));
   }
 
   /**
@@ -73,7 +113,7 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
 
     foreach ($contributionCreateData as $data) {
       CaseSalesOrder::contributionCreateAction()
-        ->setId($salesOrder['id'])
+        ->setIds([$salesOrder['id']])
         ->setStatusId($data['statusId'])
         ->setToBeInvoiced($data['toBeInvoiced'])
         ->setPercentValue($data['percentValue'])

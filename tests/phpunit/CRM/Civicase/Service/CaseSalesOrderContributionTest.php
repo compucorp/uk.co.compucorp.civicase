@@ -44,7 +44,7 @@ class CRM_Civicase_Service_CRM_Civicase_Service_CaseSalesOrderContributionsTest 
     $previousContributionCount = rand(1, 4);
     for ($i = 0; $i < $previousContributionCount; $i++) {
       CaseSalesOrder::contributionCreateAction()
-        ->setId($salesOrder['id'])
+        ->setIds([$salesOrder['id']])
         ->setStatusId(1)
         ->setToBeInvoiced(SalesOrderService::INVOICE_PERCENT)
         ->setPercentValue(20)

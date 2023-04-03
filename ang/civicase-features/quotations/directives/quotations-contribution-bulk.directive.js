@@ -34,18 +34,25 @@
       date: $.datepicker.formatDate('yy-mm-dd', new Date())
     };
     ctrl.salesOrderStatus = SalesOrderStatus.getAll();
+    this.progress = null;
+    const BATCH_SIZE = 50;
 
     this.createBulkContribution = () => {
       $q(async function (resolve, reject) {
         ctrl.run = true;
+        ctrl.progress = 0;
         let contributionCreated = 0;
-
-        for (const id of ctrl.ids) {
+        let index = 0;
+        const chunkedIds = _.chunk(ctrl.ids, BATCH_SIZE);
+        for (const ids of chunkedIds) {
           try {
-            await crmApi4('CaseSalesOrder', 'contributionCreateAction', { ...ctrl.data, id });
-            contributionCreated++;
+            await crmApi4('CaseSalesOrder', 'contributionCreateAction', { ...ctrl.data, ids });
+            contributionCreated += ids.length;
           } catch (error) {
             console.log(error);
+          } finally {
+            index += BATCH_SIZE;
+            ctrl.progress = (index * 100) / ctrl.ids.length;
           }
         }
 

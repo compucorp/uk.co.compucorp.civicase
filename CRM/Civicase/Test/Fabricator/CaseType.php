@@ -44,6 +44,17 @@ class CRM_Civicase_Test_Fabricator_CaseType {
    */
   public static function fabricate(array $params = []) {
     $params = array_merge(self::$defaultParams, $params);
+
+    $result = civicrm_api3(
+      'CaseType',
+      'get',
+      ['name' => $params['name']]
+    );
+
+    if (!empty($result['values'])) {
+      $params['id'] = array_pop($result['values'])['id'];
+    }
+
     $result = civicrm_api3(
       'CaseType',
       'create',

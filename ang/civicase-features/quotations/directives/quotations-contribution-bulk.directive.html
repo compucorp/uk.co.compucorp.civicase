@@ -1,7 +1,13 @@
 <div id="bootstrap-theme" class="civicase__container" crm-dialog="crmSearchTask">
 
   <form name="contributionForm" class="form-horizontal" ng-controller="quotationContributionBulkController as $ctrl">
-
+    <div class="row" style="margin-bottom: 2em;">
+      <div class="col-sm-12">
+        <p>
+          <strong ng-if="$ctrl.ids.length">{{:: ts('Create Bulk Contribution for %1 Quotations', {1: $ctrl.ids.length}) }}</strong>
+          </p>
+      </div>
+    </div>
     <div class="row">
       <div ng-show="$ctrl.stage === 'done'">{{$ctrl.completedMessage}}</div>
     </div>
@@ -71,6 +77,18 @@
         </select>
         <span class="crm-inline-error" ng-show="contributionForm.status.$dirty && contributionForm.status.$invalid && contributionForm.status.$error.required">Status is required</span>
       </div>
+    </div>
+
+    <div class="form-group row" ng-if="$ctrl.progress !== null" >
+      <hr />
+      <dv class="col-md-12">
+        <div class="crm-search-task-progress">
+          <h5>{{:: ts('Creating Contributions..') }}</h5>
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped active" role="progressbar" ng-style="{width: '' + $ctrl.progress + '%'}"></div>
+          </div>
+        </div>
+      </dv>
     </div>
     
     <div class="form-group row">
