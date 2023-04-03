@@ -37,7 +37,7 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
 
     $newStatus = $this->getCaseSalesOrderStatus()[1]['value'];
     CaseSalesOrder::contributionCreateAction()
-      ->setIds($ids)
+      ->setSalesOrderIds($ids)
       ->setStatusId($newStatus)
       ->setToBeInvoiced('percent')
       ->setPercentValue('100')
@@ -71,7 +71,7 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
 
     $newStatus = $this->getCaseSalesOrderStatus()[1]['value'];
     CaseSalesOrder::contributionCreateAction()
-      ->setIds($ids)
+      ->setSalesOrderIds($ids)
       ->setStatusId($newStatus)
       ->setToBeInvoiced('percent')
       ->setPercentValue('100')
@@ -113,7 +113,7 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
 
     foreach ($contributionCreateData as $data) {
       CaseSalesOrder::contributionCreateAction()
-        ->setIds([$salesOrder['id']])
+        ->setSalesOrderIds([$salesOrder['id']])
         ->setStatusId($data['statusId'])
         ->setToBeInvoiced($data['toBeInvoiced'])
         ->setPercentValue($data['percentValue'])

@@ -44,10 +44,10 @@
         let contributionCreated = 0;
         let index = 0;
         const chunkedIds = _.chunk(ctrl.ids, BATCH_SIZE);
-        for (const ids of chunkedIds) {
+        for (const salesOrderIds of chunkedIds) {
           try {
-            await crmApi4('CaseSalesOrder', 'contributionCreateAction', { ...ctrl.data, ids });
-            contributionCreated += ids.length;
+            await crmApi4('CaseSalesOrder', 'contributionCreateAction', { ...ctrl.data, salesOrderIds });
+            contributionCreated += salesOrderIds.length;
           } catch (error) {
             console.log(error);
           } finally {

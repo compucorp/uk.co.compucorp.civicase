@@ -25,7 +25,7 @@ class ContributionCreateAction extends AbstractAction {
    *
    * @var array
    */
-  protected $ids;
+  protected $salesOrderIds;
 
   /**
    * Sales order Status ID.
@@ -78,7 +78,7 @@ class ContributionCreateAction extends AbstractAction {
     $transaction = CRM_Core_Transaction::create();
     $priceField = $this->getDefaultContributionPriceField();
 
-    foreach ($this->ids as $id) {
+    foreach ($this->salesOrderIds as $id) {
       try {
         $contribution = $this->createContributionWithLineItems($id, $priceField);
         $this->linkCaseSalesOrderToContribution($id, $contribution['id']);
