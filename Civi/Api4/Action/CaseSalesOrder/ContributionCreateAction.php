@@ -74,9 +74,9 @@ class ContributionCreateAction extends AbstractAction {
   /**
    * {@inheritDoc}
    */
-  protected function createContribution() {
+  private function createContribution() {
     $transaction = CRM_Core_Transaction::create();
-    $priceField = $this->getDefaultContributionPriceField();
+    $priceField = $this->getDefaultPriceSetFields();
 
     foreach ($this->salesOrderIds as $id) {
       try {
@@ -100,7 +100,7 @@ class ContributionCreateAction extends AbstractAction {
    * @param array $priceField
    *   Array of price fields.
    */
-  public function createContributionWithLineItems(int $salesOrderId, array $priceField): array {
+  private function createContributionWithLineItems(int $salesOrderId, array $priceField): array {
     $salesOrderContribution = new salesOrderlineItemGenerator($salesOrderId, $this->toBeInvoiced, $this->percentValue);
     $lineItems = $salesOrderContribution->generateLineItems();
 
@@ -135,7 +135,7 @@ class ContributionCreateAction extends AbstractAction {
    * @return array
    *   Array of price fields
    */
-  public function getDefaultContributionPriceField(): array {
+  private function getDefaultPriceSetFields(): array {
     $priceSet = PriceSet::get()
       ->addWhere('name', '=', 'default_contribution_amount')
       ->addWhere('is_quick_config', '=', 1)
@@ -161,7 +161,7 @@ class ContributionCreateAction extends AbstractAction {
    * @param int $contributionId
    *   Contribution ID.
    */
-  public function linkCaseSalesOrderToContribution(int $salesOrderId, int $contributionId): void {
+  private function linkCaseSalesOrderToContribution(int $salesOrderId, int $contributionId): void {
     Api4CaseSalesOrderContribution::create()
       ->addValue('case_sales_order_id', $salesOrderId)
       ->addValue('to_be_invoiced', $this->toBeInvoiced)
@@ -176,7 +176,7 @@ class ContributionCreateAction extends AbstractAction {
    * @param int $salesOrderId
    *   Sales Order Id.
    */
-  public function updateCaseSalesOrderStatus(int $salesOrderId): void {
+  private function updateCaseSalesOrderStatus(int $salesOrderId): void {
     CaseSalesOrder::update()
       ->addWhere('id', '=', $salesOrderId)
       ->addValue('status_id', $this->statusId)
