@@ -75,10 +75,10 @@ class ContributionCreateAction extends AbstractAction {
    * {@inheritDoc}
    */
   private function createContribution() {
-    $transaction = CRM_Core_Transaction::create();
     $priceField = $this->getDefaultPriceSetFields();
 
     foreach ($this->salesOrderIds as $id) {
+      $transaction = CRM_Core_Transaction::create();
       try {
         $contribution = $this->createContributionWithLineItems($id, $priceField);
         $this->linkCaseSalesOrderToContribution($id, $contribution['id']);
