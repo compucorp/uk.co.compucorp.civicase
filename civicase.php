@@ -570,4 +570,11 @@ function civicase_civicrm_searchKitTasks(array &$tasks, bool $checkPermissions, 
     'title' => ts('Add Discount'),
     'uiDialog' => ['templateUrl' => '~/civicase-features/quotations/directives/quotations-discount.directive.html'],
   ];
+
+  $tasks['CaseSalesOrder']['create_contribution'] = [
+    'module' => 'civicase-features',
+    'icon'  => 'fa-credit-card',
+    'title' => ts('Create Contribution(Bulk)'),
+    'uiDialog' => ['templateUrl' => '~/civicase-features/quotations/directives/quotations-contribution-bulk.directive.html'],
+  ];
 }

@@ -1,5 +1,6 @@
 <?php
 
+use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\OptionValue;
 use CRM_Civicase_Test_Fabricator_Case as CaseFabricator;
 use CRM_Civicase_Test_Fabricator_Product as ProductFabricator;
@@ -85,6 +86,36 @@ trait Helpers_CaseSalesOrderTrait {
       'discounted_percentage' => NULL,
       'subtotal_amount' => $quantity * $unitPrice,
     ], $default);
+  }
+
+  /**
+   * Creates case sales order.
+   *
+   * @param array $params
+   *   Extra paramters.
+   *
+   * @return array
+   *   Created case sales order
+   */
+  public function createCaseSalesOrder(array $params = []): array {
+    $salesOrder = $this->getCaseSalesOrderData();
+    $salesOrder['items'][] = $this->getCaseSalesOrderLineData();
+    $salesOrder['items'][] = $this->getCaseSalesOrderLineData();
+
+    if (!empty($params['items']['discounted_percentage'])) {
+      $salesOrder['items'][0]['discounted_percentage'] = $params['items']['discounted_percentage'];
+    }
+
+    if (!empty($params['items']['tax_rate'])) {
+      $salesOrder['items'][0]['tax_rate'] = $params['items']['tax_rate'];
+    }
+
+    $salesOrder['id'] = CaseSalesOrder::save()
+      ->addRecord($salesOrder)
+      ->execute()
+      ->jsonSerialize()[0]['id'];
+
+    return $salesOrder;
   }
 
 }
