@@ -90,6 +90,9 @@ function _get_case_type_ids_from_webform(array $webform) {
   $caseTypeIds = [];
 
   foreach ($webform['case'] as $cases) {
+    if (!is_array($cases)) {
+      continue;
+    }
     foreach ($cases['case'] as $case) {
       if (!empty($case['case_type_id'])) {
         array_push($caseTypeIds, $case['case_type_id']);
