@@ -17,7 +17,7 @@ $options = [];
 
 set_currency_codes($options);
 set_case_sales_order_status($options);
-set_case_types_with_quotations_enabled($options);
+set_case_types_with_features_enabled($options);
 
 /**
  * Get a list of JS files.
@@ -45,12 +45,15 @@ function set_currency_codes(&$options) {
 }
 
 /**
- * Exposes Case types that have quotations enabled to Angular.
+ * Exposes Case types that have features enabled to Angular.
  */
-function set_case_types_with_quotations_enabled(&$options) {
+function set_case_types_with_features_enabled(&$options) {
   $caseTypeCategoryFeatures = new CaseTypeCategoryFeatures();
-  $caseTypeCategories = $caseTypeCategoryFeatures->retrieveCaseInstanceWithEnabledFeatures(['quotations']);
-  $options['featureCaseTypes']['quotations'] = array_keys($caseTypeCategories);
+
+  array_map(function ($feature) use ($caseTypeCategoryFeatures, &$options) {
+    $caseTypeCategories = $caseTypeCategoryFeatures->retrieveCaseInstanceWithEnabledFeatures([$feature]);
+    $options['featureCaseTypes'][$feature] = array_keys($caseTypeCategories);
+  }, ['quotations', 'invoices']);
 }
 
 /**
@@ -73,6 +76,7 @@ $requires = [
   'civicase-base',
   'afsearchQuotations',
   'afsearchContactQuotations',
+  'afsearchQuotationInvoices',
 ];
 
 return [
