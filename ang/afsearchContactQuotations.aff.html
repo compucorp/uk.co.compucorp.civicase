@@ -1,20 +1,25 @@
 <div af-fieldset="">
-  <div class="af-container row civicase__case-filter-form-elements">
-    <af-field name="id" class="col-md-2" defn="{label: 'Quotation Id', input_attrs: {}}"/>
-    <af-field name="owner_id" class="col-md-2" ng-show="expanded"/>
-    <af-field name="description" class="col-md-2" ng-show="expanded"/>
-    <div class="civicase__features-filters">
-      <div />
-      <button class="btn btn-primary" ng-click="expanded = !expanded">
-        <span class="btn-text" ng-if="expanded">{{ ts(' Hide Filter ') }}</span>
-        <span class="btn-text" ng-if="!expanded">{{ ts(' Show Filter ') }}</span>
-        <span class="btn-icon"><i ng-if="expanded" class="fa fa-chevron-up"/> <i ng-if="!expanded" class="fa fa-chevron-down"/> </span>
-      </button>
+  <div class="civicase__features">
+    <div class="af-container row civicase__case-filter-form-elements">
+      <af-field name="id" class="col-md-2" defn="{label: 'Quotation Id', input_attrs: {}}"/>
+      <af-field name="owner_id" class="col-md-2" ng-show="expanded"/>
+      <af-field name="description" class="col-md-2" ng-show="expanded"/>
+      <div class="civicase__features-filters">
+        <div />
+        <button class="btn btn-primary" ng-click="expanded = !expanded">
+          <span class="btn-text" ng-if="expanded">{{ ts(' Hide Filter ') }}</span>
+          <span class="btn-text" ng-if="!expanded">{{ ts(' Show Filter ') }}</span>
+          <span class="btn-icon"><i ng-if="expanded" class="fa fa-chevron-up"/> <i ng-if="!expanded" class="fa fa-chevron-down"/> </span>
+        </button>
+      </div>
     </div>
-  </div>
-  <div class="af-container row civicase__case-filter-form-elements" ng-show="expanded">
-    <af-field name="status_id" defn="{input_attrs: {multiple: true}}" class="col-md-2" />
-    <af-field name="quotation_date" defn="{input_attrs: {time: false}, search_range: true, label: 'Date'}" class="col-md-3 civicase__ui-range" />
+    <div class="af-container row civicase__case-filter-form-elements" ng-show="expanded">
+      <af-field name="status_id" defn="{input_attrs: {multiple: true}}" class="col-md-2" />
+      <af-field name="quotation_date" defn="{input_attrs: {time: false}, search_range: true, label: 'Date'}" class="col-md-3 civicase__ui-range" />
+      <div class="col-md-1">
+        <button type="button" class="btn btn-link civicase__features-filters-clear" style="margin-top: 2em;">Clear All</button>
+      </div>
+    </div>
   </div>
   <crm-search-display-table search-name="Civicase_Quotations" display-name="Civicase_Contact_Quotations_Table" filters="{client_id: routeParams.cid}"></crm-search-display-table>
 </div>

@@ -28,7 +28,7 @@
         $location.search().cid = $scope.contactId;
       }
 
-      preventDatePickerNavigation();
+      addEventToElementsWhenInDOMTree();
     }());
 
     /**
@@ -45,12 +45,20 @@
     }
 
     /**
-     * Prevents date picker from triggering route navigation.
+     * Add events to elements that are occasionally removed from DOM tree
      */
-    function preventDatePickerNavigation () {
+    function addEventToElementsWhenInDOMTree () {
       const observer = new window.MutationObserver(function (mutations) {
         if ($('#ui-datepicker-div:visible a').length) {
+          // Prevents date picker from triggering route navigation.
           $('#ui-datepicker-div:visible a').click((event) => { event.preventDefault(); });
+        }
+
+        if ($('.civicase__features-filters-clear').length) {
+          // Handle clear filter button.
+          $('.civicase__features-filters-clear').click(event => {
+            CRM.$('.civicase__features input, .civicase__features textarea').val('').change();
+          });
         }
       });
 
