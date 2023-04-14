@@ -1,4 +1,4 @@
-(function (angular, _) {
+(function (angular, _, $) {
   var module = angular.module('civicase-features');
 
   module.directive('quotationsList', function () {
@@ -27,9 +27,12 @@
       if ($scope.contactId) {
         $location.search().cid = $scope.contactId;
       }
+
+      preventDatePickerNavigation();
     }());
+
     /**
-     * Redirect user to new quotation screen
+     * Redirects user to new quotation screen
      */
     function redirectToQuotationCreationScreen () {
       let url = '/civicrm/case-features/a#/quotations/new';
@@ -40,5 +43,21 @@
 
       $window.location.href = url;
     }
+
+    /**
+     * Prevents date picker from triggering route navigation.
+     */
+    function preventDatePickerNavigation () {
+      const observer = new window.MutationObserver(function (mutations) {
+        if ($('#ui-datepicker-div:visible a').length) {
+          $('#ui-datepicker-div:visible a').click((event) => { event.preventDefault(); });
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    }
   }
-})(angular, CRM._);
+})(angular, CRM._, CRM.$);
