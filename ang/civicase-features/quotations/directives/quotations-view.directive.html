@@ -1,15 +1,13 @@
 <div id="bootstrap-theme" class="civicase__container">
+  <h1 crm-page-title>{{ ts('View Quotation') }}</h1>
 
   <div class="row">
-    <div class="col-md-12">
-      <h2 class="text-center" style="margin: 2em;"><strong>View Quotation</strong></h2>
-    </div>
 
       <div class="panel panel-default">
-        <div class="panel-body" style="background: none; padding: 2em;">
+        <div class="panel-body" >
           <div class="row">
-            <div class="col-md-6 col-sm-12" style="border: 1px solid; padding: 2em; background: #fff;">
-              <table class="table">
+            <div class="col-md-6 col-sm-12">
+              <table class="table" id="quotation__detail">
                 <tbody>
                   <tr>
                     <td>Quotatioin Id</td>
@@ -33,16 +31,16 @@
                     <td colspan="2"><strong>Case/Opportunity</strong></td>
                   </tr>
                   <tr>
-                    <th>Case Id</th>
-                    <th><a href="{{dashboardLink}}" target="_blank">{{salesOrder.case_id}}</a></th>
+                    <td>Case Id</td>
+                    <td><a href="{{dashboardLink}}" target="_blank">{{salesOrder.case_id}}</a></td>
                   </tr>
                   <tr>
-                    <th>Case Type</th>
-                    <th>{{salesOrder['case_id.case_type_id:label']}}</th>
+                    <td>Case Type</td>
+                    <td>{{salesOrder['case_id.case_type_id:label']}}</td>
                   </tr>
                   <tr>
-                    <th>Case Subject</th>
-                    <th>{{salesOrder['case_id.subject']}}</th>
+                    <td>Case Subject</td>
+                    <td>{{salesOrder['case_id.subject']}}</td>
                   </tr>
                 </tbody>
 
@@ -68,7 +66,7 @@
             <div class="col-md-12" style="margin: 1em 0em;">
               <h3><strong>Items Overview</strong></h3>
             </div>
-            <div class="col-md-12" style="border: 1px solid; padding: 2em; background: #fff;">
+            <div class="col-md-12" style="border: 1px solid; padding: 0em;">
               <table class="table table-bordered">
                 <tr>
                   <th>Product</th>
@@ -98,8 +96,8 @@
             <div class="col-md-12" style="margin: 1em 0em;">
               <h3><strong>Amount Summary</strong></h3>
             </div>
-            <div class="col-md-6 col-sm-12" style="border: 1px solid; padding: 2em; background: #fff;">
-              <table class="table">
+            <div class="col-md-6 col-sm-12">
+              <table class="table" id="amount__summary">
                 <tr>
                   <td>Total</td>
                   <td>{{ currencySymbol }} {{ salesOrder.total_before_tax }}</td>
@@ -121,7 +119,7 @@
               <h3><strong>Notes</strong></h3>
             </div>
           </div>
-          <div class="col-md-6 col-sm-12" style="border: 1px solid; padding: 2em; background: #fff;">
+          <div class="col-md-6 col-sm-12">
             <p>
               {{salesOrder.notes}}
             </p>
@@ -132,3 +130,22 @@
   </div>
 
 </div>
+
+<style>
+  table#quotation__detail.table > tbody > tr > td,
+  table#amount__summary.table > tbody > tr > td {
+    border: 0;
+    border-top: 0;
+  }
+
+  table#quotation__detail.table>tbody+tbody {
+    border-top: 0;
+  }
+
+  table#quotation__detail.table>tbody+tbody:before {
+    content:"@";
+    display:block;
+    line-height:2em;
+    text-indent:-99999px;
+}
+</style>
