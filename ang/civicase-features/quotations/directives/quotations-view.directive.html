@@ -15,7 +15,7 @@
                   </tr>
                   <tr>
                     <td>Client</td>
-                    <td>{{salesOrder['client_id.display_name']}}</td>
+                    <td><a href="{{getContactLink(salesOrder.client_id)}}" target="_blank">{{salesOrder['client_id.display_name']}}</a></td>
                   </tr>
                   <tr>
                     <td>Date</td>
@@ -47,7 +47,7 @@
                 <tbody>
                   <tr>
                     <td>Owner</td>
-                    <td>{{salesOrder['owner_id.display_name']}}</td>
+                    <td><a href="{{getContactLink(salesOrder.client_id)}}" target="_blank">{{salesOrder['owner_id.display_name']}}</a></td>
                   </tr>
                   <tr>
                     <td>Status</td>
