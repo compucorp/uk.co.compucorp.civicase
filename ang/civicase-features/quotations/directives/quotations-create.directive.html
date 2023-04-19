@@ -1,7 +1,7 @@
 <div id="bootstrap-theme" class="civicase__container">
   <h1 crm-page-title>{{ ts('Create Quotation') }}</h1>
 
-  <div class="panel panel-default">
+  <div class="panel panel-default" id="quotation__create">
     <div class="panel-body">
       <form name="quotationsForm" class="form-horizontal">
         <div class="form-group">
@@ -137,6 +137,7 @@
             <tr ng-repeat="item in salesOrder.items track by $index">
               <td>
                 <input class="form-control"
+                  style="width: 100%; min-width: 12em"
                   ng-model="salesOrder.items[$index].product_id"
                   ng-change="handleProductChange($index)"
                   placeholder="Product"
@@ -149,12 +150,13 @@
                 />
               </td>
               <td>
-                <input type="text" name="item_description_{{$index}}" ng-model="salesOrder.items[$index].item_description" class="form-control" required />
+                <textarea type="text" name="item_description_{{$index}}" ng-model="salesOrder.items[$index].item_description" class="form-control" required> </textarea>
                 <br />
                 <span class="crm-inline-error" ng-show="quotationsForm.item_description_{{$index}}.$dirty && quotationsForm.item_description_{{$index}}.$invalid && quotationsForm.item_description_{{$index}}.$error.required">Description is required</span>
               </td>
               <td>
                 <input class="form-control"
+                style="width: 100%"
                   ng-model="salesOrder.items[$index].financial_type_id"
                   ng-change="handleFinancialTypeChange($index)"
                   name="financial_type_{{$index}}"
@@ -170,24 +172,22 @@
                 <span class="crm-inline-error" ng-show="quotationsForm.financial_type_{{$index}}.$dirty && quotationsForm.financial_type_{{$index}}.$invalid && quotationsForm.financial_type_{{$index}}.$error.required">Financial Type is required</span>
               </td>
               <td>
-                <div class="input-group" style="width: 8em;">
+                <div class="input-group">
                   <span class="input-group-addon">{{ currencySymbol }}</span>
-                  <input type="number" name="unit_price_{{$index}}" required placeholder="Unit Price" ng-model="salesOrder.items[$index].unit_price" ng-change="calculateSubtotal($index)" class="form-control" />
+                  <input type="number" min="0" name="unit_price_{{$index}}" required placeholder="Unit Price" ng-model="salesOrder.items[$index].unit_price" ng-change="calculateSubtotal($index)" class="form-control" />
                 </div>
                 <br />
-                <span class="crm-inline-error" ng-show="quotationsForm.unit_price_{{$index}}.$dirty && quotationsForm.unit_price_{{$index}}.$invalid && quotationsForm.unit_price_{{$index}}.$error.required">Unit price is required</span>
+                <span class="crm-inline-error" ng-show="quotationsForm.unit_price_{{$index}}.$dirty && (quotationsForm.unit_price_{{$index}}.$invalid || quotationsForm.unit_price_{{$index}}.$error.required)">Unit price is invalid</span>
               </td>
               <td>
-                <div class="input-group" style="width: 8em;">
-                  <input type="number" name="quantity_{{$index}}" required placeholder="Quantity" ng-model="salesOrder.items[$index].quantity" class="form-control" ng-change="calculateSubtotal($index)" />
-                </div>
+                  <input type="number" min="0" name="quantity_{{$index}}" required placeholder="Quantity" ng-model="salesOrder.items[$index].quantity" class="form-control" ng-change="calculateSubtotal($index)" style="width: 6em" step="0.01" />
                 <br />
-                <span class="crm-inline-error" ng-show="quotationsForm.quantity_{{$index}}.$dirty && quotationsForm.quantity_{{$index}}.$invalid && quotationsForm.quantity_{{$index}}.$error.required">Quantity is required</span>
+                <span class="crm-inline-error" ng-show="quotationsForm.quantity_{{$index}}.$dirty && (quotationsForm.quantity_{{$index}}.$invalid || quotationsForm.quantity_{{$index}}.$error.required)">Quantity is invalid</span>
               </td>
               <td>
-                <div class="input-group" style="width: 8em;">
-                  <input type="number" min="0" max="100" name="discounted_percentage" placeholder="Discount" ng-model="salesOrder.items[$index].discounted_percentage" class="form-control" ng-change="calculateSubtotal($index)" />
-                </div>
+                  <input type="number" min="0" max="100" name="discounted_percentage_{{$index}}" placeholder="Discount" ng-model="salesOrder.items[$index].discounted_percentage" class="form-control" ng-change="calculateSubtotal($index)" step="0.01"/>
+                  <br />
+                  <span class="crm-inline-error" ng-show="quotationsForm.discounted_percentage_{{$index}}.$dirty && (quotationsForm.discounted_percentage_{{$index}}.$invalid)">Discount is invalid</span>
               </td>
               <td>
                 {{ roundTo(salesOrder.items[$index].tax_rate, 2) }}
@@ -247,3 +247,9 @@
     </div>
   </div>
 </div>
+
+<style>
+  #quotation__create .table>tbody>tr>td {
+    padding: 10px 10px;
+  }
+</style>
