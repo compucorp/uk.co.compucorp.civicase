@@ -1,4 +1,4 @@
-(function (angular, _) {
+(function (angular, _, $) {
   var module = angular.module('civicase-features');
 
   module.directive('quotationsList', function () {
@@ -27,9 +27,12 @@
       if ($scope.contactId) {
         $location.search().cid = $scope.contactId;
       }
+
+      addEventToElementsWhenInDOMTree();
     }());
+
     /**
-     * Redirect user to new quotation screen
+     * Redirects user to new quotation screen
      */
     function redirectToQuotationCreationScreen () {
       let url = '/civicrm/case-features/a#/quotations/new';
@@ -40,5 +43,29 @@
 
       $window.location.href = url;
     }
+
+    /**
+     * Add events to elements that are occasionally removed from DOM tree
+     */
+    function addEventToElementsWhenInDOMTree () {
+      const observer = new window.MutationObserver(function (mutations) {
+        if ($('#ui-datepicker-div:visible a').length) {
+          // Prevents date picker from triggering route navigation.
+          $('#ui-datepicker-div:visible a').click((event) => { event.preventDefault(); });
+        }
+
+        if ($('.civicase__features-filters-clear').length) {
+          // Handle clear filter button.
+          $('.civicase__features-filters-clear').click(event => {
+            CRM.$('.civicase__features input, .civicase__features textarea').val('').change();
+          });
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    }
   }
-})(angular, CRM._);
+})(angular, CRM._, CRM.$);
