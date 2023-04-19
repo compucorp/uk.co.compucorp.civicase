@@ -169,6 +169,7 @@
      */
     function handleProductChange (index) {
       if (!$scope.salesOrder.items[index].product_id) {
+        $scope.salesOrder.items[index]['product_id.name'] = '';
         return;
       }
       const updateProductDependentFields = (productId) => {
