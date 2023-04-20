@@ -29,6 +29,7 @@
       total_after_tax: 0
     };
     $scope.hasCase = false;
+    $scope.getContactLink = getContactLink;
 
     (function init () {
       if ($scope.salesOrderId) {
@@ -56,10 +57,21 @@
           }
           $scope.hasCase = true;
           CaseUtils.getDashboardLink($scope.salesOrder.case_id).then(link => {
-            $scope.dashboardLink = link;
+            $scope.dashboardLink = `${link}&focus=1&tab=Quotations`;
           });
         }
       });
+    }
+
+    /**
+     * Returns link to the contact dashboard
+     *
+     * @param {number} id the contact ID
+     *
+     * @returns {string} dashboard link
+     */
+    function getContactLink (id) {
+      return CRM.url(`/contact/view?reset=1&cid=${id}`);
     }
   }
 })(angular, CRM._);
