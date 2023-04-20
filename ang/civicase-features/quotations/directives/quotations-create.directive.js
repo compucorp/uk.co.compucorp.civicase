@@ -169,11 +169,17 @@
      */
     function handleProductChange (index) {
       if (!$scope.salesOrder.items[index].product_id) {
+        $scope.salesOrder.items[index]['product_id.name'] = '';
         return;
       }
       const updateProductDependentFields = (productId) => {
         $scope.salesOrder.items[index].item_description = productsCache.get(productId).description;
         $scope.salesOrder.items[index].unit_price = parseFloat(productsCache.get(productId).price);
+        const financialTypeId = productsCache.get(productId).financial_type_id ?? null;
+        if (financialTypeId) {
+          $scope.salesOrder.items[index].financial_type_id = financialTypeId;
+          handleFinancialTypeChange(index);
+        }
         calculateSubtotal(index);
       };
 
