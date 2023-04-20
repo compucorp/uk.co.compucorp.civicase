@@ -117,7 +117,9 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
       }
 
       foreach ($items as $item) {
-        $item['qty'] = -1 * $item['qty'];
+        $item['qty'] = $item['qty'];
+        $item['unit_price'] = -1 * $item['unit_price'];
+        $item['tax_amount'] = -1 * $item['tax_amount'];
         $item['line_total'] = $item['qty'] * floatval($item['unit_price']);
         $previousItems[] = $item;
       }
