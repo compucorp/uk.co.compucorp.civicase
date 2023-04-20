@@ -120,14 +120,16 @@
       </div>
     </div>
 
+    {if !empty($terms) }
     <div style="margin-top: 16px;">
       <p><strong>Terms</strong></p>
 
-      <p>{if $terms }{$terms}{/if}</p>
+      <p>{$terms}</p>
 
       <table style="width:100%; margin-bottom: 14px;">
       </table>
     </div>
+    {/if}
   </div>
 </body>
 

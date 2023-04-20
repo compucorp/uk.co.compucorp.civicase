@@ -1,5 +1,6 @@
 <?php
 
+use Civi\Api4\Setting;
 use Civi\Api4\Address;
 use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\CaseSalesOrderLine;
@@ -191,7 +192,7 @@ class CRM_Civicase_Form_CaseSalesOrderInvoice extends CRM_Core_Form {
       ->first();
 
     $model = new CRM_Civicase_WorkflowMessage_SalesOrderInvoice();
-    $terms = Civi::settings()->get('quotations_notes');
+    $terms = self::getTerms();
     $model->setDomainLogo($organisation['image_URL']);
     $model->setSalesOrder($caseSalesOrder);
     $model->setTerms($terms);
@@ -199,6 +200,23 @@ class CRM_Civicase_Form_CaseSalesOrderInvoice extends CRM_Core_Form {
     $rendered = $model->renderTemplate();
 
     return $rendered;
+  }
+
+  /**
+   * Returns the Quotation invoice terms.
+   */
+  private static function getTerms() {
+    $terms = NULL;
+    $invoicing = Setting::get()
+      ->addSelect('invoicing')
+      ->execute()
+      ->first();
+
+    if (!empty($invoicing['value'])) {
+      $terms = Civi::settings()->get('quotations_notes');
+    }
+
+    return $terms;
   }
 
   /**

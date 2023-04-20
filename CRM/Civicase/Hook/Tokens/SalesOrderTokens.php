@@ -58,7 +58,20 @@ class CRM_Civicase_Hook_Tokens_SalesOrderTokens extends AbstractTokenSubscriber 
             ->execute()
             ->first();
           foreach ($caseSalesOrder as $key => $value) {
-            $row->tokens(self::TOKEN, $key, $value);
+            try {
+              $row->tokens(self::TOKEN, $key, $value ?? '');
+            }
+            catch (\Throwable $th) {
+              \Civi::log()->error(
+                'Error resolving token: ' . self::TOKEN . '.' . $key,
+                [
+                  'context' => [
+                    'backtrace' => $th->getTraceAsString(),
+                    'message' => $th->getMessage(),
+                  ],
+                ]
+              );
+            }
           }
         }
       }
