@@ -79,10 +79,10 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
       $items[] = $this->lineItemToContributionLineItem($item);
 
       if ($item['discounted_percentage'] > 0) {
-        $item['tax'] = 0;
         $item['item_description'] = "{$item['item_description']} Discount {$item['discounted_percentage']}%";
         $item['unit_price'] = $this->percent($item['discounted_percentage'], -$item['unit_price']);
         $item['total'] = $item['quantity'] * floatval($item['unit_price']);
+        $item['tax'] = empty($item['tax_rate']) ? 0 : $this->percent($item['tax_rate'], $item['total']);
         $items[] = $this->lineItemToContributionLineItem($item);
       }
     }
@@ -117,7 +117,9 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
       }
 
       foreach ($items as $item) {
-        $item['qty'] = -1 * $item['qty'];
+        $item['qty'] = $item['qty'];
+        $item['unit_price'] = -1 * $item['unit_price'];
+        $item['tax_amount'] = -1 * $item['tax_amount'];
         $item['line_total'] = $item['qty'] * floatval($item['unit_price']);
         $previousItems[] = $item;
       }

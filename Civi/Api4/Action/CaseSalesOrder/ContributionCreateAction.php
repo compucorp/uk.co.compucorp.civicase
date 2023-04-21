@@ -2,6 +2,7 @@
 
 namespace Civi\Api4\Action\CaseSalesOrder;
 
+use Civi\Api4\OptionValue;
 use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\PriceFieldValue;
 use Civi\Api4\PriceField;
@@ -124,6 +125,7 @@ class ContributionCreateAction extends AbstractAction {
       'financial_type_id' => $this->financialTypeId,
       'receive_date' => $this->date,
       'contact_id' => $salesOrderContribution->salesOrder['client_id'],
+      'contribution_status_id' => $this->getPendingContributionStatusId(),
     ];
 
     return Contribution::create($params)->toArray();
@@ -181,6 +183,27 @@ class ContributionCreateAction extends AbstractAction {
       ->addWhere('id', '=', $salesOrderId)
       ->addValue('status_id', $this->statusId)
       ->execute();
+  }
+
+  /**
+   * Returns ID for pending contribution status.
+   *
+   * @return int
+   *   pending status ID
+   */
+  private function getPendingContributionStatusId(): ?int {
+    $pendingStatus = OptionValue::get()
+      ->addSelect('value')
+      ->addWhere('option_group_id:name', '=', 'contribution_status')
+      ->addWhere('name', '=', 'pending')
+      ->execute()
+      ->first();
+
+    if (!empty($pendingStatus)) {
+      return $pendingStatus['value'];
+    }
+
+    return NULL;
   }
 
 }

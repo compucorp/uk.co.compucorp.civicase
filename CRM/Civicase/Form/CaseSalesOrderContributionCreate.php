@@ -170,7 +170,7 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
       $errors['to_be_invoiced'] = 'Contribution amount cannot exceed the total sales order amount';
     }
 
-    if ($values['to_be_invoiced'] == self::INVOICE_PERCENT && $values['percent_value'] > $remainPercent) {
+    if ($values['to_be_invoiced'] == self::INVOICE_PERCENT && floatval($values['percent_value']) > $remainPercent) {
       $errors['percent_value'] = 'Percentage value cannot exceed ' . round($remainPercent, 2);
     }
 
