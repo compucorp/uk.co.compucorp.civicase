@@ -121,7 +121,7 @@
           <label class="col-sm-2 control-label required-mark">
             {{ts('Item')}}
           </label>
-          <div class="col-sm-9">
+          <div class="col-sm-10">
            <table class="table table-bordered">
             <tr>
               <th>Product</th>
@@ -135,7 +135,7 @@
               <th></th>
             </tr>
             <tr ng-repeat="item in salesOrder.items track by $index">
-              <td>
+              <td style="max-width: 15em;">
                 <input class="form-control"
                   style="width: 100%; min-width: 12em"
                   ng-model="salesOrder.items[$index].product_id"
@@ -154,7 +154,7 @@
                 <br />
                 <span class="crm-inline-error" ng-show="quotationsForm.item_description_{{$index}}.$dirty && quotationsForm.item_description_{{$index}}.$invalid && quotationsForm.item_description_{{$index}}.$error.required">Description is required</span>
               </td>
-              <td>
+              <td style="max-width: 15em;">
                 <input class="form-control"
                 style="width: 100%"
                   ng-model="salesOrder.items[$index].financial_type_id"
@@ -172,9 +172,9 @@
                 <span class="crm-inline-error" ng-show="quotationsForm.financial_type_{{$index}}.$dirty && quotationsForm.financial_type_{{$index}}.$invalid && quotationsForm.financial_type_{{$index}}.$error.required">Financial Type is required</span>
               </td>
               <td>
-                <div class="input-group">
+                <div class="input-group" style="width: 10em">
                   <span class="input-group-addon">{{ currencySymbol }}</span>
-                  <input type="number" min="0" name="unit_price_{{$index}}" required placeholder="Unit Price" ng-model="salesOrder.items[$index].unit_price" ng-change="calculateSubtotal($index)" class="form-control" />
+                  <input type="number" min="0" name="unit_price_{{$index}}" required placeholder="Unit Price" ng-model="salesOrder.items[$index].unit_price" ng-change="calculateSubtotal($index)" class="form-control" step="0.01" />
                 </div>
                 <br />
                 <span class="crm-inline-error" ng-show="quotationsForm.unit_price_{{$index}}.$dirty && (quotationsForm.unit_price_{{$index}}.$invalid || quotationsForm.unit_price_{{$index}}.$error.required)">Unit price is invalid</span>
