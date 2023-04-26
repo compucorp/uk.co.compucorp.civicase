@@ -54,6 +54,7 @@
     function addLineItem (quantity, unitPrice, description, financialTypeId, taxAmount) {
       const row = $($(`tr#add-item-row-${count}`));
       row.show().removeClass('hiddenElement');
+      quantity = +parseFloat(quantity).toFixed(10); // limit to 10 decimal places
 
       $('input[id^="item_label"]', row).val(ts(description));
       $('select[id^="item_financial_type_id"]', row).select2('val', financialTypeId);
