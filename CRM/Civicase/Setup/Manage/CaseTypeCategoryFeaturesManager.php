@@ -35,15 +35,6 @@ class CRM_Civicase_Setup_Manage_CaseTypeCategoryFeaturesManager extends CRM_Civi
       'is_active' => TRUE,
       'is_reserved' => TRUE,
     ]);
-
-    CRM_Core_BAO_OptionValue::ensureOptionValueExists([
-      'option_group_id' => CRM_Civicase_Service_CaseTypeCategoryFeatures::NAME,
-      'name' => 'pledges',
-      'label' => 'Pledges',
-      'is_default' => TRUE,
-      'is_active' => TRUE,
-      'is_reserved' => TRUE,
-    ]);
   }
 
   /**
