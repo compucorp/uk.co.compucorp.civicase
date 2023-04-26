@@ -214,6 +214,10 @@
       $scope.salesOrder.items[index].tax_rate = 0;
       $scope.$emit('totalChange');
 
+      if ($scope.salesOrder.items[index]['financial_type_id.name']) {
+        $scope.salesOrder.items[index]['financial_type_id.name'] = '';
+      }
+
       const updateFinancialTypeDependentFields = (financialTypeId) => {
         $scope.salesOrder.items[index].tax_rate = financialTypesCache.get(financialTypeId).tax_rate;
         $scope.$emit('totalChange');
