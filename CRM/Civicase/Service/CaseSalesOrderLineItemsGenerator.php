@@ -23,7 +23,7 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
   /**
    * Constructs CaseSalesOrderContribution service.
    */
-  public function __construct(private int $salesOrderId, private string $type, private string $percentValue) {
+  public function __construct(private int $salesOrderId, private string $type, private ?string $percentValue) {
     $this->setSalesOrder();
   }
 

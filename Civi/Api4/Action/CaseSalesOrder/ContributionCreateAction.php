@@ -114,10 +114,14 @@ class ContributionCreateAction extends AbstractAction {
       $lineItem['price_field_value_id'] = $priceField[$index]['price_field_value'][0]['id'];
       $priceSetID = \CRM_Core_DAO::getFieldValue('CRM_Price_BAO_PriceField', $priceField[$index]['id'], 'price_set_id');
       $allLineItems[$priceSetID][$priceField[$index]['id']] = $lineItem;
-      $taxAmount += (float) ($lineItem['tax_amount'] ?? 0);
-      $lineTotal += (float) ($lineItem['line_total'] ?? 0);
+      $taxAmount += (float) $lineItem['tax_amount'] ?? 0;
+      $lineTotal += (float) $lineItem['line_total'] ?? 0;
     }
     $totalAmount = $lineTotal + $taxAmount;
+
+    if (round($totalAmount, 2) < 1) {
+      throw new \Exception("Contribution total amount must be greater than zero");
+    }
 
     $params = [
       'source' => "Quotation {$salesOrderId}",

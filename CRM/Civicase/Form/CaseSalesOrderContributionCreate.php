@@ -163,6 +163,7 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
 
     $paidTotal = array_sum(array_column($caseSalesOrderContributions, 'contribution_id.total_amount'));
     $remainBalance = $caseSalesOrder['total_after_tax'] - $paidTotal;
+    $remainBalance = round($remainBalance, 2);
 
     if ($remainBalance <= 0) {
       $errors['to_be_invoiced'] = 'Unable to create a contribution due to insufficient balance.';
