@@ -139,7 +139,6 @@
       $scope.submitInProgress = true;
       crmApi4('CaseSalesOrder', 'save', { records: [$scope.salesOrder] })
         .then(function (results) {
-          $scope.submitInProgress = false;
           showSucessNotification();
           redirectToAppropraitePage();
         }, function (failure) {
