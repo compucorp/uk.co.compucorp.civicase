@@ -286,6 +286,11 @@
      * else redirects to the case view of the selected case.
      */
     function redirectToAppropraitePage () {
+      if ($scope.isUpdate) {
+        $window.location.href = $window.document.referrer;
+        return;
+      }
+
       if (!$scope.salesOrder.case_id) {
         $window.location.href = 'a#/quotations';
       }
