@@ -62,10 +62,10 @@
 
       const total = quantity * parseFloat(unitPrice);
 
-      $('input[id^="item_unit_price"]', row).val(CRM.formatMoney(unitPrice, true));
+      $('input[id^="item_unit_price"]', row).val(unitPrice);
       $('input[id^="item_line_total"]', row).val(CRM.formatMoney(total, true));
 
-      $('input[id^="item_tax_amount"]', row).val(CRM.formatMoney(taxAmount, true));
+      $('input[id^="item_tax_amount"]', row).val(taxAmount);
 
       count++;
     }
