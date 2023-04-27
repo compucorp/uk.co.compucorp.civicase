@@ -69,7 +69,7 @@ class ContributionCreateAction extends AbstractAction {
   public function _run(Result $result) { // phpcs:ignore
     $resultArray = $this->createContribution();
 
-    $result->exchangeArray($resultArray);
+    return $result->exchangeArray($resultArray);
   }
 
   /**
@@ -77,6 +77,7 @@ class ContributionCreateAction extends AbstractAction {
    */
   private function createContribution() {
     $priceField = $this->getDefaultPriceSetFields();
+    $createdContributionsCount = 0;
 
     foreach ($this->salesOrderIds as $id) {
       $transaction = CRM_Core_Transaction::create();
@@ -84,13 +85,14 @@ class ContributionCreateAction extends AbstractAction {
         $contribution = $this->createContributionWithLineItems($id, $priceField);
         $this->linkCaseSalesOrderToContribution($id, $contribution['id']);
         $this->updateCaseSalesOrderStatus($id);
+        $createdContributionsCount++;
       }
       catch (\Exception $e) {
         $transaction->rollback();
       }
     }
 
-    return [];
+    return ['created_contributions_count' => $createdContributionsCount];
   }
 
   /**
