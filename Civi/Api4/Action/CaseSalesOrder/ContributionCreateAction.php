@@ -2,18 +2,18 @@
 
 namespace Civi\Api4\Action\CaseSalesOrder;
 
-use Civi\Api4\OptionValue;
 use Civi\Api4\CaseSalesOrder;
-use Civi\Api4\PriceFieldValue;
-use Civi\Api4\PriceField;
-use Civi\Api4\PriceSet;
-use CRM_Core_Transaction;
-use Civi\Api4\Generic\Result;
-use Civi\Api4\Generic\AbstractAction;
-use Civi\Api4\Generic\Traits\DAOActionTrait;
-use CRM_Contribute_BAO_Contribution as Contribution;
-use CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator as salesOrderlineItemGenerator;
 use Civi\Api4\CaseSalesOrderContribution as Api4CaseSalesOrderContribution;
+use Civi\Api4\Generic\AbstractAction;
+use Civi\Api4\Generic\Result;
+use Civi\Api4\Generic\Traits\DAOActionTrait;
+use Civi\Api4\OptionValue;
+use Civi\Api4\PriceField;
+use Civi\Api4\PriceFieldValue;
+use Civi\Api4\PriceSet;
+use CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator as salesOrderlineItemGenerator;
+use CRM_Contribute_BAO_Contribution as Contribution;
+use CRM_Core_Transaction;
 
 /**
  * Creates contribution for multiple sales orders.

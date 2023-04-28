@@ -1,9 +1,9 @@
 <?php
 
-use Civi\Api4\LineItem;
+use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\CaseSalesOrderContribution;
 use Civi\Api4\CaseSalesOrderLine;
-use Civi\Api4\CaseSalesOrder;
+use Civi\Api4\LineItem;
 
 /**
  * Service class to generate sales order line items.
