@@ -139,7 +139,6 @@
       $scope.submitInProgress = true;
       crmApi4('CaseSalesOrder', 'save', { records: [$scope.salesOrder] })
         .then(function (results) {
-          $scope.submitInProgress = false;
           showSucessNotification();
           redirectToAppropraitePage();
         }, function (failure) {
@@ -286,6 +285,11 @@
      * else redirects to the case view of the selected case.
      */
     function redirectToAppropraitePage () {
+      if ($scope.isUpdate) {
+        $window.location.href = $window.document.referrer;
+        return;
+      }
+
       if (!$scope.salesOrder.case_id) {
         $window.location.href = 'a#/quotations';
       }
