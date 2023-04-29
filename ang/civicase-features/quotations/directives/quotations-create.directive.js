@@ -23,11 +23,13 @@
    * @param {object} FeatureCaseTypes FeatureCaseTypes service
    * @param {object} SalesOrderStatus SalesOrderStatus service
    * @param {object} CaseUtils case utility service
+   * @param {object} crmUiHelp crm ui help service
    */
-  function quotationsCreateController ($scope, $location, $window, CurrencyCodes, civicaseCrmApi, Contact, crmApi4, FeatureCaseTypes, SalesOrderStatus, CaseUtils) {
+  function quotationsCreateController ($scope, $location, $window, CurrencyCodes, civicaseCrmApi, Contact, crmApi4, FeatureCaseTypes, SalesOrderStatus, CaseUtils, crmUiHelp) {
     const defaultCurrency = 'GBP';
     const productsCache = new Map();
     const financialTypesCache = new Map();
+    $scope.hs = crmUiHelp({ file: 'CRM/Civicase/SalesOrderCtrl' });
 
     $scope.isUpdate = false;
     $scope.formValid = true;

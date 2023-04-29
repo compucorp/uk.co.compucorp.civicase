@@ -1,0 +1,11 @@
+{htxt id="sales_order_notes"}
+<p>
+  {ts}Add any notes related to the quotation here. They will be visible on the quotation PDF.{/ts}
+</p>
+{/htxt}
+
+{htxt id="sales_order_description}
+<p>
+  {ts}This is an internal field for adding a description for the quotation. It will not be displayed anywhere.{/ts}
+</p>
+{/htxt}

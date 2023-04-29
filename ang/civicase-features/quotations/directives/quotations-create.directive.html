@@ -38,6 +38,7 @@
         <div class="form-group">
           <label class="col-sm-2 control-label required-mark">
             Description
+            <a crm-ui-help="hs({title:ts('Description'), id:'sales_order_description'})"></a>
           </label>
           <div class="col-sm-5">
             <textarea name="description" ng-model="salesOrder.description" class="crm-form-wysiwyg" id="sales-order-description" required></textarea>
@@ -222,6 +223,7 @@
         <div class="form-group">
           <label class="col-sm-2 control-label">
             {{ts('Notes')}}
+            <a crm-ui-help="hs({title:ts('Notes'), id:'sales_order_notes'})"></a>
           </label>
           <div class="col-sm-5">
             <textarea name="notes" rows="5" cols="20" style="width: 100%;" ng-model="salesOrder.notes"></textarea>
