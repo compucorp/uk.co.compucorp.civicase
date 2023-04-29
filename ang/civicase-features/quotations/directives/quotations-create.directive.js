@@ -83,6 +83,7 @@
       $scope.total = 0;
       $scope.taxRates = [];
 
+      setDefaultClientID();
       prefillSalesOrderForUpdate();
     }
 
@@ -103,6 +104,25 @@
         $scope.salesOrder.status_id = (result.status_id).toString();
         CRM.wysiwyg.setVal('#sales-order-description', $scope.salesOrder.description);
         $scope.$emit('totalChange');
+      });
+    }
+
+    /**
+     * Sets client ID to case client.
+     */
+    function setDefaultClientID () {
+      if (!$scope.defaultCaseId || $scope.isUpdate) {
+        return;
+      }
+
+      crmApi4('Relationship', 'get', {
+        select: ['contact_id_a'],
+        where: [['case_id', '=', $scope.defaultCaseId], ['relationship_type_id:name', '=', 'Case Coordinator is'], ['is_current', '=', true]],
+        limit: 1
+      }).then(function (relationships) {
+        if (Array.isArray(relationships) && relationships.length > 0) {
+          $scope.salesOrder.client_id = relationships[0].contact_id_a ?? null;
+        }
       });
     }
 
