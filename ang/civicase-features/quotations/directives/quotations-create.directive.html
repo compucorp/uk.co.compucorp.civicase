@@ -121,7 +121,7 @@
           <label class="col-sm-2 control-label required-mark">
             {{ts('Item')}}
           </label>
-          <div class="col-sm-10">
+          <div class="col-sm-10" style="overflow: scroll;">
            <table class="table table-bordered">
             <tr>
               <th>Product</th>
@@ -150,7 +150,7 @@
                 />
               </td>
               <td>
-                <textarea type="text" name="item_description_{{$index}}" ng-model="salesOrder.items[$index].item_description" class="form-control" required> </textarea>
+                <textarea type="text" name="item_description_{{$index}}" ng-model="salesOrder.items[$index].item_description" class="form-control" style="resize: none" required> </textarea>
                 <br />
                 <span class="crm-inline-error" ng-show="quotationsForm.item_description_{{$index}}.$dirty && quotationsForm.item_description_{{$index}}.$invalid && quotationsForm.item_description_{{$index}}.$error.required">Description is required</span>
               </td>
@@ -192,7 +192,7 @@
               <td>
                 {{ roundTo(salesOrder.items[$index].tax_rate, 2) }}
               </td>
-              <td>{{ roundTo(salesOrder.items[$index].subtotal_amount, 2) }}</td>
+              <td>{{ formatMoney(salesOrder.items[$index].subtotal_amount, salesOrder.currency) }}</td>
               <td><a ng-if="salesOrder.items.length > 1" href ng-click="removeSalesOrderItem($index)" ><i class="fa fa-trash"></i></a></td>
             </tr>
            </table>
@@ -209,12 +209,12 @@
           <label class="col-sm-2"></label>
           <div class="col-sm-3">
             <table class="table">
-              <tr><th>Total</th><td>{{ currencySymbol }} {{ salesOrder.total }}</td></tr>
+              <tr><th>Total</th><td>{{ currencySymbol }} {{ formatMoney(salesOrder.total, salesOrder.currency) }}</td></tr>
                 <tr ng-repeat="i in taxRates">
                   <th>Tax @ {{ i.rate }}%</th>
-                  <td>{{ currencySymbol }} {{ i.value }}</td>
+                  <td>{{ currencySymbol }} {{ formatMoney(i.value, salesOrder.currency) }}</td>
                 </tr>
-              <tr><th>Grand Total</th><td>{{ currencySymbol }} {{salesOrder.grandTotal}}</td></tr>
+              <tr><th>Grand Total</th><td>{{ currencySymbol }} {{formatMoney(salesOrder.grandTotal, salesOrder.currency)}}</td></tr>
             </table>
           </div>
         </div>

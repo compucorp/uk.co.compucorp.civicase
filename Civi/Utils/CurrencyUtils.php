@@ -3,6 +3,7 @@
 namespace Civi\Utils;
 
 use CRM_Core_DAO;
+use CRM_Utils_Money;
 
 /**
  * Utility class to manage CiviCRM currency table.
@@ -28,7 +29,11 @@ class CurrencyUtils {
       $dao = CRM_Core_DAO::executeQuery($query);
       self::$currencies = [];
       while ($dao->fetch()) {
-        self::$currencies[] = ['name' => $dao->name, 'symbol' => $dao->symbol];
+        self::$currencies[] = [
+          'name' => $dao->name,
+          'symbol' => $dao->symbol,
+          'format' => CRM_Utils_Money::format(1234.56, $dao->name),
+        ];
       }
     }
 

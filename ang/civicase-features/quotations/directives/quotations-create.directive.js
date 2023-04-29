@@ -32,6 +32,7 @@
     $scope.isUpdate = false;
     $scope.formValid = true;
     $scope.roundTo = roundTo;
+    $scope.formatMoney = formatMoney;
     $scope.submitInProgress = false;
     $scope.caseApiParam = caseApiParam;
     $scope.saveQuotation = saveQuotation;
@@ -60,6 +61,7 @@
       $scope.salesOrder = {
         currency: defaultCurrency,
         status_id: SalesOrderStatus.getValueByName('new'),
+        clientId: null,
         owner_id: Contact.getCurrentContactID(),
         quotation_date: $.datepicker.formatDate('yy-mm-dd', new Date()),
         items: [{
@@ -320,6 +322,17 @@
       }, function (failure) {
         // handle failure
       });
+    }
+
+    /**
+     * Formats a number into the number format of the currently selected currency
+     *
+     * @param {number} value the number to be formatted
+     * @param {string } currency the selected currency
+     * @returns {number} the formatted number
+     */
+    function formatMoney (value, currency) {
+      return CRM.formatMoney(value, true, CurrencyCodes.getFormat(currency));
     }
   }
 })(angular, CRM.$, CRM._);
