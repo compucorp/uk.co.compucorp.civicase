@@ -55,6 +55,7 @@ class SalesOrderSaveAction extends AbstractSaveAction {
         if (!empty($result) && !empty($lineItems)) {
           array_walk($lineItems, function (&$lineItem) use ($result, $caseSalesOrderLineAPI) {
             $lineItem['sales_order_id'] = $result['id'];
+            $lineItem['subtotal_amount'] = $lineItem['unit_price'] * $lineItem['quantity'] * ((100 - $lineItem['discounted_percentage']) / 100);
             $caseSalesOrderLineAPI->addRecord($lineItem);
           });
 
