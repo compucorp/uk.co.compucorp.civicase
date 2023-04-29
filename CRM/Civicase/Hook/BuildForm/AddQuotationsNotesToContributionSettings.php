@@ -56,6 +56,10 @@ class CRM_Civicase_Hook_BuildForm_AddQuotationsNotesToContributionSettings {
     $form->assign('htmlFields', array_merge($form->get_template_vars('htmlFields'), $field));
     $value = Civi::settings()->get($fieldName) ?? NULL;
     $form->setDefaults(array_merge($form->_defaultValues, [$fieldName => $value]));
+
+    CRM_Core_Region::instance('form-buttons')->add([
+      'template' => "CRM/Civicase/Form/CaseSalesOrderInvoiceNote.tpl",
+    ]);
   }
 
 }
