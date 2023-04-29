@@ -54,6 +54,7 @@
     function addLineItem (quantity, unitPrice, description, financialTypeId, taxAmount) {
       const row = $($(`tr#add-item-row-${count}`));
       row.show().removeClass('hiddenElement');
+      quantity = +parseFloat(quantity).toFixed(10); // limit to 10 decimal places
 
       $('input[id^="item_label"]', row).val(ts(description));
       $('select[id^="item_financial_type_id"]', row).select2('val', financialTypeId);
@@ -61,10 +62,10 @@
 
       const total = quantity * parseFloat(unitPrice);
 
-      $('input[id^="item_unit_price"]', row).val(CRM.formatMoney(unitPrice, true));
+      $('input[id^="item_unit_price"]', row).val(unitPrice);
       $('input[id^="item_line_total"]', row).val(CRM.formatMoney(total, true));
 
-      $('input[id^="item_tax_amount"]', row).val(CRM.formatMoney(taxAmount, true));
+      $('input[id^="item_tax_amount"]', row).val(taxAmount);
 
       count++;
     }
