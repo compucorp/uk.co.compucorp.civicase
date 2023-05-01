@@ -37,6 +37,13 @@
     this.progress = null;
     const BATCH_SIZE = 50;
 
+    (function () {
+      CaseUtils.getSalesOrderAndLineItems(ctrl.ids[0]).then((result) => {
+        ctrl.data.financialTypeId = result.items[0].financial_type_id ?? null;
+        ctrl.data.statusId = Number(result.status_id).toString();
+      });
+    })();
+
     this.createBulkContribution = () => {
       $q(async function (resolve, reject) {
         ctrl.run = true;
