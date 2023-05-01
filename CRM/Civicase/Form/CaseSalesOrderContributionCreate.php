@@ -61,7 +61,7 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
     $this->add(
       'select',
       'status',
-      ts('Status'),
+      ts('Update status of quotation to'),
         ['' => 'Select'] +
         array_combine(
           array_column($statusOptions, 'value'),
