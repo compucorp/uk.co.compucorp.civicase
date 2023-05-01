@@ -89,6 +89,21 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
   /**
    * {@inheritDoc}
    */
+  public function setDefaultValues() {
+    $caseSalesOrder = CaseSalesOrder::get()
+      ->addWhere('id', '=', $this->id)
+      ->addSelect('status_id')
+      ->execute()
+      ->first();
+
+    return [
+      'status' => $caseSalesOrder['status_id'] ?? NULL,
+    ];
+  }
+
+  /**
+   * {@inheritDoc}
+   */
   public function addRules() {
     $this->addFormRule([$this, 'formRule']);
     $this->addFormRule([$this, 'validateAmount']);
