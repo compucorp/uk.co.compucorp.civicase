@@ -1,7 +1,7 @@
 <?php
 
-use Civi\Api4\CaseSalesOrderContribution;
 use Civi\Api4\CaseSalesOrder;
+use Civi\Api4\CaseSalesOrderContribution;
 use Civi\Api4\OptionValue;
 use CRM_Certificate_ExtensionUtil as E;
 
