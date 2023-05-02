@@ -1,9 +1,9 @@
 <?php
 
-use Civi\Api4\LineItem;
+use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\CaseSalesOrderContribution;
 use Civi\Api4\CaseSalesOrderLine;
-use Civi\Api4\CaseSalesOrder;
+use Civi\Api4\LineItem;
 
 /**
  * Service class to generate sales order line items.
@@ -23,7 +23,7 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
   /**
    * Constructs CaseSalesOrderContribution service.
    */
-  public function __construct(private int $salesOrderId, private string $type, private string $percentValue) {
+  public function __construct(private int $salesOrderId, private string $type, private ?string $percentValue) {
     $this->setSalesOrder();
   }
 

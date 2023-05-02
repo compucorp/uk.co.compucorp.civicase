@@ -18,7 +18,7 @@
         <label for="percent_toBeInvoiced">Enter % to be invoiced ?</label>
       </div>
       <div class="col-sm-5" ng-show="$ctrl.data.toBeInvoiced == 'percent'">
-        <input type="number" max="100" name="percentValue" class="form-control" ng-model="$ctrl.data.percentValue" ng-disabled="$ctrl.data.toBeInvoiced !== 'percent'" ng-required="$ctrl.data.toBeInvoiced == 'percent'" />
+        <input type="number" min="1" name="percentValue" class="form-control" ng-model="$ctrl.data.percentValue" ng-disabled="$ctrl.data.toBeInvoiced !== 'percent'" ng-required="$ctrl.data.toBeInvoiced == 'percent'" />
         <span class="crm-inline-error" ng-show="contributionForm.percentValue.$dirty && contributionForm.percentValue.$invalid && contributionForm.percentValue.$error.required">Amount is required</span>
       </div>
     </div>

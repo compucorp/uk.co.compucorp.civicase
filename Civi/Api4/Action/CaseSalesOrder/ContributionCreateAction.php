@@ -2,18 +2,18 @@
 
 namespace Civi\Api4\Action\CaseSalesOrder;
 
-use Civi\Api4\OptionValue;
 use Civi\Api4\CaseSalesOrder;
-use Civi\Api4\PriceFieldValue;
-use Civi\Api4\PriceField;
-use Civi\Api4\PriceSet;
-use CRM_Core_Transaction;
-use Civi\Api4\Generic\Result;
-use Civi\Api4\Generic\AbstractAction;
-use Civi\Api4\Generic\Traits\DAOActionTrait;
-use CRM_Contribute_BAO_Contribution as Contribution;
-use CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator as salesOrderlineItemGenerator;
 use Civi\Api4\CaseSalesOrderContribution as Api4CaseSalesOrderContribution;
+use Civi\Api4\Generic\AbstractAction;
+use Civi\Api4\Generic\Result;
+use Civi\Api4\Generic\Traits\DAOActionTrait;
+use Civi\Api4\OptionValue;
+use Civi\Api4\PriceField;
+use Civi\Api4\PriceFieldValue;
+use Civi\Api4\PriceSet;
+use CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator as salesOrderlineItemGenerator;
+use CRM_Contribute_BAO_Contribution as Contribution;
+use CRM_Core_Transaction;
 
 /**
  * Creates contribution for multiple sales orders.
@@ -69,7 +69,7 @@ class ContributionCreateAction extends AbstractAction {
   public function _run(Result $result) { // phpcs:ignore
     $resultArray = $this->createContribution();
 
-    $result->exchangeArray($resultArray);
+    return $result->exchangeArray($resultArray);
   }
 
   /**
@@ -77,6 +77,7 @@ class ContributionCreateAction extends AbstractAction {
    */
   private function createContribution() {
     $priceField = $this->getDefaultPriceSetFields();
+    $createdContributionsCount = 0;
 
     foreach ($this->salesOrderIds as $id) {
       $transaction = CRM_Core_Transaction::create();
@@ -84,13 +85,14 @@ class ContributionCreateAction extends AbstractAction {
         $contribution = $this->createContributionWithLineItems($id, $priceField);
         $this->linkCaseSalesOrderToContribution($id, $contribution['id']);
         $this->updateCaseSalesOrderStatus($id);
+        $createdContributionsCount++;
       }
       catch (\Exception $e) {
         $transaction->rollback();
       }
     }
 
-    return [];
+    return ['created_contributions_count' => $createdContributionsCount];
   }
 
   /**
@@ -112,10 +114,14 @@ class ContributionCreateAction extends AbstractAction {
       $lineItem['price_field_value_id'] = $priceField[$index]['price_field_value'][0]['id'];
       $priceSetID = \CRM_Core_DAO::getFieldValue('CRM_Price_BAO_PriceField', $priceField[$index]['id'], 'price_set_id');
       $allLineItems[$priceSetID][$priceField[$index]['id']] = $lineItem;
-      $taxAmount += (float) ($lineItem['tax_amount'] ?? 0);
-      $lineTotal += (float) ($lineItem['line_total'] ?? 0);
+      $taxAmount += (float) $lineItem['tax_amount'] ?? 0;
+      $lineTotal += (float) $lineItem['line_total'] ?? 0;
     }
     $totalAmount = $lineTotal + $taxAmount;
+
+    if (round($totalAmount, 2) < 1) {
+      throw new \Exception("Contribution total amount must be greater than zero");
+    }
 
     $params = [
       'source' => "Quotation {$salesOrderId}",

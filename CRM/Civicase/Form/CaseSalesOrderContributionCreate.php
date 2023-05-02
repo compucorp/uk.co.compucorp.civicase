@@ -44,7 +44,6 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
       'placeholder' => 'Percentage to be invoiced',
       'class' => 'form-control',
       'min' => 1,
-      'max' => 100,
     ], FALSE);
     $this->addElement('radio', 'to_be_invoiced', '', ts('Remaining Balance'),
       self::INVOICE_REMAIN,
@@ -129,10 +128,6 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
       $errors['percent_value'] = 'Percentage value is required';
     }
 
-    if ($values['to_be_invoiced'] == self::INVOICE_PERCENT && $values['percent_value'] > 100) {
-      $errors['percent_value'] = 'Percentage value cannot exceed 100 ';
-    }
-
     return $errors ?: TRUE;
   }
 
@@ -160,6 +155,10 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
   public function validateAmount(array $values) {
     $errors = [];
 
+    if ($values['to_be_invoiced'] == self::INVOICE_PERCENT) {
+      return TRUE;
+    }
+
     $caseSalesOrder = CaseSalesOrder::get()
       ->addSelect('total_after_tax')
       ->addWhere('id', '=', $this->id)
@@ -178,15 +177,11 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
       ->jsonSerialize();
 
     $paidTotal = array_sum(array_column($caseSalesOrderContributions, 'contribution_id.total_amount'));
-    $paidPercent = ($paidTotal * 100) / $caseSalesOrder['total_after_tax'];
-    $remainPercent = 100 - $paidPercent;
+    $remainBalance = $caseSalesOrder['total_after_tax'] - $paidTotal;
+    $remainBalance = round($remainBalance, 2);
 
-    if ($remainPercent <= 0) {
-      $errors['to_be_invoiced'] = 'Contribution amount cannot exceed the total sales order amount';
-    }
-
-    if ($values['to_be_invoiced'] == self::INVOICE_PERCENT && floatval($values['percent_value']) > $remainPercent) {
-      $errors['percent_value'] = 'Percentage value cannot exceed ' . round($remainPercent, 2);
+    if ($remainBalance <= 0) {
+      $errors['to_be_invoiced'] = 'Unable to create a contribution due to insufficient balance.';
     }
 
     return $errors ?: TRUE;
