@@ -1,10 +1,10 @@
 <?php
 
-use Civi\Api4\Setting;
 use Civi\Api4\Address;
 use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\CaseSalesOrderLine;
 use Civi\Api4\Contact;
+use Civi\Api4\Setting;
 use Civi\Token\TokenProcessor;
 
 /**
@@ -176,9 +176,12 @@ class CRM_Civicase_Form_CaseSalesOrderInvoice extends CRM_Core_Form {
 
     if (!empty($caseSalesOrder['client_id'])) {
       $caseSalesOrder['clientAddress'] = Address::get()
+        ->addSelect('*', 'country_id:label', 'state_province_id:label')
         ->addWhere('contact_id', '=', $caseSalesOrder['client_id'])
         ->execute()
         ->first();
+      $caseSalesOrder['clientAddress']['country'] = $caseSalesOrder['clientAddress']['country_id:label'];
+      $caseSalesOrder['clientAddress']['state'] = $caseSalesOrder['clientAddress']['state_province_id:label'];
     }
 
     $caseSalesOrder['taxRates'] = $caseSalesOrder['computedRates'][0]['taxRates'] ?? [];
@@ -197,7 +200,10 @@ class CRM_Civicase_Form_CaseSalesOrderInvoice extends CRM_Core_Form {
     $model->setSalesOrder($caseSalesOrder);
     $model->setTerms($terms);
     $model->setSalesOrderId($salesOrderId);
+    $model->setDomainLocation(self::getDomainLocation());
     $rendered = $model->renderTemplate();
+
+    $rendered['format'] = $rendered['format'] ?? self::defaultInvoiceFormat();
 
     return $rendered;
   }
@@ -220,6 +226,36 @@ class CRM_Civicase_Form_CaseSalesOrderInvoice extends CRM_Core_Form {
   }
 
   /**
+   * Gets domain location.
+   *
+   * @return array
+   *   An array of address lines.
+   */
+  private static function getDomainLocation() {
+    $domain = CRM_Core_BAO_Domain::getDomain();
+    $locParams = ['contact_id' => $domain->contact_id];
+    $locationDefaults = CRM_Core_BAO_Location::getValues($locParams);
+    if (empty($locationDefaults['address'][1])) {
+      return [];
+    }
+    $stateProvinceId = $locationDefaults['address'][1]['state_province_id'] ?? NULL;
+    $stateProvinceAbbreviationDomain = !empty($stateProvinceId) ? CRM_Core_PseudoConstant::stateProvinceAbbreviation($stateProvinceId) : '';
+    $countryId = $locationDefaults['address'][1]['country_id'];
+    $countryDomain = !empty($countryId) ? CRM_Core_PseudoConstant::country($countryId) : '';
+
+    return [
+      'street_address' => CRM_Utils_Array::value('street_address', CRM_Utils_Array::value('1', $locationDefaults['address'])),
+      'supplemental_address_1' => CRM_Utils_Array::value('supplemental_address_1', CRM_Utils_Array::value('1', $locationDefaults['address'])),
+      'supplemental_address_2' => CRM_Utils_Array::value('supplemental_address_2', CRM_Utils_Array::value('1', $locationDefaults['address'])),
+      'supplemental_address_3' => CRM_Utils_Array::value('supplemental_address_3', CRM_Utils_Array::value('1', $locationDefaults['address'])),
+      'city' => CRM_Utils_Array::value('city', CRM_Utils_Array::value('1', $locationDefaults['address'])),
+      'postal_code' => CRM_Utils_Array::value('postal_code', CRM_Utils_Array::value('1', $locationDefaults['address'])),
+      'state' => $stateProvinceAbbreviationDomain,
+      'country' => $countryDomain,
+    ];
+  }
+
+  /**
    * Get the rows for each contactID.
    *
    * @return array
@@ -237,12 +273,23 @@ class CRM_Civicase_Form_CaseSalesOrderInvoice extends CRM_Core_Form {
   }
 
   /**
+   * Returns the default format to use for Invoice.
+   */
+  private static function defaultInvoiceFormat() {
+    return [
+      'margin_top' => 10,
+      'margin_left' => 65,
+      'metric' => 'px',
+    ];
+  }
+
+  /**
    * Renders and return the generated PDF to the browser.
    */
   public static function download(): void {
     $rendered = self::getQuotationInvoice();
     ob_end_clean();
-    CRM_Utils_PDF_Utils::html2pdf($rendered['html'], 'quotation_invoice.pdf', FALSE, $rendered['format'] ?? []);
+    CRM_Utils_PDF_Utils::html2pdf($rendered['html'], 'quotation_invoice.pdf', FALSE, $rendered['format']);
     CRM_Utils_System::civiExit();
   }
 
