@@ -1,7 +1,7 @@
 <?php
 
-use Civi\Api4\CaseSalesOrderContribution;
 use Civi\Api4\CaseSalesOrder;
+use Civi\Api4\CaseSalesOrderContribution;
 use Civi\Api4\OptionValue;
 use CRM_Certificate_ExtensionUtil as E;
 
@@ -61,7 +61,7 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
     $this->add(
       'select',
       'status',
-      ts('Status'),
+      ts('Update status of quotation to'),
         ['' => 'Select'] +
         array_combine(
           array_column($statusOptions, 'value'),
@@ -84,6 +84,21 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
     ]);
 
     parent::buildQuickForm();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function setDefaultValues() {
+    $caseSalesOrder = CaseSalesOrder::get()
+      ->addWhere('id', '=', $this->id)
+      ->addSelect('status_id')
+      ->execute()
+      ->first();
+
+    return [
+      'status' => $caseSalesOrder['status_id'] ?? NULL,
+    ];
   }
 
   /**

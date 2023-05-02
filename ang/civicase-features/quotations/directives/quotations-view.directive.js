@@ -51,6 +51,7 @@
           $scope.salesOrder = caseSalesOrders.pop();
           $scope.salesOrder.taxRates = $scope.salesOrder.computedRates[0].taxRates;
           $scope.currencySymbol = CurrencyCodes.getSymbol($scope.salesOrder.currency);
+          $scope.salesOrder.quotation_date = CRM.utils.formatDate($scope.salesOrder.quotation_date);
 
           if (!$scope.salesOrder.case_id) {
             return;
