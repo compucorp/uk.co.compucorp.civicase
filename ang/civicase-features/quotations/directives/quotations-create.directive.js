@@ -23,15 +23,18 @@
    * @param {object} FeatureCaseTypes FeatureCaseTypes service
    * @param {object} SalesOrderStatus SalesOrderStatus service
    * @param {object} CaseUtils case utility service
+   * @param {object} crmUiHelp crm ui help service
    */
-  function quotationsCreateController ($scope, $location, $window, CurrencyCodes, civicaseCrmApi, Contact, crmApi4, FeatureCaseTypes, SalesOrderStatus, CaseUtils) {
+  function quotationsCreateController ($scope, $location, $window, CurrencyCodes, civicaseCrmApi, Contact, crmApi4, FeatureCaseTypes, SalesOrderStatus, CaseUtils, crmUiHelp) {
     const defaultCurrency = 'GBP';
     const productsCache = new Map();
     const financialTypesCache = new Map();
+    $scope.hs = crmUiHelp({ file: 'CRM/Civicase/SalesOrderCtrl' });
 
     $scope.isUpdate = false;
     $scope.formValid = true;
     $scope.roundTo = roundTo;
+    $scope.formatMoney = formatMoney;
     $scope.submitInProgress = false;
     $scope.caseApiParam = caseApiParam;
     $scope.saveQuotation = saveQuotation;
@@ -60,6 +63,7 @@
       $scope.salesOrder = {
         currency: defaultCurrency,
         status_id: SalesOrderStatus.getValueByName('new'),
+        clientId: null,
         owner_id: Contact.getCurrentContactID(),
         quotation_date: $.datepicker.formatDate('yy-mm-dd', new Date()),
         items: [{
@@ -79,6 +83,7 @@
       $scope.total = 0;
       $scope.taxRates = [];
 
+      setDefaultClientID();
       prefillSalesOrderForUpdate();
     }
 
@@ -99,6 +104,25 @@
         $scope.salesOrder.status_id = (result.status_id).toString();
         CRM.wysiwyg.setVal('#sales-order-description', $scope.salesOrder.description);
         $scope.$emit('totalChange');
+      });
+    }
+
+    /**
+     * Sets client ID to case client.
+     */
+    function setDefaultClientID () {
+      if (!$scope.defaultCaseId || $scope.isUpdate) {
+        return;
+      }
+
+      crmApi4('Relationship', 'get', {
+        select: ['contact_id_a'],
+        where: [['case_id', '=', $scope.defaultCaseId], ['relationship_type_id:name', '=', 'Case Coordinator is'], ['is_current', '=', true]],
+        limit: 1
+      }).then(function (relationships) {
+        if (Array.isArray(relationships) && relationships.length > 0) {
+          $scope.salesOrder.client_id = relationships[0].contact_id_a ?? null;
+        }
       });
     }
 
@@ -320,6 +344,17 @@
       }, function (failure) {
         // handle failure
       });
+    }
+
+    /**
+     * Formats a number into the number format of the currently selected currency
+     *
+     * @param {number} value the number to be formatted
+     * @param {string } currency the selected currency
+     * @returns {number} the formatted number
+     */
+    function formatMoney (value, currency) {
+      return CRM.formatMoney(value, true, CurrencyCodes.getFormat(currency));
     }
   }
 })(angular, CRM.$, CRM._);
