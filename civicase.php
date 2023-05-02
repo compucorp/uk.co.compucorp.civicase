@@ -566,17 +566,29 @@ function civicase_civicrm_alterMailParams(&$params, $context) {
  * Implements hook_civicrm_searchKitTasks().
  */
 function civicase_civicrm_searchKitTasks(array &$tasks, bool $checkPermissions, ?int $userID) {
-  $tasks['CaseSalesOrder']['add_discount'] = [
+  if (empty($tasks['CaseSalesOrder'])) {
+    return;
+  }
+
+  $actions = [];
+
+  if (!empty($tasks['CaseSalesOrder']['delete'])) {
+    $actions['delete'] = $tasks['CaseSalesOrder']['delete'];
+    $actions['delete']['title'] = 'Delete Quotation(s)';
+  }
+
+  $actions['add_discount'] = [
     'module' => 'civicase-features',
-    'icon'  => 'fa-percent',
-    'title' => ts('Add Discount'),
+    'title' => ts('Add Discount %'),
     'uiDialog' => ['templateUrl' => '~/civicase-features/quotations/directives/quotations-discount.directive.html'],
   ];
 
-  $tasks['CaseSalesOrder']['create_contribution'] = [
+  $actions['create_contribution'] = [
     'module' => 'civicase-features',
     'icon'  => 'fa-credit-card',
-    'title' => ts('Create Contribution(Bulk)'),
+    'title' => ts('Create Contribution(s)'),
     'uiDialog' => ['templateUrl' => '~/civicase-features/quotations/directives/quotations-contribution-bulk.directive.html'],
   ];
+
+  $tasks['CaseSalesOrder'] = $actions;
 }
