@@ -17,6 +17,8 @@ use Civi\WorkflowMessage\GenericWorkflowMessage;
  * @method $this setDomainLogo(?string $logo)
  * @method ?int getSalesOrderId()
  * @method $this setSalesOrderId(?int $salesOrderId)
+ * @method ?string getDomainName()
+ * @method $this setDomainName(?string $domainName)
  */
 class CRM_Civicase_WorkflowMessage_SalesOrderInvoice extends GenericWorkflowMessage {
 
@@ -57,9 +59,17 @@ class CRM_Civicase_WorkflowMessage_SalesOrderInvoice extends GenericWorkflowMess
   /**
    * Sales Order ID.
    *
-   * @var array
+   * @var int
    * @scope tokenContext
    */
   protected $salesOrderId;
+
+  /**
+   * Domain Name.
+   *
+   * @var string
+   * @scope tplParams as domain_name
+   */
+  protected $domainName;
 
 }

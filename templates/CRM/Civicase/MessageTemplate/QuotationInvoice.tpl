@@ -20,7 +20,7 @@
         <tr>
           <td width="30%"><b><font size="1" align="center">{ts}Client Name: {$sales_order.client.display_name}<{/ts}</font></b></td>
           <td width="50%" valign="bottom"><b><font size="1" align="center">{ts}Date:{/ts}</font></b></td>
-          <td valign="bottom" style="white-space: nowrap"><b><font size="1" align="right">Address</font></b></td>
+          <td valign="bottom" style="white-space: nowrap"><b><font size="1" align="right">{$domain_name}</font></b></td>
         </tr>
         <tr>
           <td><font size="1" align="center">

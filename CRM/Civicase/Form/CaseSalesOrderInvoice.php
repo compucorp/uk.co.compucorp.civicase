@@ -201,6 +201,7 @@ class CRM_Civicase_Form_CaseSalesOrderInvoice extends CRM_Core_Form {
     $model->setTerms($terms);
     $model->setSalesOrderId($salesOrderId);
     $model->setDomainLocation(self::getDomainLocation());
+    $model->setDomainName($domain->name ?? '');
     $rendered = $model->renderTemplate();
 
     $rendered['format'] = $rendered['format'] ?? self::defaultInvoiceFormat();
