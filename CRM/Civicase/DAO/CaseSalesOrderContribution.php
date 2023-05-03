@@ -91,7 +91,7 @@ class CRM_Civicase_DAO_CaseSalesOrderContribution extends CRM_Core_DAO {
    *   Whether to return the plural version of the title.
    */
   public static function getEntityTitle($plural = FALSE) {
-    return $plural ? E::ts('Case Sales Order Contributions') : E::ts('Case Sales Order Contribution');
+    return $plural ? E::ts('Quotation Contributions') : E::ts('Quotation Contribution');
   }
 
   /**
