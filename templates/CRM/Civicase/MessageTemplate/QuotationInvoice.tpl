@@ -8,10 +8,10 @@
 </head>
 
 <body>
-  <div style="padding-top:100px;margin-right:50px;border-style: none; font-family: Arial, Verdana, sans-serif;">
-    <table style="margin-top:5px;padding-bottom:50px;" cellpadding="5" cellspacing="0">
+  <div style="padding-top:25px;margin-right:50px;border-style: none; font-family: Arial, Verdana, sans-serif;">
+    <table style="margin-top:5px;padding-bottom:50px; width:100%;" cellpadding="5" cellspacing="0">
       <tr>
-        <td><img src="{$domain_logo}" height="34px" width="99px"></td>
+        <td style="text-align:right;"><img src="{$domain_logo}" style="width: width: auto; max-height: 120px;"></td>
       </tr>
     </table>
 
