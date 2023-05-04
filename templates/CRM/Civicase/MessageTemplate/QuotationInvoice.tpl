@@ -8,10 +8,10 @@
 </head>
 
 <body>
-  <div style="padding-top:100px;margin-right:50px;border-style: none; font-family: Arial, Verdana, sans-serif;">
-    <table style="margin-top:5px;padding-bottom:50px;" cellpadding="5" cellspacing="0">
+  <div style="padding-top:25px;margin-right:50px;border-style: none; font-family: Arial, Verdana, sans-serif;">
+    <table style="margin-top:5px;padding-bottom:50px; width:100%;" cellpadding="5" cellspacing="0">
       <tr>
-        <td><img src="{$domain_logo}" height="34px" width="99px"></td>
+        <td style="text-align:right;"><img src="{$domain_logo}" style="width: width: auto; max-height: 120px;"></td>
       </tr>
     </table>
 
@@ -20,7 +20,7 @@
         <tr>
           <td width="30%"><b><font size="1" align="center">{ts}Client Name: {$sales_order.client.display_name}<{/ts}</font></b></td>
           <td width="50%" valign="bottom"><b><font size="1" align="center">{ts}Date:{/ts}</font></b></td>
-          <td valign="bottom" style="white-space: nowrap"><b><font size="1" align="right">Address</font></b></td>
+          <td valign="bottom" style="white-space: nowrap"><b><font size="1" align="right">{$domain_name}</font></b></td>
         </tr>
         <tr>
           <td><font size="1" align="center">
