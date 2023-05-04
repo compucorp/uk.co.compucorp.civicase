@@ -579,7 +579,8 @@ function civicase_civicrm_searchKitTasks(array &$tasks, bool $checkPermissions, 
 
   $actions['add_discount'] = [
     'module' => 'civicase-features',
-    'title' => ts('Add Discount %'),
+    'icon' => 'fa-percent',
+    'title' => ts('Add Discount'),
     'uiDialog' => ['templateUrl' => '~/civicase-features/quotations/directives/quotations-discount.directive.html'],
   ];
 
