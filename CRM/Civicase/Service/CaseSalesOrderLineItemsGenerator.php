@@ -140,12 +140,12 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
   private function lineItemToContributionLineItem(array $item) {
     return [
       'qty' => $item['quantity'],
-      'tax_amount' => $item['tax'],
+      'tax_amount' => round($item['tax'], 2),
       'label' => $item['item_description'],
       'entity_table' => 'civicrm_contribution',
       'financial_type_id' => $item['financial_type_id'],
-      'line_total' => $item['total'],
-      'unit_price' => $item['unit_price'],
+      'line_total' => round($item['total'], 2),
+      'unit_price' => round($item['unit_price'], 2),
     ];
   }
 
