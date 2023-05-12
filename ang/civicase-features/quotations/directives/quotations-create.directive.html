@@ -229,23 +229,14 @@
             <textarea name="notes" rows="5" cols="20" style="width: 100%;" ng-model="salesOrder.notes"></textarea>
           </div>
         </div>
-
-
-        <div class="form-group">
-          <div class="col-sm-12">
-            <div class="clearfix">
-              <div class="pull-left">
-                <button type="button" class="btn btn-primary-outline cancel" history-back>
-                  <span class="btn-icon"></span> {{ts('Cancel')}}</button>
-                  </div>
-                <div class="pull-right">
-                <button type="submit" class="btn btn-primary" ng-disabled="submitInProgress" ng-click="saveQuotation()">
-                  <span class="btn-icon"></span> {{ts('Save')}}</button>
-              </div>
-            </div>
-          </div>
-        </div>
       </form>
+    </div>
+
+    <div class="panel-footer flex-between crm-submit-buttons">
+      <button type="button" class="btn btn-primary-outline cancel" history-back>
+        <span class="btn-icon"></span> {{ts('Cancel')}}</button>
+      <button type="submit" class="btn btn-primary" ng-disabled="submitInProgress" ng-click="saveQuotation()">
+        <span class="btn-icon"></span> {{ts('Save')}}</button>
     </div>
   </div>
 </div>
@@ -253,5 +244,9 @@
 <style>
   #quotation__create .table>tbody>tr>td {
     padding: 10px 10px;
+  }
+  .flex-between {
+    display: flex;
+    justify-content: space-between;
   }
 </style>
