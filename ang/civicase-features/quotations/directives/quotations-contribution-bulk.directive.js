@@ -65,7 +65,10 @@
 
         ctrl.run = false;
         ctrl.close();
-        CRM.alert(`${contributionCreated} Invoices have been generated.`, ts('Success'), 'success');
+        const contributionNotCreated = ctrl.ids.length - contributionCreated;
+        let message = `${contributionCreated} contributions have been generated`;
+        message += contributionNotCreated > 0 ? ` and no contributions were created for ${contributionNotCreated} quotes as there was no remaining amount to be invoiced` : '';
+        CRM.alert(message, ts('Success'), 'success');
       });
     };
   }
