@@ -45,11 +45,14 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
       'class' => 'form-control',
       'min' => 1,
     ], FALSE);
-    $this->addElement('radio', 'to_be_invoiced', '', ts('Remaining Balance'),
-      self::INVOICE_REMAIN,
-      ['id' => 'invoice_remain']
-    );
-    $this->addRule('to_be_invoiced', ts('Invoice value is required'), 'required');
+
+    if ($this->hasRemainingBalance()) {
+      $this->addElement('radio', 'to_be_invoiced', '', ts('Remaining Balance'),
+        self::INVOICE_REMAIN,
+        ['id' => 'invoice_remain']
+      );
+      $this->addRule('to_be_invoiced', ts('Invoice value is required'), 'required');
+    }
 
     $statusOptions = OptionValue::get()
       ->addSelect('value', 'label')
@@ -159,6 +162,17 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
       return TRUE;
     }
 
+    if (!$this->hasRemainingBalance()) {
+      $errors['to_be_invoiced'] = 'Unable to create a contribution due to insufficient balance.';
+    }
+
+    return $errors ?: TRUE;
+  }
+
+  /**
+   * Checks if the sales order has left over balance to be invoiced.
+   */
+  public function hasRemainingBalance() {
     $caseSalesOrder = CaseSalesOrder::get()
       ->addSelect('total_after_tax')
       ->addWhere('id', '=', $this->id)
@@ -181,10 +195,10 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
     $remainBalance = round($remainBalance, 2);
 
     if ($remainBalance <= 0) {
-      $errors['to_be_invoiced'] = 'Unable to create a contribution due to insufficient balance.';
+      return FALSE;
     }
 
-    return $errors ?: TRUE;
+    return TRUE;
   }
 
   /**

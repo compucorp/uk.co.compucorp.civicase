@@ -36,7 +36,7 @@
         $(`<input type="hidden" value="${toBeInvoiced}" name="to_be_invoiced" />`).insertBefore('#source');
         $(`<input type="hidden" value="${percentValue}" name="percent_value" />`).insertBefore('#source');
         $(`<input type="hidden" value="${salesOrderStatusId}" name="sales_order_status_id" />`).insertBefore('#source');
-        $('#totalAmount, #totalAmountORaddLineitem, #totalAmountORPriceSet, #price_set_id, #choose-manual, .remove_item, #add-another-item').hide();
+        $('#totalAmount, #totalAmountORaddLineitem, #totalAmountORPriceSet, #price_set_id, #choose-manual').hide();
       });
     }
 
