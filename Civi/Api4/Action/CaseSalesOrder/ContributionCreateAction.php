@@ -59,7 +59,7 @@ class ContributionCreateAction extends AbstractAction {
   /**
    * Contribution Financial Type ID.
    *
-   * @var string
+   * @var string|int
    */
   protected $financialTypeId;
 
