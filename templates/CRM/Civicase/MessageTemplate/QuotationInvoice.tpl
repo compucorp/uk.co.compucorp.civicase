@@ -88,7 +88,7 @@
         <tbody>
           {foreach from=$sales_order.items key=k item=item}
           <tr {if ($k%2) == 0} style="background-color: #eeeeee;" {/if}>
-            <td style="padding: 8px 10px; text-align: left; white-space: nowrap; border: 1px solid #000;" > <font size="1">{$item.item_description|truncate:30:"..."}</font></td>
+            <td style="padding: 8px 10px;text-align: left;border: 1px solid #000;" > <font size="1">{$item.item_description}</font></td>
             <td style="padding: 8px 10px;text-align: right;border: 1px solid #000;"><font size="1">{$item.quantity}</font></td>
             <td style="padding: 8px 10px;text-align: right;border: 1px solid #000;"><font size="1">{$item.unit_price|crmMoney:$sales_order.currency}</font></td>
             <td style="padding: 8px 10px;text-align: right;border: 1px solid #000;"><font size="1">{if empty($item.discounted_percentage) } 0 {else}{$item.discounted_percentage}{/if}%</font></td>
