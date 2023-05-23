@@ -2,8 +2,8 @@
 
 use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\CaseSalesOrderContribution as Api4CaseSalesOrderContribution;
-use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
 use CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator as CaseSalesOrderContribution;
+use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
 
 /**
  * CaseSalesOrder.ContributionCreateAction API Test Case.
@@ -19,7 +19,7 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
   /**
    * Setup data before tests run.
    */
-  public function setUp() {
+  public function setUp(): void {
     $this->generatePriceField();
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
@@ -132,6 +132,43 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
 
     // We can only guarantee that the value will be equal to 1 decimal place.
     $this->assertEquals(round(($expectedPercent * $computedTotal['totalAfterTax']) / 100, 1), round($paidTotal, 1));
+  }
+
+  /**
+   * Ensures The expected numbers of contributions are created for bulk action.
+   *
+   * @dataProvider provideBulkContributionCreateData
+   */
+  public function testExpectedContributionCountIsCreated($expectedCount, $contributionCreateData, $salesOrderData) {
+    $salesOrders = [];
+
+    foreach ($salesOrderData as $data) {
+      $salesOrder = $this->createCaseSalesOrder();
+
+      if ($data['previouslyInvoiced'] > 0) {
+        CaseSalesOrder::contributionCreateAction()
+          ->setSalesOrderIds([$salesOrder['id']])
+          ->setStatusId(1)
+          ->setToBeInvoiced(CaseSalesOrderContribution::INVOICE_PERCENT)
+          ->setPercentValue($data['previouslyInvoiced'])
+          ->setDate(date("Y-m-d"))
+          ->setFinancialTypeId(1)
+          ->execute();
+      }
+
+      $salesOrders[] = $salesOrder;
+    }
+
+    $result = CaseSalesOrder::contributionCreateAction()
+      ->setSalesOrderIds(array_column($salesOrders, 'id'))
+      ->setStatusId($contributionCreateData['statusId'])
+      ->setToBeInvoiced($contributionCreateData['toBeInvoiced'])
+      ->setPercentValue($contributionCreateData['percentValue'])
+      ->setDate($contributionCreateData['date'])
+      ->setFinancialTypeId($contributionCreateData['financialTypeId'])
+      ->execute();
+
+    $this->assertEquals($expectedCount, $result['created_contributions_count']);
   }
 
   /**
@@ -314,6 +351,122 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
             'percentValue' => 0,
             'date' => date("Y-m-d"),
             'financialTypeId' => '1',
+          ],
+        ],
+      ],
+    ];
+  }
+
+  /**
+   * Provides data to test bulk contribution create action.
+   *
+   * @return array
+   *   Array of different scenarios
+   */
+  public function provideBulkContributionCreateData(): array {
+    return [
+      '1 percentvalue contribution is created for 1 quotaition' => [
+        'expectedCount' => 1,
+        'contributionCreateData' => [
+          'statusId' => 1,
+          'toBeInvoiced' => CaseSalesOrderContribution::INVOICE_PERCENT,
+          'percentValue' => 100,
+          'date' => date("Y-m-d"),
+          'financialTypeId' => '1',
+        ],
+        'salesOrderData' => [
+          [
+            'previouslyInvoiced' => 60,
+          ],
+        ],
+      ],
+      '2 percentvalue contributions are created for 2 quotations' => [
+        'expectedCount' => 2,
+        'contributionCreateData' => [
+          'statusId' => 1,
+          'toBeInvoiced' => CaseSalesOrderContribution::INVOICE_PERCENT,
+          'percentValue' => 100,
+          'date' => date("Y-m-d"),
+          'financialTypeId' => '1',
+        ],
+        'salesOrderData' => [
+          [
+            'previouslyInvoiced' => 60,
+          ],
+          [
+            'previouslyInvoiced' => 100,
+          ],
+        ],
+      ],
+      '2 percentvalues contribution are created for 2 quotations with 100% already invoiced' => [
+        'expectedCount' => 2,
+        'contributionCreateData' => [
+          'statusId' => 1,
+          'toBeInvoiced' => CaseSalesOrderContribution::INVOICE_PERCENT,
+          'percentValue' => 100,
+          'date' => date("Y-m-d"),
+          'financialTypeId' => '1',
+        ],
+        'salesOrderData' => [
+          [
+            'previouslyInvoiced' => 100,
+          ],
+          [
+            'previouslyInvoiced' => 100,
+          ],
+        ],
+      ],
+      'No remain value contribution is created for 2 quotaions with 100% already invoiced' => [
+        'expectedCount' => 0,
+        'contributionCreateData' => [
+          'statusId' => 1,
+          'toBeInvoiced' => CaseSalesOrderContribution::INVOICE_REMAIN,
+          'percentValue' => 0,
+          'date' => date("Y-m-d"),
+          'financialTypeId' => '1',
+        ],
+        'salesOrderData' => [
+          [
+            'previouslyInvoiced' => 100,
+          ],
+          [
+            'previouslyInvoiced' => 100,
+          ],
+        ],
+      ],
+      '1 remain value contribution is created for 2 quotaions, where only one has remain value' => [
+        'expectedCount' => 1,
+        'contributionCreateData' => [
+          'statusId' => 1,
+          'toBeInvoiced' => CaseSalesOrderContribution::INVOICE_REMAIN,
+          'percentValue' => 0,
+          'date' => date("Y-m-d"),
+          'financialTypeId' => '1',
+        ],
+        'salesOrderData' => [
+          [
+            'previouslyInvoiced' => 80,
+          ],
+          [
+            'previouslyInvoiced' => 100,
+          ],
+        ],
+      ],
+      '2 remain value contribution is created for 2 quotaions, where the two has remain value' => [
+        'expectedCount' => 2,
+        'contributionCreateData' => [
+          'statusId' => 1,
+          'toBeInvoiced' => CaseSalesOrderContribution::INVOICE_REMAIN,
+          'percentValue' => 0,
+          'date' => date("Y-m-d"),
+          'financialTypeId' => '1',
+        ],
+        'salesOrderData' => [
+          [
+            'previouslyInvoiced' => 0,
+          ],
+          [
+            'previouslyInvoiced' => 0,
           ],
         ],
       ],
