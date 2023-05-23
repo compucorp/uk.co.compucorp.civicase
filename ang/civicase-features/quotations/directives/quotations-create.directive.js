@@ -64,7 +64,6 @@
         currency: defaultCurrency,
         status_id: SalesOrderStatus.getValueByName('new'),
         clientId: null,
-        owner_id: Contact.getCurrentContactID(),
         quotation_date: $.datepicker.formatDate('yy-mm-dd', new Date()),
         items: [{
           product_id: null,
@@ -94,13 +93,13 @@
       const salesOrderId = $location.search().id;
 
       if (!salesOrderId) {
+        $scope.salesOrder.owner_id = Contact.getCurrentContactID();
         return;
       }
 
       CaseUtils.getSalesOrderAndLineItems(salesOrderId).then((result) => {
         $scope.isUpdate = true;
         $scope.salesOrder = result;
-        $scope.salesOrder.owner_id = parseInt(result.owner_id);
         $scope.salesOrder.quotation_date = $.datepicker.formatDate('yy-mm-dd', new Date(result.quotation_date));
         $scope.salesOrder.status_id = (result.status_id).toString();
         CRM.wysiwyg.setVal('#sales-order-description', $scope.salesOrder.description);
