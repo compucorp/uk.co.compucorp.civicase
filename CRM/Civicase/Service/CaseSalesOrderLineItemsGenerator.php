@@ -105,6 +105,7 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
       ->addSelect('contribution_id')
       ->addWhere('case_sales_order_id.id', '=', $this->salesOrderId)
       ->addChain('items', LineItem::get()
+        ->addSelect('qty', 'unit_price', 'tax_amount', 'line_total', 'entity_table', 'label', 'financial_type_id')
         ->addWhere('contribution_id', '=', '$contribution_id')
     )
       ->execute();
@@ -113,10 +114,11 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
       $items = $contribution['items'];
 
       if (empty($items)) {
-        return [];
+        continue;
       }
 
       foreach ($items as $item) {
+        unset($item['id']);
         $item['qty'] = $item['qty'];
         $item['unit_price'] = -1 * $item['unit_price'];
         $item['tax_amount'] = -1 * $item['tax_amount'];

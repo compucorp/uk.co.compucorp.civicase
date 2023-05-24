@@ -90,6 +90,8 @@ class ContributionCreateAction extends AbstractAction {
       catch (\Exception $e) {
         $transaction->rollback();
       }
+
+      $transaction->commit();
     }
 
     return ['created_contributions_count' => $createdContributionsCount];
@@ -104,7 +106,7 @@ class ContributionCreateAction extends AbstractAction {
    *   Array of price fields.
    */
   private function createContributionWithLineItems(int $salesOrderId, array $priceField): array {
-    $salesOrderContribution = new salesOrderlineItemGenerator($salesOrderId, $this->toBeInvoiced, $this->percentValue);
+    $salesOrderContribution = new salesOrderlineItemGenerator($salesOrderId, $this->toBeInvoiced, $this->percentValue ?? 0);
     $lineItems = $salesOrderContribution->generateLineItems();
 
     $taxAmount = $lineTotal = 0;
