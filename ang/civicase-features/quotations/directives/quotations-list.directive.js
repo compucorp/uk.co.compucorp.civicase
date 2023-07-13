@@ -24,10 +24,6 @@
     $scope.redirectToQuotationCreationScreen = redirectToQuotationCreationScreen;
 
     (function init () {
-      if ($scope.contactId) {
-        $location.search().cid = $scope.contactId;
-      }
-
       addEventToElementsWhenInDOMTree();
     }());
 
