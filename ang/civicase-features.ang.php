@@ -73,6 +73,8 @@ $requires = [
   'crmUi',
   'crmUtil',
   'civicase',
+  'ui.sortable',
+  'dialogService',
   'civicase-base',
   'afsearchQuotations',
   'afsearchContactQuotations',

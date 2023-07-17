@@ -30,6 +30,8 @@ class CRM_Civicase_Form_CaseSalesOrderDelete extends CRM_Core_Form {
    * {@inheritDoc}
    */
   public function buildQuickForm() {
+    $this->assign('id', $this->id);
+
     $this->addButtons([
       [
         'type' => 'submit',

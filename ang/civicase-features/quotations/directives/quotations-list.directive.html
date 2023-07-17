@@ -11,7 +11,7 @@
   <div class="panel panel-default">
     <div class="panel-body">
       <div ng-switch="view">
-        <afsearch-contact-quotations ng-switch-when="contact"> </afsearch-contact-quotations>
+        <afsearch-contact-quotations options="{contact_id: contactId}" ng-switch-when="contact"> </afsearch-contact-quotations>
         <afsearch-quotations ng-switch-default> </afsearch-quotations>
       </div>
       
