@@ -11,10 +11,13 @@
 </div>
 
 <script type="text/javascript">
+  const id = { $id }
   {literal}
     CRM.$(function($) {
       $("a[target='crm-popup']").on('crmPopupFormSuccess', function (e) {
-        CRM.refreshParent(e);
+        const val = CRM.$('.civicase__features input#id-0').val();
+        CRM.$('.civicase__features input#id-0').val(id).change();
+        CRM.$('.civicase__features input#id-0').val(val).change();
       });
     });
   {/literal}

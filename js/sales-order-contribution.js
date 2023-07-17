@@ -40,10 +40,6 @@
       });
     }
 
-    $("a[target='crm-popup']").on('crmPopupFormSuccess', function (e) {
-      CRM.refreshParent(e);
-    });
-
     /**
      * @param {number} quantity Item quantity
      * @param {number} unitPrice Item unit price
