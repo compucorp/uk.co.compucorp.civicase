@@ -1,23 +1,24 @@
 <?php
 
-use CRM_Civicase_Setup_CaseTypeCategorySupport as CaseTypeCategorySupport;
-use CRM_Civicase_Setup_CreateCasesOptionValue as CreateCasesOptionValue;
+use CRM_Civicase_ExtensionUtil as E;
+use CRM_Civicase_Helper_CaseUrl as CaseUrlHelper;
+use CRM_Civicase_Service_CaseCategoryInstance as CaseCategoryInstance;
 use CRM_Civicase_Setup_AddCaseCategoryWordReplacementOptionGroup as AddCaseCategoryWordReplacementOptionGroup;
-use CRM_Civicase_Setup_MoveCaseTypesToCasesCategory as MoveCaseTypesToCasesCategory;
-use CRM_Civicase_Setup_CreateSafeFileExtensionOptionValue as CreateSafeFileExtensionOptionValue;
-use CRM_Civicase_Uninstall_RemoveCustomGroupSupportForCaseCategory as RemoveCustomGroupSupportForCaseCategory;
-use CRM_Civicase_Setup_ProcessCaseCategoryForCustomGroupSupport as ProcessCaseCategoryForCustomGroupSupport;
-use CRM_Civicase_Setup_CaseCategoryInstanceSupport as CaseCategoryInstanceSupport;
 use CRM_Civicase_Setup_AddChangeCaseRoleDateActivityTypes as AddChangeCaseRoleDateActivityTypes;
 use CRM_Civicase_Setup_AddManageWorkflowMenu as AddManageWorkflowMenu;
-use CRM_Civicase_Service_CaseCategoryInstance as CaseCategoryInstance;
-use CRM_Civicase_Helper_CaseUrl as CaseUrlHelper;
-use CRM_Civicase_Setup_AddSingularLabels as AddSingularLabels;
-use CRM_Civicase_ExtensionUtil as E;
 use CRM_Civicase_Setup_AddMyActivitiesMenu as AddMyActivitiesMenu;
-use CRM_Civicase_Setup_Manage_CaseTypeCategoryFeaturesManager as CaseTypeCategoryFeaturesManager;
+use CRM_Civicase_Setup_AddSingularLabels as AddSingularLabels;
+use CRM_Civicase_Setup_CaseCategoryInstanceSupport as CaseCategoryInstanceSupport;
+use CRM_Civicase_Setup_CaseTypeCategorySupport as CaseTypeCategorySupport;
+use CRM_Civicase_Setup_CreateCasesOptionValue as CreateCasesOptionValue;
+use CRM_Civicase_Setup_CreateSafeFileExtensionOptionValue as CreateSafeFileExtensionOptionValue;
 use CRM_Civicase_Setup_Manage_CaseSalesOrderStatusManager as CaseSalesOrderStatusManager;
+use CRM_Civicase_Setup_Manage_CaseTypeCategoryFeaturesManager as CaseTypeCategoryFeaturesManager;
+use CRM_Civicase_Setup_Manage_MembershipTypeCustomFieldManager as MembershipTypeCustomFieldManager;
 use CRM_Civicase_Setup_Manage_QuotationTemplateManager as QuotationTemplateManager;
+use CRM_Civicase_Setup_MoveCaseTypesToCasesCategory as MoveCaseTypesToCasesCategory;
+use CRM_Civicase_Setup_ProcessCaseCategoryForCustomGroupSupport as ProcessCaseCategoryForCustomGroupSupport;
+use CRM_Civicase_Uninstall_RemoveCustomGroupSupportForCaseCategory as RemoveCustomGroupSupportForCaseCategory;
 
 /**
  * Collection of upgrade steps.
@@ -154,6 +155,7 @@ class CRM_Civicase_Upgrader extends CRM_Civicase_Upgrader_Base {
     (new CaseTypeCategoryFeaturesManager())->create();
     (new CaseSalesOrderStatusManager())->create();
     (new QuotationTemplateManager())->create();
+    (new MembershipTypeCustomFieldManager())->create();
   }
 
   /**
