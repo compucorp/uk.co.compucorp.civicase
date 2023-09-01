@@ -11,6 +11,7 @@
           <div class="col-sm-5">
             <input class="form-control"
               ng-model="salesOrder.client_id"
+              ng-change="handleClientChange()"
               placeholder="Client"
               name="client"
               crm-entityref="{
