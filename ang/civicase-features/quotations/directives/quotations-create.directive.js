@@ -33,6 +33,7 @@
 
     $scope.isUpdate = false;
     $scope.formValid = true;
+    $scope.membeshipTypesProductDiscountPercentage = 0;
     $scope.roundTo = roundTo;
     $scope.formatMoney = formatMoney;
     $scope.submitInProgress = false;
@@ -40,6 +41,7 @@
     $scope.saveQuotation = saveQuotation;
     $scope.calculateSubtotal = calculateSubtotal;
     $scope.currencyCodes = CurrencyCodes.getAll();
+    $scope.handleClientChange = handleClientChange;
     $scope.handleProductChange = handleProductChange;
     $scope.handleCurrencyChange = handleCurrencyChange;
     $scope.salesOrderStatus = SalesOrderStatus.getAll();
@@ -146,7 +148,7 @@
         financial_type_id: null,
         unit_price: null,
         quantity: null,
-        discounted_percentage: null,
+        discounted_percentage: $scope.membeshipTypesProductDiscountPercentage,
         tax_rate: 0,
         subtotal_amount: 0
       });
@@ -219,6 +221,40 @@
             updateProductDependentFields(productId);
           }
         });
+    }
+
+    /**
+     * Applies any membership type product discounts to
+     * each sale order line item if the selected client has any memberships.
+     */
+    function handleClientChange () {
+      const clientID = $scope.salesOrder.client_id;
+      crmApi4('Membership', 'get', {
+        select: ['membership_type_id.Product_Discounts.Product_Discount_Amount'],
+        where: [['contact_id', '=', clientID]]
+      }).then(function (results) {
+        let discountPercentage = 0;
+        results.forEach((membership) => {
+          discountPercentage += membership['membership_type_id.Product_Discounts.Product_Discount_Amount'];
+        });
+        // make sure that the discount percentage cannot be more than 100%
+        if (discountPercentage > 100) {
+          discountPercentage = 100;
+        }
+        $scope.membeshipTypesProductDiscountPercentage = discountPercentage;
+        applySaleOrderItemPencentageDiscount();
+        CRM.alert(ts('Automatic Members Discount Applied'), ts('Product Discount'), 'success');
+      });
+    }
+
+    /**
+     * Applies Membership Type discounted percentage to
+     * each sale order item discounted percentage.
+     */
+    function applySaleOrderItemPencentageDiscount () {
+      $scope.salesOrder.items.forEach((item) => {
+        item.discounted_percentage = item.discounted_percentage + $scope.membeshipTypesProductDiscountPercentage;
+      });
     }
 
     /**
