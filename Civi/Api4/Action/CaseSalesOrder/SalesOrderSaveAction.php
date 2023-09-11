@@ -2,12 +2,12 @@
 
 namespace Civi\Api4\Action\CaseSalesOrder;
 
-use CRM_Core_Transaction;
-use Civi\Api4\Generic\Result;
 use Civi\Api4\CaseSalesOrderLine;
 use Civi\Api4\Generic\AbstractSaveAction;
+use Civi\Api4\Generic\Result;
 use Civi\Api4\Generic\Traits\DAOActionTrait;
 use CRM_Civicase_BAO_CaseSalesOrder as CaseSalesOrderBAO;
+use CRM_Core_Transaction;
 
 /**
  * {@inheritDoc}
@@ -86,6 +86,10 @@ class SalesOrderSaveAction extends AbstractSaveAction {
     }
 
     $lineItemsInUse = array_column($salesOrder['items'], 'id');
+
+    if (empty($lineItemsInUse)) {
+      return;
+    }
 
     CaseSalesOrderLine::delete()
       ->addWhere('sales_order_id', '=', $salesOrder['id'])
