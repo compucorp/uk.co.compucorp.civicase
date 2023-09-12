@@ -189,6 +189,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
     new CRM_Civicase_Hook_BuildForm_AddQuotationsNotesToContributionSettings(),
     new CRM_Civicase_Hook_BuildForm_AddSalesOrderLineItemsToContribution(),
     new CRM_Civicase_Hook_BuildForm_AddEntityReferenceToCustomField(),
+    new CRM_Civicase_Hook_BuildForm_AttachQuotationToInvoiceMail(),
   ];
 
   foreach ($hooks as $hook) {
@@ -556,6 +557,7 @@ function _civicase_add_case_category_case_type_entity(array &$entityTypes) {
 function civicase_civicrm_alterMailParams(&$params, $context) {
   $hooks = [
     new CRM_Civicase_Hook_alterMailParams_SubjectCaseTypeCategoryProcessor(),
+    new CRM_Civicase_Hook_alterMailParams_AttachQuotation(),
   ];
 
   foreach ($hooks as &$hook) {
