@@ -415,53 +415,51 @@ $mgd = [
       ],
     ],
     [
-      'name' => 'SavedSearch_Quotation_Invoices',
+      'name' => 'SavedSearch_Quotation_Contributions',
       'entity' => 'SavedSearch',
       'cleanup' => 'unused',
       'update' => 'unmodified',
       'params' => [
         'version' => 4,
         'values' => [
-          'name' => 'Quotation_Invoices',
-          'label' => 'Quotation Invoices',
+          'name' => 'Quotation_Contributions',
+          'label' => 'Quotation Contributions',
           'form_values' => NULL,
           'search_custom_id' => NULL,
-          'api_entity' => 'CaseSalesOrderContribution',
+          'api_entity' => 'Contribution',
           'api_params' => [
             'version' => 4,
             'select' => [
-              'id',
-              'CaseSalesOrderContribution_Contribution_contribution_id_01.id',
-              'CaseSalesOrderContribution_Contribution_contribution_id_01.financial_type_id:label',
-              'CaseSalesOrderContribution_Contribution_contribution_id_01.total_amount',
-              'CaseSalesOrderContribution_Contribution_contribution_id_01.source',
-              'CaseSalesOrderContribution_Contribution_contribution_id_01.thankyou_date',
-              'CaseSalesOrderContribution_Contribution_contribution_id_01.contribution_status_id:label',
-              'CaseSalesOrderContribution_Contribution_contribution_id_01.receive_date',
+              'total_amount',
+              'financial_type_id:label',
+              'source',
+              'receive_date',
+              'thankyou_date',
+              'contribution_status_id:label',
+              'Opportunity_Details.Case_Opportunity',
             ],
             'orderBy' => [],
-            'where' => [],
-            'groupBy' => [],
-            'join' => [
+            'where' => [
               [
-                'Contribution AS CaseSalesOrderContribution_Contribution_contribution_id_01',
-                'LEFT',
-                [
-                  'contribution_id',
-                  '=',
-                  'CaseSalesOrderContribution_Contribution_contribution_id_01.id',
-                ],
+                'id',
+                'IS NOT EMPTY',
               ],
               [
-                'CaseSalesOrder AS CaseSalesOrderContribution_CaseSalesOrder_case_sales_order_id_01',
-                'LEFT',
+                'OR',
                 [
-                  'case_sales_order_id',
-                  '=',
-                  'CaseSalesOrderContribution_CaseSalesOrder_case_sales_order_id_01.id',
+                  [
+                    'Opportunity_Details.Case_Opportunity',
+                    'IS NOT EMPTY',
+                  ],
+                  [
+                    'Opportunity_Details.Quotation',
+                    'IS NOT EMPTY',
+                  ],
                 ],
               ],
             ],
+            'groupBy' => [],
+            'join' => [],
             'having' => [],
           ],
           'expires_date' => NULL,
@@ -471,19 +469,19 @@ $mgd = [
       ],
     ],
     [
-      'name' => 'SavedSearch_Quotation_Invoices_SearchDisplay_Quotation_Invoices',
+      'name' => 'SavedSearch_Quotation_Contributions_SearchDisplay_Contributions_Table_1',
       'entity' => 'SearchDisplay',
       'cleanup' => 'unused',
       'update' => 'unmodified',
       'params' => [
         'version' => 4,
         'values' => [
-          'name' => 'Quotation_Invoices',
-          'label' => 'Quotation Invoices',
-          'saved_search_id.name' => 'Quotation_Invoices',
+          'name' => 'Contributions_Table_1',
+          'label' => 'Contributions Table 1',
+          'saved_search_id.name' => 'Quotation_Contributions',
           'type' => 'table',
           'settings' => [
-            'actions' => FALSE,
+            'actions' => TRUE,
             'limit' => 10,
             'classes' => [
               'table',
@@ -495,43 +493,43 @@ $mgd = [
             'columns' => [
               [
                 'type' => 'field',
-                'key' => 'CaseSalesOrderContribution_Contribution_contribution_id_01.total_amount',
+                'key' => 'total_amount',
                 'dataType' => 'Money',
                 'label' => 'Amount',
                 'sortable' => TRUE,
               ],
               [
                 'type' => 'field',
-                'key' => 'CaseSalesOrderContribution_Contribution_contribution_id_01.financial_type_id:label',
+                'key' => 'financial_type_id:label',
                 'dataType' => 'Integer',
                 'label' => 'Type',
                 'sortable' => TRUE,
               ],
               [
                 'type' => 'field',
-                'key' => 'CaseSalesOrderContribution_Contribution_contribution_id_01.source',
+                'key' => 'source',
                 'dataType' => 'String',
                 'label' => 'Source',
                 'sortable' => TRUE,
               ],
               [
                 'type' => 'field',
-                'key' => 'CaseSalesOrderContribution_Contribution_contribution_id_01.receive_date',
+                'key' => 'receive_date',
                 'dataType' => 'Timestamp',
                 'label' => 'Date',
                 'sortable' => TRUE,
               ],
               [
                 'type' => 'field',
-                'key' => 'CaseSalesOrderContribution_Contribution_contribution_id_01.thankyou_date',
+                'key' => 'thankyou_date',
                 'dataType' => 'Timestamp',
-                'label' => 'Thank-You Sent',
+                'label' => 'Thank-you Sent',
                 'sortable' => TRUE,
-                'rewrite' => '{if "[CaseSalesOrderContribution_Contribution_contribution_id_01.thankyou_date]"} Yes {else} No {/if}',
+                'rewrite' => '{if "[thankyou_date]"} Yes {else} No {/if}',
               ],
               [
                 'type' => 'field',
-                'key' => 'CaseSalesOrderContribution_Contribution_contribution_id_01.contribution_status_id:label',
+                'key' => 'contribution_status_id:label',
                 'dataType' => 'Integer',
                 'label' => 'Status',
                 'sortable' => TRUE,
@@ -545,7 +543,7 @@ $mgd = [
                   [
                     'entity' => 'Contribution',
                     'action' => 'view',
-                    'join' => 'CaseSalesOrderContribution_Contribution_contribution_id_01',
+                    'join' => '',
                     'target' => 'crm-popup',
                     'icon' => 'fa-external-link',
                     'text' => 'View',
@@ -556,7 +554,7 @@ $mgd = [
                   [
                     'entity' => 'Contribution',
                     'action' => 'update',
-                    'join' => 'CaseSalesOrderContribution_Contribution_contribution_id_01',
+                    'join' => '',
                     'target' => 'crm-popup',
                     'icon' => 'fa-pencil',
                     'text' => 'Edit',
@@ -565,15 +563,15 @@ $mgd = [
                     'condition' => [],
                   ],
                   [
-                    'path' => 'civicrm/contribute/invoice/email/?reset=1&id=[contribution_id]&select=email',
-                    'icon' => 'fa-paper-plane-o',
-                    'text' => 'Send By Email',
-                    'style' => 'default',
-                    'condition' => [],
                     'entity' => '',
                     'action' => '',
                     'join' => '',
                     'target' => 'crm-popup',
+                    'icon' => 'fa-paper-plane-o',
+                    'text' => 'Send By Email',
+                    'style' => 'default',
+                    'path' => 'civicrm/contribute/invoice/email/?reset=1&id=[id]&select=email',
+                    'condition' => [],
                   ],
                 ],
                 'type' => 'menu',
@@ -587,7 +585,6 @@ $mgd = [
       ],
     ],
 ];
-
 
 $searchKitIsInstalled = 'installed' ===
 CRM_Extension_System::singleton()->getManager()->getStatus('org.civicrm.search_kit');
