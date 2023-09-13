@@ -1,4 +1,14 @@
 (function ($, _) {
+  const waitForElement = function ($, elementPath, callBack) {
+    window.setTimeout(function () {
+      if ($(elementPath).length) {
+        callBack($, $(elementPath));
+      } else {
+        window.waitForElement($, elementPath, callBack);
+      }
+    }, 500);
+  };
+
   $(document).one('crmLoad', function () {
     const params = CRM.vars['uk.co.compucorp.civicase'];
     const salesOrderId = params.sales_order;
@@ -6,6 +16,8 @@
     const percentValue = params.percent_value;
     const toBeInvoiced = params.to_be_invoiced;
     const lineItems = JSON.parse(params.line_items);
+    const caseCustomField = params.case_custom_field;
+    const quotationCustomField = params.quotation_custom_field;
     let count = 0;
 
     const apiRequest = {};
@@ -37,6 +49,14 @@
         $(`<input type="hidden" value="${percentValue}" name="percent_value" />`).insertBefore('#source');
         $(`<input type="hidden" value="${salesOrderStatusId}" name="sales_order_status_id" />`).insertBefore('#source');
         $('#totalAmount, #totalAmountORaddLineitem, #totalAmountORPriceSet, #price_set_id, #choose-manual').hide();
+
+        waitForElement($, `[name^=${quotationCustomField}_]`, function ($, elem) {
+          $(`[name^=${quotationCustomField}_]`).val(caseSalesOrder.id).trigger('change');
+        });
+
+        waitForElement($, `[name^=${caseCustomField}_]`, function ($, elem) {
+          $(`[name^=${caseCustomField}_]`).val(caseSalesOrder.case_id).trigger('change');
+        });
       });
     }
 
