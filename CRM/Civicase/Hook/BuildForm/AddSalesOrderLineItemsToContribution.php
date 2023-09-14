@@ -36,6 +36,8 @@ class CRM_Civicase_Hook_BuildForm_AddSalesOrderLineItemsToContribution {
         'to_be_invoiced' => $toBeInvoiced,
         'percent_value' => $percentValue,
         'line_items' => json_encode($lineItems),
+        'quotation_custom_field' => CRM_Core_BAO_CustomField::getCustomFieldID('Quotation', 'Opportunity_Details', TRUE),
+        'case_custom_field' => CRM_Core_BAO_CustomField::getCustomFieldID('Case_Opportunity', 'Opportunity_Details', TRUE),
       ]);
   }
 

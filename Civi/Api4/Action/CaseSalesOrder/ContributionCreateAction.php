@@ -4,6 +4,7 @@ namespace Civi\Api4\Action\CaseSalesOrder;
 
 use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\CaseSalesOrderContribution as Api4CaseSalesOrderContribution;
+use Civi\Api4\Contribution as Api4Contribution;
 use Civi\Api4\Generic\AbstractAction;
 use Civi\Api4\Generic\Result;
 use Civi\Api4\Generic\Traits\DAOActionTrait;
@@ -177,6 +178,17 @@ class ContributionCreateAction extends AbstractAction {
       ->addValue('to_be_invoiced', $this->toBeInvoiced)
       ->addValue('percent_value', $this->percentValue)
       ->addValue('contribution_id', $contributionId)
+      ->execute();
+
+    $salesOrder = CaseSalesOrder::get()
+      ->addWhere('id', '=', $salesOrderId)
+      ->execute()
+      ->first();
+
+    Api4Contribution::update()
+      ->addValue('Opportunity_Details.Case_Opportunity', $salesOrder['case_id'])
+      ->addValue('Opportunity_Details.Quotation', $salesOrderId)
+      ->addWhere('id', '=', $contributionId)
       ->execute();
   }
 

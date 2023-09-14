@@ -188,6 +188,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
     new CRM_Civicase_Hook_BuildForm_AddCaseCategoryFeaturesField(),
     new CRM_Civicase_Hook_BuildForm_AddQuotationsNotesToContributionSettings(),
     new CRM_Civicase_Hook_BuildForm_AddSalesOrderLineItemsToContribution(),
+    new CRM_Civicase_Hook_BuildForm_AddEntityReferenceToCustomField(),
   ];
 
   foreach ($hooks as $hook) {
