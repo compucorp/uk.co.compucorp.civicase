@@ -29,7 +29,7 @@ return [
         'max_multiple' => NULL,
         'collapse_adv_display' => TRUE,
         'created_date' => '2023-09-12 13:08:59',
-        'is_reserved' => TRUE,
+        'is_reserved' => FALSE,
         'is_public' => FALSE,
         'icon' => '',
         'extends_entity_column_id' => NULL,
