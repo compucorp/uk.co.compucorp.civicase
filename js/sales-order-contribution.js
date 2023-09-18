@@ -1,12 +1,10 @@
 (function ($, _) {
   const waitForElement = function ($, elementPath, callBack) {
-    window.setTimeout(function () {
-      if ($(elementPath).length) {
-        callBack($, $(elementPath));
-      } else {
-        window.waitForElement($, elementPath, callBack);
-      }
-    }, 500);
+    (new window.MutationObserver(function () {
+      callBack($, $(elementPath));
+    })).observe(document.querySelector(elementPath), {
+      attributes: true
+    });
   };
 
   $(document).one('crmLoad', function () {
@@ -50,12 +48,9 @@
         $(`<input type="hidden" value="${salesOrderStatusId}" name="sales_order_status_id" />`).insertBefore('#source');
         $('#totalAmount, #totalAmountORaddLineitem, #totalAmountORPriceSet, #price_set_id, #choose-manual').hide();
 
-        waitForElement($, `[name^=${quotationCustomField}_]`, function ($, elem) {
-          $(`[name^=${quotationCustomField}_]`).val(caseSalesOrder.id).trigger('change');
-        });
-
-        waitForElement($, `[name^=${caseCustomField}_]`, function ($, elem) {
+        waitForElement($, '#customData', function ($, elem) {
           $(`[name^=${caseCustomField}_]`).val(caseSalesOrder.case_id).trigger('change');
+          $(`[name^=${quotationCustomField}_]`).val(caseSalesOrder.id).trigger('change');
         });
       });
     }
