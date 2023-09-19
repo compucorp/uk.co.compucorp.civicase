@@ -3,7 +3,6 @@
 namespace Civi\Api4\Action\CaseSalesOrder;
 
 use Civi\Api4\CaseSalesOrder;
-use Civi\Api4\CaseSalesOrderContribution as Api4CaseSalesOrderContribution;
 use Civi\Api4\Contribution as Api4Contribution;
 use Civi\Api4\Generic\AbstractAction;
 use Civi\Api4\Generic\Result;
@@ -164,22 +163,12 @@ class ContributionCreateAction extends AbstractAction {
   /**
    * Links sales order with contirbution.
    *
-   * This is done by inserting new row into the
-   * pivot table CaseSalesOrderContribution.
-   *
    * @param int $salesOrderId
    *   Sales Order Id.
    * @param int $contributionId
    *   Contribution ID.
    */
   private function linkCaseSalesOrderToContribution(int $salesOrderId, int $contributionId): void {
-    Api4CaseSalesOrderContribution::create()
-      ->addValue('case_sales_order_id', $salesOrderId)
-      ->addValue('to_be_invoiced', $this->toBeInvoiced)
-      ->addValue('percent_value', $this->percentValue)
-      ->addValue('contribution_id', $contributionId)
-      ->execute();
-
     $salesOrder = CaseSalesOrder::get()
       ->addWhere('id', '=', $salesOrderId)
       ->execute()
