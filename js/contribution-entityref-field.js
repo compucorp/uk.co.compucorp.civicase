@@ -1,20 +1,18 @@
 (function ($, _) {
   window.waitForElement = function ($, elementPath, callBack) {
-    window.setTimeout(function () {
-      if ($(elementPath).length) {
-        callBack($, $(elementPath));
-      } else {
-        window.waitForElement($, elementPath, callBack);
-      }
-    }, 500);
+    (new window.MutationObserver(function () {
+      callBack($, $(elementPath));
+    })).observe(document.querySelector(elementPath), {
+      attributes: true
+    });
   };
 
   $(document).one('crmLoad', function () {
     const entityRefCustomFields = CRM.vars.civicase.entityRefCustomFields ?? [];
 
-    entityRefCustomFields.forEach(field => {
-      /* eslint-disable no-undef */
-      waitForElement($, `[name^=${field.name}_]`, function ($, elem) {
+    /* eslint-disable no-undef */
+    waitForElement($, '#customData', function ($, elem) {
+      entityRefCustomFields.forEach(field => {
         $(`[name^=${field.name}_]`)
           .attr('placeholder', field.placeholder)
           .attr('disabled', false)

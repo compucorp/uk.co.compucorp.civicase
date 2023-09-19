@@ -1,8 +1,8 @@
 <?php
 
 use Civi\Api4\CaseSalesOrder;
-use Civi\Api4\CaseSalesOrderContribution;
 use Civi\Api4\CaseSalesOrderLine;
+use Civi\Api4\Contribution;
 use Civi\Api4\LineItem;
 
 /**
@@ -21,7 +21,7 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
   public array $salesOrder;
 
   /**
-   * Constructs CaseSalesOrderContribution service.
+   * Constructs CaseSalesOrderLineItemsGenerator service.
    */
   public function __construct(private int $salesOrderId, private string $type, private ?string $percentValue) {
     $this->setSalesOrder();
@@ -101,16 +101,16 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
   private function getPreviousContributionLineItem() {
     $previousItems = [];
 
-    $caseSalesOrderContributions = CaseSalesOrderContribution::get()
-      ->addSelect('contribution_id')
-      ->addWhere('case_sales_order_id.id', '=', $this->salesOrderId)
+    $contributions = Contribution::get()
+      ->addSelect('*',)
+      ->addWhere('Opportunity_Details.Quotation', '=', $this->salesOrderId)
       ->addChain('items', LineItem::get()
         ->addSelect('qty', 'unit_price', 'tax_amount', 'line_total', 'entity_table', 'label', 'financial_type_id')
-        ->addWhere('contribution_id', '=', '$contribution_id')
+        ->addWhere('contribution_id', '=', '$id')
     )
       ->execute();
 
-    foreach ($caseSalesOrderContributions as $contribution) {
+    foreach ($contributions as $contribution) {
       $items = $contribution['items'];
 
       if (empty($items)) {

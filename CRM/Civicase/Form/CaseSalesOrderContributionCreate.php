@@ -1,7 +1,7 @@
 <?php
 
 use Civi\Api4\CaseSalesOrder;
-use Civi\Api4\CaseSalesOrderContribution;
+use Civi\Api4\Contribution;
 use Civi\Api4\OptionValue;
 use CRM_Certificate_ExtensionUtil as E;
 
@@ -184,13 +184,13 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
     }
 
     // Get all the previous contributions.
-    $caseSalesOrderContributions = CaseSalesOrderContribution::get()
-      ->addSelect('contribution_id', 'contribution_id.total_amount')
-      ->addWhere('case_sales_order_id.id', '=', $this->id)
+    $contributions = Contribution::get()
+      ->addSelect('total_amount')
+      ->addWhere('Opportunity_Details.Quotation', '=', $this->id)
       ->execute()
       ->jsonSerialize();
 
-    $paidTotal = array_sum(array_column($caseSalesOrderContributions, 'contribution_id.total_amount'));
+    $paidTotal = array_sum(array_column($contributions, 'total_amount'));
     $remainBalance = $caseSalesOrder['total_after_tax'] - $paidTotal;
     $remainBalance = round($remainBalance, 2);
 

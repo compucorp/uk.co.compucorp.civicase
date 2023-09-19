@@ -1,7 +1,7 @@
 <?php
 
 use Civi\Api4\CaseSalesOrder;
-use Civi\Api4\CaseSalesOrderContribution as Api4CaseSalesOrderContribution;
+use Civi\Api4\Contribution;
 use CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator as CaseSalesOrderContribution;
 use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
 
@@ -57,12 +57,9 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
   }
 
   /**
-   * Ensures contribution create action will create expeted pivot row.
-   *
-   * I.e.
-   * Inserts a new row for each of the case sales order contribution.
+   * Ensures contribution create action will update contribution custom field.
    */
-  public function testContributionCreateActionWillInsertPivotRow() {
+  public function testContributionCreateActionWillUpdateCustomFields() {
     $ids = [];
 
     for ($i = 0; $i < rand(5, 11); $i++) {
@@ -79,14 +76,14 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
       ->setFinancialTypeId('1')
       ->execute();
 
-    $salesOrderContributions = Api4CaseSalesOrderContribution::get()
-      ->addSelect('case_sales_order_id')
-      ->addWhere('case_sales_order_id.id', 'IN', $ids)
+    $contributions = Contribution::get()
+      ->addSelect('Opportunity_Details.Quotation')
+      ->addWhere('Opportunity_Details.Quotation', 'IN', $ids)
       ->execute()
       ->jsonSerialize();
 
-    $this->assertCount(count($ids), $salesOrderContributions);
-    $this->assertEmpty(array_diff(array_column($salesOrderContributions, 'case_sales_order_id'), $ids));
+    $this->assertCount(count($ids), $contributions);
+    $this->assertEmpty(array_diff(array_column($contributions, 'Opportunity_Details.Quotation'), $ids));
   }
 
   /**
@@ -122,13 +119,13 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
         ->execute();
     }
 
-    $contributionAmounts = Api4CaseSalesOrderContribution::get()
-      ->addSelect('contribution_id', 'contribution_id.total_amount')
-      ->addWhere('case_sales_order_id.id', '=', $salesOrder['id'])
+    $contributionAmounts = Contribution::get()
+      ->addSelect('total_amount')
+      ->addWhere('Opportunity_Details.Quotation', '=', $salesOrder['id'])
       ->execute()
       ->jsonSerialize();
 
-    $paidTotal = array_sum(array_column($contributionAmounts, 'contribution_id.total_amount'));
+    $paidTotal = array_sum(array_column($contributionAmounts, 'total_amount'));
 
     // We can only guarantee that the value will be equal to 1 decimal place.
     $this->assertEquals(round(($expectedPercent * $computedTotal['totalAfterTax']) / 100, 1), round($paidTotal, 1));

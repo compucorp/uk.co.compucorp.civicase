@@ -75,7 +75,7 @@ function _civicrm_api3_case_sales_order_getlist_output($result, $request) {
 
       $data = [
         'id' => $row[$request['id_field']],
-        'label' => "Client: {$caseSalesOrder['contact.display_name']}",
+        'label' => "ID: {$caseSalesOrder['id']}, Client: {$caseSalesOrder['contact.display_name']}",
         'description' => [
           strip_tags($row['description']),
         ],
