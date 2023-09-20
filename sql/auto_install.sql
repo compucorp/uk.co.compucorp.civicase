@@ -60,6 +60,8 @@ CREATE TABLE IF NOT EXISTS `civicase_sales_order` (
   `case_id` int unsigned COMMENT 'FK to Case',
   `currency` varchar(3) DEFAULT NULL COMMENT '3 character string, value from config setting or input via user.',
   `status_id` int unsigned NOT NULL COMMENT 'One of the values of the case_sales_order_status option group',
+  `invoicing_status_id` int unsigned NOT NULL COMMENT 'One of the values of the case_sales_order_invoicing_status option group',
+  `payment_status_id` int unsigned NOT NULL COMMENT 'One of the values of the case_sales_order_payment_status option group',
   `description` text NULL COMMENT 'Sales order deesctiption',
   `notes` text NULL COMMENT 'Sales order notes',
   `total_before_tax` decimal(20,2) NULL COMMENT 'Total amount of the sales order line items before tax deduction.',
