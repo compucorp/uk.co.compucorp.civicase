@@ -57,6 +57,14 @@
                     <td>Currency</td>
                     <td>{{salesOrder.currency}}</td>
                   </tr>
+                  <tr>
+                    <td>Invoicing</td>
+                    <td>{{salesOrder['invoicing_status_id:label']}}</td>
+                  </tr>
+                  <tr>
+                    <td>Payments</td>
+                    <td>{{salesOrder['payment_status_id:label']}}</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -113,6 +121,23 @@
               </table>
             </div>
           </div>
+          <div class="row">
+            <div class="col-md-12" style="margin: 1em 0em;">
+              <hr/>
+            </div>
+            <div class="col-md-6 col-sm-12">
+              <table class="table" id="payment__invoice_statuses">
+                <tr>
+                  <td>Total Amount Invoiced</td>
+                  <td>{{ currencySymbol }} {{ salesOrder.totalAmountInvoiced.amount }}</td>
+                </tr>
+                <tr>
+                  <td>Total Amount Paid</td>
+                  <td>{{ currencySymbol }} {{salesOrder.totalAmountPaid.amount}}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
 
           <div class="row">
             <div class="col-md-12" style="margin: 1em 0em;">
@@ -133,7 +158,8 @@
 
 <style>
   table#quotation__detail.table > tbody > tr > td,
-  table#amount__summary.table > tbody > tr > td {
+  table#amount__summary.table > tbody > tr > td,
+  table#payment__invoice_statuses.table > tbody > tr > td  {
     border: 0;
     border-top: 0;
   }

@@ -42,17 +42,24 @@
      */
     function getSalesOrderAndLineItems () {
       crmApi4('CaseSalesOrder', 'get', {
-        select: ['*', 'case_sales_order_line.*', 'client_id.display_name', 'owner_id.display_name', 'case_id.case_type_id:label', 'case_id.subject', 'status_id:label'],
+        select: ['*', 'case_sales_order_line.*', 'client_id.display_name', 'owner_id.display_name', 'case_id.case_type_id:label', 'case_id.subject', 'status_id:label', 'invoicing_status_id:label', 'payment_status_id:label'],
         where: [['id', '=', $scope.salesOrderId]],
         limit: 1,
-        chain: { items: ['CaseSalesOrderLine', 'get', { where: [['sales_order_id', '=', '$id']], select: ['*', 'product_id.name', 'financial_type_id.name'] }], computedRates: ['CaseSalesOrder', 'computeTotal', { lineItems: '$items' }] }
+        chain: {
+          items: ['CaseSalesOrderLine', 'get', {
+            where: [['sales_order_id', '=', '$id']],
+            select: ['*', 'product_id.name', 'financial_type_id.name']
+          }],
+          computedRates: ['CaseSalesOrder', 'computeTotal', { lineItems: '$items' }],
+          totalAmountInvoiced: ['CaseSalesOrder', 'computeTotalAmountInvoiced', { salesOrderId: '$id' }],
+          totalAmountPaid: ['CaseSalesOrder', 'computeTotalAmountPaid', { salesOrderId: '$id' }]
+        }
       }).then(async function (caseSalesOrders) {
         if (Array.isArray(caseSalesOrders) && caseSalesOrders.length > 0) {
           $scope.salesOrder = caseSalesOrders.pop();
           $scope.salesOrder.taxRates = $scope.salesOrder.computedRates[0].taxRates;
           $scope.currencySymbol = CurrencyCodes.getSymbol($scope.salesOrder.currency);
           $scope.salesOrder.quotation_date = CRM.utils.formatDate($scope.salesOrder.quotation_date);
-
           if (!$scope.salesOrder.case_id) {
             return;
           }
