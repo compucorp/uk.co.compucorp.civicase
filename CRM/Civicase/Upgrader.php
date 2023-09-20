@@ -23,7 +23,7 @@ use CRM_Civicase_Uninstall_RemoveCustomGroupSupportForCaseCategory as RemoveCust
 /**
  * Collection of upgrade steps.
  */
-class CRM_Civicase_Upgrader extends CRM_Civicase_Upgrader_Base {
+class CRM_Civicase_Upgrader extends CRM_Extension_Upgrader_Base {
 
   // By convention, functions that look like "function upgrade_NNNN()" are
   // upgrade tasks. They are executed in order (like Drupal's hook_update_N).
@@ -516,13 +516,13 @@ class CRM_Civicase_Upgrader extends CRM_Civicase_Upgrader_Base {
    *
    * @inheritdoc
    */
-  public function enqueuePendingRevisions(CRM_Queue_Queue $queue) {
+  public function enqueuePendingRevisions() {
     $currentRevisionNum = (int) $this->getCurrentRevision();
     foreach ($this->getRevisions() as $revisionClass => $revisionNum) {
       if ($revisionNum <= $currentRevisionNum) {
         continue;
       }
-      $title = E::ts('Upgrade %1 to revision %2', [
+      $title = ts('Upgrade %1 to revision %2', [
         1 => $this->extensionName,
         2 => $revisionNum,
       ]);
@@ -531,13 +531,8 @@ class CRM_Civicase_Upgrader extends CRM_Civicase_Upgrader_Base {
         [(new $revisionClass())],
         $title
       );
-      $queue->createItem($upgradeTask);
-      $setRevisionTask = new CRM_Queue_Task(
-        [get_class($this), '_queueAdapter'],
-        ['setCurrentRevision', $revisionNum],
-        $title
-      );
-      $queue->createItem($setRevisionTask);
+      $this->queue->createItem($upgradeTask);
+      $this->appendTask($title, 'setCurrentRevision', $revisionNum);
     }
   }
 
