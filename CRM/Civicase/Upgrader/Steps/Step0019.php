@@ -1,8 +1,9 @@
 <?php
 
-use CRM_Civicase_Setup_Manage_QuotationTemplateManager as QuotationTemplateManager;
-use CRM_Civicase_Setup_Manage_CaseTypeCategoryFeaturesManager as CaseTypeCategoryManager;
 use CRM_Civicase_Setup_Manage_CaseSalesOrderStatusManager as CaseSalesOrderStatusManager;
+use CRM_Civicase_Setup_Manage_CaseTypeCategoryFeaturesManager as CaseTypeCategoryManager;
+use CRM_Civicase_Setup_Manage_MembershipTypeCustomFieldManager as MembershipTypeCustomFieldManager;
+use CRM_Civicase_Setup_Manage_QuotationTemplateManager as QuotationTemplateManager;
 
 /**
  * Update menus with new URL.
@@ -23,6 +24,7 @@ class CRM_Civicase_Upgrader_Steps_Step0019 {
       (new QuotationTemplateManager())->create();
       (new CaseTypeCategoryManager())->create();
       (new CaseSalesOrderStatusManager())->create();
+      (new MembershipTypeCustomFieldManager())->create();
     }
     catch (\Throwable $th) {
       \Civi::log()->error('Error upgrading Civicase', [
