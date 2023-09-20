@@ -115,7 +115,7 @@ class CRM_Civicase_Service_CaseSaleOrderContribution {
    *   Payment status option value's value
    */
   public function calculatePaymentStatus() {
-    if (empty($this->salesOrder) || empty($this->contributions)) {
+    if (empty($this->salesOrder) || empty($this->contributions) || !($this->totalPaymentsAmount > 0)) {
 
       return $this->getStatus('no_payments', $this->paymentStatusOptionValues);
     }

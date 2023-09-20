@@ -1,6 +1,7 @@
 <?php
 
 use Civi\Api4\CaseSalesOrder;
+use Civi\Api4\Contribution;
 
 /**
  * Handles sales order contribution post processing.
@@ -8,7 +9,7 @@ use Civi\Api4\CaseSalesOrder;
 class CRM_Civicase_Hook_Post_CreateSalesOrderContribution {
 
   /**
-   * Creates Sales Order Contribtution.
+   * Updates CaseSaleOrder status when creating a quotation contribution.
    *
    * @param string $op
    *   The operation being performed.
@@ -20,18 +21,39 @@ class CRM_Civicase_Hook_Post_CreateSalesOrderContribution {
    *   Object reference.
    */
   public function run($op, $objectName, $objectId, &$objectRef) {
-    $salesOrderId = CRM_Utils_Request::retrieve('sales_order', 'Integer');
-    $salesOrderStatusId = CRM_Utils_Request::retrieve('sales_order_status_id', 'Integer');
-
-    if (!$this->shouldRun($op, $objectName, $salesOrderId)) {
+    if (!$this->shouldRun($op, $objectName)) {
       return;
+    }
+
+    $salesOrderId = CRM_Utils_Request::retrieve('sales_order', 'Integer');
+    if (empty($salesOrderId)) {
+      $salesOrderId = $this->getQuotationID($objectId)['Opportunity_Details.Quotation'];
+    }
+
+    if (empty($salesOrderId)) {
+      return;
+    }
+
+    $salesOrderStatusId = CRM_Utils_Request::retrieve('sales_order_status_id', 'Integer');
+    if (empty($salesOrderStatusId)) {
+      $salesOrderStatusId = CaseSalesOrder::get()
+        ->addSelect('status_id')
+        ->addWhere('id', '=', $salesOrderId)
+        ->execute()
+        ->first()['status_id'];
     }
 
     $transaction = CRM_Core_Transaction::create();
     try {
+      $caseSaleOrderContributionService = new CRM_Civicase_Service_CaseSaleOrderContribution($salesOrderId);
+      $paymentStatusID = $caseSaleOrderContributionService->calculatePaymentStatus();
+      $invoicingStatusID = $caseSaleOrderContributionService->calculateInvoicingStatus();
+
       CaseSalesOrder::update()
         ->addWhere('id', '=', $salesOrderId)
         ->addValue('status_id', $salesOrderStatusId)
+        ->addValue('invoicing_status_id', $invoicingStatusID)
+        ->addValue('payment_status_id', $paymentStatusID)
         ->execute();
     }
     catch (\Throwable $th) {
@@ -47,14 +69,23 @@ class CRM_Civicase_Hook_Post_CreateSalesOrderContribution {
    *   The operation being performed.
    * @param string $objectName
    *   Object name.
-   * @param string $salesOrderId
-   *   The sales order that triggered the contribution (if any).
    *
    * @return bool
    *   returns a boolean to determine if hook will run or not.
    */
-  private function shouldRun($op, $objectName, $salesOrderId) {
-    return strtolower($objectName) == 'contribution' && !empty($salesOrderId) && $op == 'create';
+  private function shouldRun($op, $objectName) {
+    return strtolower($objectName) == 'contribution' && $op == 'create';
+  }
+
+  /**
+   * Gets quotation ID by contribution ID.
+   */
+  private function getQuotationId($id) {
+    return Contribution::get()
+      ->addSelect('Opportunity_Details.Quotation')
+      ->addWhere('id', '=', $id)
+      ->execute()
+      ->first();
   }
 
 }
