@@ -137,6 +137,10 @@ class CRM_Civicase_Service_CaseSaleOrderContribution {
    * @throws \Civi\API\Exception\UnauthorizedException
    */
   private function getContributions() {
+    if (empty($this->salesOrder) || empty($this->salesOrder['id'])) {
+      return [];
+    }
+
     return Contribution::get(FALSE)
       ->addWhere('Opportunity_Details.Quotation', '=', $this->salesOrder['id'])
       ->execute()
