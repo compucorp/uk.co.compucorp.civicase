@@ -101,48 +101,12 @@ function civicase_civicrm_install() {
 }
 
 /**
- * Implements hook_civicrm_postInstall().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_postInstall
- */
-function civicase_civicrm_postInstall() {
-  _civicase_civix_civicrm_postInstall();
-}
-
-/**
- * Implements hook_civicrm_uninstall().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_uninstall
- */
-function civicase_civicrm_uninstall() {
-  _civicase_civix_civicrm_uninstall();
-}
-
-/**
  * Implements hook_civicrm_enable().
  *
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_enable
  */
 function civicase_civicrm_enable() {
   _civicase_civix_civicrm_enable();
-}
-
-/**
- * Implements hook_civicrm_disable().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_disable
- */
-function civicase_civicrm_disable() {
-  _civicase_civix_civicrm_disable();
-}
-
-/**
- * Implements hook_civicrm_upgrade().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_upgrade
- */
-function civicase_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
-  return _civicase_civix_civicrm_upgrade($op, $queue);
 }
 
 /**
@@ -281,6 +245,7 @@ function civicase_civicrm_validateForm($formName, &$fields, &$files, &$form, &$e
  */
 function civicase_civicrm_post($op, $objectName, $objectId, &$objectRef) {
   $hooks = [
+    new CRM_Civicase_Hook_Post_CaseSalesOrderPayment(),
     new CRM_Civicase_Hook_Post_CreateSalesOrderContribution(),
     new CRM_Civicase_Hook_Post_PopulateCaseCategoryForCaseType(),
     new CRM_Civicase_Hook_Post_CaseCategoryCustomGroupSaver(),
@@ -452,7 +417,6 @@ function civicase_civicrm_selectWhereClause($entity, &$clauses) {
  * Implements hook_civicrm_entityTypes().
  */
 function civicase_civicrm_entityTypes(&$entityTypes) {
-  _civicase_civix_civicrm_entityTypes($entityTypes);
   _civicase_add_case_category_case_type_entity($entityTypes);
 }
 

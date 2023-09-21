@@ -111,6 +111,34 @@
   </field>
 
   <field>
+    <name>invoicing_status_id</name>
+    <type>int unsigned</type>
+    <comment>One of the values of the case_sales_order_invoicing_status option group</comment>
+    <required>true</required>
+    <pseudoconstant>
+      <optionGroupName>case_sales_order_invoicing_status</optionGroupName>
+    </pseudoconstant>
+    <html>
+      <label>Invoicing</label>
+      <type>Select</type>
+    </html>
+  </field>
+
+  <field>
+    <name>payment_status_id</name>
+    <type>int unsigned</type>
+    <comment>One of the values of the case_sales_order_payment_status option group</comment>
+    <required>true</required>
+    <pseudoconstant>
+      <optionGroupName>case_sales_order_payment_status</optionGroupName>
+    </pseudoconstant>
+    <html>
+      <label>Payments</label>
+      <type>Select</type>
+    </html>
+  </field>
+
+  <field>
     <name>description</name>
     <type>text</type>
     <required>false</required>

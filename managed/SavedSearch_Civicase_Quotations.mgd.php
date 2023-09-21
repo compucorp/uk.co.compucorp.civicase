@@ -30,7 +30,8 @@ $mgd = [
               'CONCAT_WS(" ", total_before_tax, currency:label) AS CONCAT_WS_total_before_tax_currency_label',
               'CONCAT_WS(" ", total_after_tax, currency:label) AS CONCAT_WS_total_after_tax_currency_label',
               'status_id:label',
-              'case_id',
+              'invoicing_status_id:label',
+              'payment_status_id:label',
             ],
             'orderBy' => [
               'created_at' => 'DESC',
@@ -85,21 +86,6 @@ $mgd = [
               ],
               [
                 'type' => 'field',
-                'key' => 'case_id',
-                'dataType' => 'Integer',
-                'label' => 'Prospect Id',
-                'sortable' => TRUE,
-                'link' => [
-                  'path' => 'civicrm/contact/view/case?reset=1&id=[case_id]&cid=[user_contact_id]&action=view&context=dashboard&selectedChild=case',
-                  'entity' => '',
-                  'action' => '',
-                  'join' => '',
-                  'target' => '',
-                ],
-                'alignment' => '',
-              ],
-              [
-                'type' => 'field',
                 'key' => 'DATE_quotation_date',
                 'dataType' => 'Date',
                 'label' => 'Date',
@@ -137,6 +123,20 @@ $mgd = [
                 'label' => 'Total After Tax',
                 'sortable' => TRUE,
                 'alignment' => '',
+              ],
+              [
+                'type' => 'field',
+                'key' => 'invoicing_status_id:label',
+                'dataType' => 'Integer',
+                'label' => 'Invoicing',
+                'sortable' => TRUE,
+              ],
+              [
+                'type' => 'field',
+                'key' => 'payment_status_id:label',
+                'dataType' => 'Integer',
+                'label' => 'Payments',
+                'sortable' => TRUE,
               ],
               [
                 'type' => 'field',
@@ -329,6 +329,20 @@ $mgd = [
                 'label' => 'Status',
                 'sortable' => TRUE,
                 'alignment' => '',
+              ],
+              [
+                'type' => 'field',
+                'key' => 'invoicing_status_id:label',
+                'dataType' => 'Integer',
+                'label' => 'Invoicing',
+                'sortable' => TRUE,
+              ],
+              [
+                'type' => 'field',
+                'key' => 'payment_status_id:label',
+                'dataType' => 'Integer',
+                'label' => 'Payments',
+                'sortable' => TRUE,
               ],
               [
                 'text' => '',

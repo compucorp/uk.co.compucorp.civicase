@@ -47,6 +47,12 @@ class SalesOrderSaveAction extends AbstractSaveAction {
         $total = CaseSalesOrderBAO::computeTotal($lineItems);
         $salesOrder['total_before_tax'] = $total['totalBeforeTax'];
         $salesOrder['total_after_tax'] = $total['totalAfterTax'];
+
+        $saleOrderId = $salesOrder['id'] ?? NULL;
+        $caseSaleOrderContributionService = new \CRM_Civicase_Service_CaseSaleOrderContribution($saleOrderId);
+        $salesOrder['payment_status_id'] = $caseSaleOrderContributionService->calculateInvoicingStatus();
+        $salesOrder['invoicing_status_id'] = $caseSaleOrderContributionService->calculatePaymentStatus();
+
         $salesOrders = $this->writeObjects([$salesOrder]);
         $result = array_pop($salesOrders);
 
