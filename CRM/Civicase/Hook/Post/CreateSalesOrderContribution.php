@@ -45,7 +45,7 @@ class CRM_Civicase_Hook_Post_CreateSalesOrderContribution {
 
     $transaction = CRM_Core_Transaction::create();
     try {
-      $caseSaleOrderContributionService = new CRM_Civicase_Service_CaseSaleOrderContribution($salesOrderId);
+      $caseSaleOrderContributionService = new CRM_Civicase_Service_CaseSalesOrderContributionCalculator($salesOrderId);
       $paymentStatusID = $caseSaleOrderContributionService->calculatePaymentStatus();
       $invoicingStatusID = $caseSaleOrderContributionService->calculateInvoicingStatus();
 

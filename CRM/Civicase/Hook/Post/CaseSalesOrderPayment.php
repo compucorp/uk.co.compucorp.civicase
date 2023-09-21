@@ -9,7 +9,7 @@ use Civi\Api4\Contribution;
 class CRM_Civicase_Hook_Post_CaseSalesOrderPayment {
 
   /**
-   * Updates CaseSaleOrder statuses when creating a payment transcation.
+   * Updates CaseSalesOrder statuses when creating a payment transaction.
    *
    * @param string $op
    *   The operation being performed.
@@ -50,7 +50,7 @@ class CRM_Civicase_Hook_Post_CaseSalesOrderPayment {
     $transaction = CRM_Core_Transaction::create();
 
     try {
-      $caseSaleOrderContributionService = new CRM_Civicase_Service_CaseSaleOrderContribution($salesOrderID);
+      $caseSaleOrderContributionService = new CRM_Civicase_Service_CaseSalesOrderContributionCalculator($salesOrderID);
       $paymentStatusID = $caseSaleOrderContributionService->calculatePaymentStatus();
       $invoicingStatusID = $caseSaleOrderContributionService->calculateInvoicingStatus();
 

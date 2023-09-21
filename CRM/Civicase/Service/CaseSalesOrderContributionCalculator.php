@@ -10,7 +10,7 @@ use Civi\Api4\OptionValue;
  * This class provides calculations for payment and invoices that
  * attached to the sale order.
  */
-class CRM_Civicase_Service_CaseSaleOrderContribution {
+class CRM_Civicase_Service_CaseSalesOrderContributionCalculator {
 
   /**
    * Case Sales Order object.

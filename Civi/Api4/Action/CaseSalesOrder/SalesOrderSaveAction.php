@@ -49,7 +49,7 @@ class SalesOrderSaveAction extends AbstractSaveAction {
         $salesOrder['total_after_tax'] = $total['totalAfterTax'];
 
         $saleOrderId = $salesOrder['id'] ?? NULL;
-        $caseSaleOrderContributionService = new \CRM_Civicase_Service_CaseSaleOrderContribution($saleOrderId);
+        $caseSaleOrderContributionService = new \CRM_Civicase_Service_CaseSalesOrderContributionCalculator($saleOrderId);
         $salesOrder['payment_status_id'] = $caseSaleOrderContributionService->calculateInvoicingStatus();
         $salesOrder['invoicing_status_id'] = $caseSaleOrderContributionService->calculatePaymentStatus();
 
