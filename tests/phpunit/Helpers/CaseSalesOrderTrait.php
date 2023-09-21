@@ -3,9 +3,9 @@
 use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\OptionValue;
 use CRM_Civicase_Test_Fabricator_Case as CaseFabricator;
-use CRM_Civicase_Test_Fabricator_Product as ProductFabricator;
-use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
 use CRM_Civicase_Test_Fabricator_CaseType as CaseTypeFabricator;
+use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
+use CRM_Civicase_Test_Fabricator_Product as ProductFabricator;
 
 /**
  * Case sales order helper trait.
@@ -25,6 +25,34 @@ trait Helpers_CaseSalesOrderTrait {
       ->execute();
 
     return $salesOrderStatus;
+  }
+
+  /**
+   * Returns list of available statuses.
+   *
+   * @return array
+   *   Array of sales order invoicing statuses
+   */
+  public function getCaseSalesOrderInvoicingStatus() {
+    return OptionValue::get()
+      ->addSelect('id', 'value', 'name', 'label')
+      ->addWhere('option_group_id:name', '=', 'case_sales_order_invoicing_status')
+      ->execute()
+      ->getArrayCopy();
+  }
+
+  /**
+   * Returns list of available statuses.
+   *
+   * @return array
+   *   Array of sales order payment statuses
+   */
+  public function getCaseSalesOrderPaymentStatus() {
+    return OptionValue::get()
+      ->addSelect('id', 'value', 'name', 'label')
+      ->addWhere('option_group_id:name', '=', 'case_sales_order_payment_status')
+      ->execute()
+      ->getArrayCopy();
   }
 
   /**
@@ -53,6 +81,8 @@ trait Helpers_CaseSalesOrderTrait {
       'case_id' => $case['id'],
       'currency' => 'GBP',
       'status_id' => $this->getCaseSalesOrderStatus()[0]['value'],
+      'invoicing_status_id' => $this->getCaseSalesOrderInvoicingStatus()[0]['value'],
+      'payment_status_id' => $this->getCaseSalesOrderPaymentStatus()[0]['value'],
       'description' => 'test',
       'notes' => 'test',
       'total_before_tax' => 0,
