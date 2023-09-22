@@ -25,7 +25,7 @@ class ComputeTotalAmountInvoicedAction extends AbstractAction {
     if (!$this->salesOrderID) {
       return;
     }
-    $service = new \CRM_Civicase_Service_CaseSaleOrderContribution($this->salesOrderID);
+    $service = new \CRM_Civicase_Service_CaseSalesOrderContributionCalculator($this->salesOrderID);
     $result['amount'] = $service->calculateTotalInvoicedAmount();
   }
 

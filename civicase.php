@@ -259,6 +259,19 @@ function civicase_civicrm_post($op, $objectName, $objectId, &$objectRef) {
 }
 
 /**
+ * Implements hook_civicrm_pre().
+ */
+function civicase_civicrm_pre($op, $objectName, $id, &$params) {
+  $hooks = [
+    new CRM_Civicase_Hook_Pre_DeleteSalesOrderContribution(),
+  ];
+
+  foreach ($hooks as $hook) {
+    $hook->run($op, $objectName, $id, $params);
+  }
+}
+
+/**
  * Implements hook_civicrm_postProcess().
  */
 function civicase_civicrm_postProcess($formName, &$form) {
