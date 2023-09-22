@@ -34,13 +34,15 @@ class CRM_Civicase_Hook_Post_CreateSalesOrderContribution {
       return;
     }
 
+    $salesOrder = CaseSalesOrder::get()
+      ->addSelect('status_id', 'case_id')
+      ->addWhere('id', '=', $salesOrderId)
+      ->execute()
+      ->first();
+
     $salesOrderStatusId = CRM_Utils_Request::retrieve('sales_order_status_id', 'Integer');
     if (empty($salesOrderStatusId)) {
-      $salesOrderStatusId = CaseSalesOrder::get()
-        ->addSelect('status_id')
-        ->addWhere('id', '=', $salesOrderId)
-        ->execute()
-        ->first()['status_id'];
+      $salesOrder = $salesOrder['status_id'];
     }
 
     $transaction = CRM_Core_Transaction::create();
@@ -55,6 +57,13 @@ class CRM_Civicase_Hook_Post_CreateSalesOrderContribution {
         ->addValue('invoicing_status_id', $invoicingStatusID)
         ->addValue('payment_status_id', $paymentStatusID)
         ->execute();
+
+      $caseId = $salesOrder['case_id'];
+      if (empty($caseId)) {
+        return;
+      }
+      $calculator = new CRM_Civicase_Service_CaseSalesOrderOpportunityCalculator($caseId);
+      $calculator->updateOpportunityFinancialDetails();
     }
     catch (\Throwable $th) {
       $transaction->rollback();

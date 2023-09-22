@@ -2,6 +2,7 @@
 
 namespace Civi\Api4\Action\CaseSalesOrder;
 
+use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\CaseSalesOrderLine;
 use Civi\Api4\Generic\AbstractSaveAction;
 use Civi\Api4\Generic\Result;
@@ -53,6 +54,10 @@ class SalesOrderSaveAction extends AbstractSaveAction {
         $salesOrder['payment_status_id'] = $caseSaleOrderContributionService->calculateInvoicingStatus();
         $salesOrder['invoicing_status_id'] = $caseSaleOrderContributionService->calculatePaymentStatus();
 
+        if (!is_null($saleOrderId)) {
+          $this->updateOpportunityDetails($saleOrderId);
+        }
+
         $salesOrders = $this->writeObjects([$salesOrder]);
         $result = array_pop($salesOrders);
 
@@ -101,6 +106,27 @@ class SalesOrderSaveAction extends AbstractSaveAction {
       ->addWhere('sales_order_id', '=', $salesOrder['id'])
       ->addWhere('id', 'NOT IN', $lineItemsInUse)
       ->execute();
+  }
+
+  /**
+   * Updates sales order's case opportunity details.
+   *
+   * @param int $salesOrderId
+   *   Sales Order Id.
+   */
+  private function updateOpportunityDetails($salesOrderId): void {
+    $caseSalesOrder = CaseSalesOrder::get()
+      ->addSelect('case_id')
+      ->addWhere('id', '=', $salesOrderId)
+      ->execute()
+      ->first();
+
+    if (empty($caseSalesOrder)) {
+      return;
+    }
+
+    $caseSaleOrderContributionService = new \CRM_Civicase_Service_CaseSalesOrderOpportunityCalculator($caseSalesOrder['case_id']);
+    $caseSaleOrderContributionService->updateOpportunityFinancialDetails();
   }
 
 }

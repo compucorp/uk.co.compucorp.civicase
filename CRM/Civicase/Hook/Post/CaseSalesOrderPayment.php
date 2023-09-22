@@ -21,28 +21,37 @@ class CRM_Civicase_Hook_Post_CaseSalesOrderPayment {
    *   Object reference.
    */
   public function run($op, $objectName, $objectId, &$objectRef) {
-    if (!$this->shouldRun($op, $objectName)) {
+    if (!$this->shouldRun($op, $objectName, $objectRef)) {
       return;
     }
 
-    $entityFinancialTrxn = civicrm_api3('EntityFinancialTrxn', 'get', [
-      'sequential' => 1,
-      'entity_table' => 'civicrm_contribution',
-      'financial_trxn_id' => $objectRef->financial_trxn_id,
-    ]);
-
-    if (empty($entityFinancialTrxn['values'][0])) {
+    $financialTrnxId = $objectRef->financial_trxn_id;
+    if (empty($financialTrnxId)) {
       return;
     }
 
-    $contributionId = $entityFinancialTrxn['values'][0]['entity_id'];
+    $contributionId = $this->getContributionId($financialTrnxId);
+    if (empty($contributionId)) {
+      return;
+    }
 
-    $salesOrderID = Contribution::get()
-      ->addSelect('Opportunity_Details.Quotation')
+    $contribution = Contribution::get()
+      ->addSelect('Opportunity_Details.Case_Opportunity', 'Opportunity_Details.Quotation')
       ->addWhere('id', '=', $contributionId)
       ->execute()
-      ->first()['Opportunity_Details.Quotation'];
+      ->first();
 
+    $this->updateQuotationFinancialStatuses($contribution['Opportunity_Details.Quotation']);
+    $this->updateCaseOpportunityFinancialDetails($contribution['Opportunity_Details.Case_Opportunity']);
+  }
+
+  /**
+   * Updates CaseSalesOrder financial statuses.
+   *
+   * @param int $salesOrderID
+   *   CaseSalesOrder ID.
+   */
+  private function updateQuotationFinancialStatuses(int $salesOrderID): void {
     if (empty($salesOrderID)) {
       return;
     }
@@ -69,18 +78,57 @@ class CRM_Civicase_Hook_Post_CaseSalesOrderPayment {
   }
 
   /**
+   * Updates Case financial statuses.
+   *
+   * @param int? $caseId
+   *   CaseSalesOrder ID.
+   */
+  private function updateCaseOpportunityFinancialDetails(?int $caseId) {
+    if (empty($caseId)) {
+      return;
+    }
+
+    try {
+      $calculator = new CRM_Civicase_Service_CaseSalesOrderOpportunityCalculator($caseId);
+      $calculator->updateOpportunityFinancialDetails();
+    }
+    catch (\Throwable $th) {
+      CRM_Core_Error::statusBounce(ts('Error updating opportunity details'));
+    }
+  }
+
+  /**
+   * Gets Contribution ID by Financial Transaction ID.
+   */
+  private function getContributionId($financialTrxnId) {
+    $entityFinancialTrxn = civicrm_api3('EntityFinancialTrxn', 'get', [
+      'sequential' => 1,
+      'entity_table' => 'civicrm_contribution',
+      'financial_trxn_id' => $financialTrxnId,
+    ]);
+
+    if (empty($entityFinancialTrxn['values'][0])) {
+      return NULL;
+    }
+
+    return $entityFinancialTrxn['values'][0]['entity_id'];
+  }
+
+  /**
    * Determines if the hook should run or not.
    *
    * @param string $op
    *   The operation being performed.
    * @param string $objectName
    *   Object name.
+   * @param string $objectRef
+   *   The hook object reference.
    *
    * @return bool
    *   returns a boolean to determine if hook will run or not.
    */
-  private function shouldRun($op, $objectName) {
-    return $objectName == 'EntityFinancialTrxn' && $op == 'create';
+  private function shouldRun($op, $objectName, $objectRef) {
+    return $objectName == 'EntityFinancialTrxn' && $op == 'create' && property_exists($objectRef, 'financial_trxn_id');
   }
 
 }

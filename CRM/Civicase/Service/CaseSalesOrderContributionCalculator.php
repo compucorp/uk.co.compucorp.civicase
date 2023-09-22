@@ -2,7 +2,6 @@
 
 use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\Contribution;
-use Civi\Api4\OptionValue;
 
 /**
  * Case Sale Order Contribution Service.
@@ -10,7 +9,7 @@ use Civi\Api4\OptionValue;
  * This class provides calculations for payment and invoices that
  * attached to the sale order.
  */
-class CRM_Civicase_Service_CaseSalesOrderContributionCalculator {
+class CRM_Civicase_Service_CaseSalesOrderContributionCalculator extends CRM_Civicase_Service_AbstractBaseSalesOrderCalculator {
 
   /**
    * Case Sales Order object.
@@ -18,18 +17,7 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator {
    * @var array|null
    */
   private ?array $salesOrder;
-  /**
-   * Case Sales Order payment status option values.
-   *
-   * @var array
-   */
-  private array $paymentStatusOptionValues;
-  /**
-   * Case Sales Order Invoicing status option values.
-   *
-   * @var array
-   */
-  private array $invoicingStatusOptionValues;
+
   /**
    * List of contributions that links to the sales order.
    *
@@ -60,12 +48,12 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator {
    * @throws \Civi\API\Exception\UnauthorizedException
    */
   public function __construct($salesOrderId) {
+    parent::__construct();
     $this->salesOrder = $this->getSalesOrder($salesOrderId);
-    $this->paymentStatusOptionValues = $this->getOptionValues('case_sales_order_payment_status');
-    $this->invoicingStatusOptionValues = $this->getOptionValues('case_sales_order_invoicing_status');
     $this->contributions = $this->getContributions();
     $this->totalInvoicedAmount = $this->getTotalInvoicedAmount();
     $this->totalPaymentsAmount = $this->getTotalPaymentsAmount();
+
   }
 
   /**
@@ -90,6 +78,13 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator {
   }
 
   /**
+   * Gets SalesOrder Total amount after tax.
+   */
+  public function getQuotedAmount(): float {
+    return $this->salesOrder['total_after_tax'];
+  }
+
+  /**
    * Calculates invoicing status.
    *
    * @return string
@@ -97,15 +92,15 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator {
    */
   public function calculateInvoicingStatus() {
     if (empty($this->salesOrder) || empty($this->contributions)) {
-      return $this->getStatus('no_invoices', $this->invoicingStatusOptionValues);
+      return $this->getValueFromOptionValues(parent::INVOICING_STATUS_NO_INVOICES, $this->invoicingStatusOptionValues);
     }
 
     $quotationTotalAmount = $this->salesOrder['total_after_tax'];
     if ($this->totalInvoicedAmount < $quotationTotalAmount) {
-      return $this->getStatus('partially_invoiced', $this->invoicingStatusOptionValues);
+      return $this->getValueFromOptionValues(parent::INVOICING_STATUS_PARTIALLY_INVOICED, $this->invoicingStatusOptionValues);
     }
 
-    return $this->getStatus('fully_invoiced', $this->invoicingStatusOptionValues);
+    return $this->getValueFromOptionValues(parent::INVOICING_STATUS_FULLY_INVOICED, $this->invoicingStatusOptionValues);
   }
 
   /**
@@ -117,14 +112,18 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator {
   public function calculatePaymentStatus() {
     if (empty($this->salesOrder) || empty($this->contributions) || !($this->totalPaymentsAmount > 0)) {
 
-      return $this->getStatus('no_payments', $this->paymentStatusOptionValues);
+      return $this->getValueFromOptionValues(parent::PAYMENT_STATUS_NO_PAYMENTS, $this->paymentStatusOptionValues);
     }
 
     if ($this->totalPaymentsAmount < $this->totalInvoicedAmount) {
-      return $this->getStatus('partially_paid', $this->paymentStatusOptionValues);
+      return $this->getValueFromOptionValues(parent::PAYMENT_STATUS_PARTIALLY_PAID, $this->paymentStatusOptionValues);
     }
 
-    return $this->getStatus('fully_paid', $this->paymentStatusOptionValues);
+    if ($this->totalPaymentsAmount > $this->totalInvoicedAmount) {
+      return $this->getValueFromOptionValues(parent::PAYMENT_STATUS_OVERPAID, $this->paymentStatusOptionValues);
+    }
+
+    return $this->getValueFromOptionValues(parent::PAYMENT_STATUS_FULLY_PAID, $this->paymentStatusOptionValues);
   }
 
   /**
@@ -167,26 +166,6 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator {
   }
 
   /**
-   * Gets option values by option group name.
-   *
-   * @param string $name
-   *   Option group name.
-   *
-   * @return array
-   *   Option values.
-   *
-   * @throws API_Exception
-   * @throws \Civi\API\Exception\UnauthorizedException
-   */
-  private function getOptionValues($name) {
-    return OptionValue::get()
-      ->addSelect('*')
-      ->addWhere('option_group_id:name', '=', $name)
-      ->execute()
-      ->getArrayCopy();
-  }
-
-  /**
    * Gets total invoiced amount.
    *
    * @return float
@@ -221,23 +200,6 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator {
     }
 
     return $totalPaymentsAmount;
-  }
-
-  /**
-   * Gets status (option values' value) from the given options.
-   *
-   * @param string $needle
-   *   Search value.
-   * @param array $options
-   *   Option value.
-   *
-   * @return string
-   *   Option values' value.
-   */
-  private function getStatus($needle, $options) {
-    $key = array_search($needle, array_column($options, 'name'));
-
-    return $options[$key]['value'];
   }
 
 }
