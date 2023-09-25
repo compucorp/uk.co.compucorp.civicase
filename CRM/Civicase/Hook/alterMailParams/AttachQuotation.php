@@ -25,7 +25,11 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotation {
 
     $rendered = $this->getContributionQuotationInvoice($params['tokenContext']['contributionId']);
 
-    $params['attachments'][] = CRM_Utils_Mail::appendPDF('quotation_invoice.pdf', $rendered['html'], $rendered['format']);
+    $attachment = CRM_Utils_Mail::appendPDF('quotation_invoice.pdf', $rendered['html'], $rendered['format']);
+
+    if ($attachment) {
+      $params['attachments'][] = $attachment;
+    }
   }
 
   /**

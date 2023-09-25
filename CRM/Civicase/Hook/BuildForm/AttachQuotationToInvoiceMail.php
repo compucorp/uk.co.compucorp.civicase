@@ -17,7 +17,7 @@ class CRM_Civicase_Hook_BuildForm_AttachQuotationToInvoiceMail {
    *   Form Name.
    */
   public function run(CRM_Core_Form &$form, $formName) {
-    if (!$this->shouldRun($formName)) {
+    if (!$this->shouldRun($form, $formName)) {
       return;
     }
 
@@ -31,18 +31,20 @@ class CRM_Civicase_Hook_BuildForm_AttachQuotationToInvoiceMail {
   /**
    * Determines if the hook will run.
    *
+   * @param CRM_Core_Form $form
+   *   Form Class object.
    * @param string $formName
    *   Form Name.
    *
    * @return bool
    *   TRUE if the hook should run, FALSE otherwise.
    */
-  private function shouldRun($formName) {
+  private function shouldRun($form, $formName) {
     if ($formName != 'CRM_Contribute_Form_Task_Invoice') {
       return FALSE;
     }
 
-    $contributionId = CRM_Utils_Request::retrieve('id', 'Positive');
+    $contributionId = CRM_Utils_Request::retrieve('id', 'Positive', $form, FALSE);
     if (!$contributionId) {
       return FALSE;
     }
@@ -50,12 +52,12 @@ class CRM_Civicase_Hook_BuildForm_AttachQuotationToInvoiceMail {
     $salesOrder = Contribution::get()
       ->addSelect('Opportunity_Details.Quotation')
       ->addWhere('Opportunity_Details.Quotation', 'IS NOT EMPTY')
-      ->addWhere('id', '=', $contributionId)
+      ->addWhere('id', 'IN', explode(',', $contributionId))
       ->addChain('salesOrder', CaseSalesOrder::get()
         ->addWhere('id', '=', '$Opportunity_Details.Quotation')
       )
       ->execute()
-      ->first()['salesOrder'];
+      ->getArrayCopy();
 
     return !empty($salesOrder);
   }

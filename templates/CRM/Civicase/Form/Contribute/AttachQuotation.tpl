@@ -8,7 +8,7 @@
 {literal}
   <script type="text/javascript">
     CRM.$(function ($) {
-      $('form.CRM_Contribute_Form_Task_Invoice > table.form-layout-compressed > tbody').append($('tr.attach-quote'))
+      $('#email_comment').parent().parent().after($('tr.attach-quote'))
     })
   </script>
 {/literal}

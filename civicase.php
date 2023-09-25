@@ -224,6 +224,11 @@ function civicase_civicrm_buildForm($formName, &$form) {
   if (!empty($_REQUEST['civicase_reload'])) {
     $form->civicase_reload = json_decode($_REQUEST['civicase_reload'], TRUE);
   }
+
+  $isSearchKit = CRM_Utils_Request::retrieve('sk', 'Positive');
+  if ($formName == 'CRM_Contribute_Form_Task_Invoice' && $isSearchKit) {
+    $form->add('hidden', 'mail_task_from_sk', $isSearchKit);
+  }
 }
 
 /**
@@ -295,6 +300,10 @@ function civicase_civicrm_postProcess($formName, &$form) {
   if (!empty($form->civicase_reload)) {
     $api = civicrm_api3('Case', 'getdetails', ['check_permissions' => 1] + $form->civicase_reload);
     $form->ajaxResponse['civicase_reload'] = $api['values'];
+  }
+
+  if ($formName == 'CRM_Contribute_Form_Task_Invoice' && !empty($form->getVar('_submitValues')['mail_task_from_sk'])) {
+    CRM_Utils_System::redirect($_SERVER['HTTP_REFERER']);
   }
 }
 
@@ -572,4 +581,20 @@ function civicase_civicrm_searchKitTasks(array &$tasks, bool $checkPermissions, 
   ];
 
   $tasks['CaseSalesOrder'] = $actions;
+
+}
+
+/**
+ * Implements hook_civicrm_searchTasks().
+ */
+function civicase_civicrm_searchTasks(string $objectName, array &$tasks) {
+  if ($objectName === 'contribution') {
+    $tasks['bulk_invoice'] = [
+      'title' => ts('Send Invoice by email'),
+      'class' => 'CRM_Contribute_Form_Task_Invoice',
+      'icon' => 'fa-paper-plane-o',
+      'url' => 'civicrm/contribute/task?reset=1&task_item=invoice&sk=1',
+      'key' => 'invoice',
+    ];
+  }
 }
