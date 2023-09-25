@@ -13,7 +13,7 @@ use CRM_Civicase_WorkflowMessage_SalesOrderInvoice as SalesOrderInvoice;
 class CRM_Civicase_Service_CaseSalesOrderInvoice {
 
   /**
-   * CreditNoteInvoiceService constructor.
+   * CaseSalesOrderInvoice constructor.
    *
    * @param \CRM_Civicase_WorkflowMessage_SalesOrderInvoice $template
    *   Workflow template.

@@ -26,6 +26,7 @@ class SalesOrderSaveAction extends AbstractSaveAction {
       $this->matchExisting($record);
       if (empty($record['id'])) {
         $this->fillDefaults($record);
+        $this->fillMandatoryFields($record);
       }
     }
     $this->validateValues();
@@ -127,6 +128,19 @@ class SalesOrderSaveAction extends AbstractSaveAction {
 
     $caseSaleOrderContributionService = new \CRM_Civicase_Service_CaseSalesOrderOpportunityCalculator($caseSalesOrder['case_id']);
     $caseSaleOrderContributionService->updateOpportunityFinancialDetails();
+  }
+
+  /**
+   * Fill mandatory fields.
+   *
+   * @param array $params
+   *   Single Sales Order Record.
+   */
+  protected function fillMandatoryFields(&$params) {
+    $saleOrderId = $params['id'] ?? NULL;
+    $caseSaleOrderContributionService = new \CRM_Civicase_Service_CaseSalesOrderContributionCalculator($saleOrderId);
+    $params['payment_status_id'] = $caseSaleOrderContributionService->calculateInvoicingStatus();
+    $params['invoicing_status_id'] = $caseSaleOrderContributionService->calculatePaymentStatus();
   }
 
 }
