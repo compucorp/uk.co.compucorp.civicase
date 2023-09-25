@@ -18,8 +18,7 @@ class CRM_Civicase_Upgrader_Steps_Step0019 {
    */
   public function apply() {
     try {
-      $upgrader = CRM_Civicase_Upgrader_Base::instance();
-      $upgrader->executeSqlFile('sql/auto_install.sql');
+      CRM_Utils_File::sourceSQLFile(CIVICRM_DSN, CRM_Civicase_ExtensionUtil::path('sql/auto_install.sql'));
 
       (new QuotationTemplateManager())->create();
       (new CaseTypeCategoryManager())->create();
