@@ -4,11 +4,17 @@
     <td class="html-adjust">{$form.attach_quote.html} <span>Yes</span></td>
   </tr>
 </table>
+<div id="editMessageDetails"></div>
 
 {literal}
   <script type="text/javascript">
     CRM.$(function ($) {
-      $('form.CRM_Contribute_Form_Task_Invoice > table.form-layout-compressed > tbody').append($('tr.attach-quote'))
+      if ($('#html_message').length) {
+        $('#html_message').parent().parent().after($('tr.attach-quote'))
+
+        return
+      }
+      $('#email_comment').parent().parent().after($('tr.attach-quote'))
     })
   </script>
 {/literal}
