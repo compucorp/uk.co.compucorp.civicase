@@ -40,7 +40,10 @@ class CRM_Civicase_Hook_BuildForm_AttachQuotationToInvoiceMail {
    *   TRUE if the hook should run, FALSE otherwise.
    */
   private function shouldRun($form, $formName) {
-    if ($formName != 'CRM_Contribute_Form_Task_Invoice') {
+    if (!in_array($formName, [
+      'CRM_Contribute_Form_Task_Invoice',
+      'CRM_Invoicehelper_Contribute_Form_Task_Invoice',
+    ])) {
       return FALSE;
     }
 

@@ -228,6 +228,13 @@ function civicase_civicrm_buildForm($formName, &$form) {
   $isSearchKit = CRM_Utils_Request::retrieve('sk', 'Positive');
   if ($formName == 'CRM_Contribute_Form_Task_Invoice' && $isSearchKit) {
     $form->add('hidden', 'mail_task_from_sk', $isSearchKit);
+    CRM_Core_Resources::singleton()->addScriptFile(
+      CRM_Civicase_ExtensionUtil::LONG_NAME,
+      'js/invoice-bulk-mail.js',
+    );
+    $form->setTitle(ts('Email Contribution Invoice'));
+    $ids = CRM_Utils_Request::retrieve('id', 'Positive', $form, FALSE);
+    $form->assign('totalSelectedContributions', count(explode(',', $ids)));
   }
 }
 

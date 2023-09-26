@@ -584,7 +584,7 @@ $mgd = [
                     'icon' => 'fa-paper-plane-o',
                     'text' => 'Send By Email',
                     'style' => 'default',
-                    'path' => 'civicrm/contribute/invoice/email/?reset=1&id=[id]&select=email',
+                    'path' => 'civicrm/contribute/invoice/email/?reset=1&id=[id]&select=email&cid=[contact_id]',
                     'condition' => [],
                   ],
                 ],
