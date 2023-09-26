@@ -31,7 +31,7 @@
      * Redirects user to new quotation screen
      */
     function redirectToQuotationCreationScreen () {
-      let url = '/civicrm/case-features/a#/quotations/new';
+      let url = CRM.url('/case-features/a#/quotations/new');
       const caseId = $location.search().caseId;
       if (caseId) {
         url += `?caseId=${caseId}`;
