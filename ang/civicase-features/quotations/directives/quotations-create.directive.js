@@ -117,13 +117,12 @@
         return;
       }
 
-      crmApi4('Relationship', 'get', {
-        select: ['contact_id_a'],
-        where: [['case_id', '=', $scope.defaultCaseId], ['relationship_type_id:name', '=', 'Case Coordinator is'], ['is_current', '=', true]],
-        limit: 1
-      }).then(function (relationships) {
-        if (Array.isArray(relationships) && relationships.length > 0) {
-          $scope.salesOrder.client_id = relationships[0].contact_id_a ?? null;
+      crmApi4('CaseContact', 'get', {
+        select: ['contact_id'],
+        where: [['case_id', '=', $scope.defaultCaseId]]
+      }).then(function (caseContacts) {
+        if (Array.isArray(caseContacts) && caseContacts.length > 0) {
+          $scope.salesOrder.client_id = caseContacts[0].contact_id ?? null;
         }
       });
     }
