@@ -8,7 +8,7 @@
   };
 
   $(document).one('crmLoad', function () {
-    const entityRefCustomFields = CRM.vars.civicase.entityRefCustomFields ?? [];
+    const entityRefCustomFields = Object.values(CRM.vars.civicase.entityRefCustomFields ?? {});
 
     /* eslint-disable no-undef */
     waitForElement($, '#customData', function ($, elem) {
@@ -20,6 +20,10 @@
             entity: field.entity,
             create: false
           });
+
+        if (field.value) {
+          $(`[name^=${field.name}_]`).val(field.value).trigger('change');
+        }
       });
     });
   });

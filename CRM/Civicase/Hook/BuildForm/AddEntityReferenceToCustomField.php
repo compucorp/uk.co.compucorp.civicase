@@ -1,5 +1,6 @@
 <?php
 
+use Civi\Api4\CaseContact;
 use CRM_Civicase_ExtensionUtil as E;
 
 /**
@@ -20,13 +21,13 @@ class CRM_Civicase_Hook_BuildForm_AddEntityReferenceToCustomField {
       return;
     }
 
-    $customFields[] = [
+    $customFields['case'] = [
       'name' => CRM_Core_BAO_CustomField::getCustomFieldID('Case_Opportunity', 'Opportunity_Details', TRUE),
       'entity' => 'Case',
       'placeholder' => '- Select Case/Opportunity -',
     ];
 
-    $customFields[] = [
+    $customFields['salesOrder'] = [
       'name' => CRM_Core_BAO_CustomField::getCustomFieldID('Quotation', 'Opportunity_Details', TRUE),
       'entity' => 'CaseSalesOrder',
       'placeholder' => '- Select Quotation -',
@@ -36,7 +37,33 @@ class CRM_Civicase_Hook_BuildForm_AddEntityReferenceToCustomField {
       'scriptFile' => [E::LONG_NAME, 'js/contribution-entityref-field.js'],
       'region' => 'page-header',
     ]);
+
+    $this->populateDefaultFields($form, $customFields);
     \Civi::resources()->addVars('civicase', ['entityRefCustomFields' => $customFields]);
+  }
+
+  /**
+   * Populates default fields.
+   *
+   * @param \CRM_Core_Form &$form
+   *   Form Class object.
+   * @param array &$customFields
+   *   Custom fields to set default value.
+   */
+  private function populateDefaultFields(CRM_Core_Form &$form, array &$customFields) {
+    $caseId = CRM_Utils_Request::retrieve('caseId', 'Positive', $form);
+    if (!$caseId) {
+      return;
+    }
+
+    $customFields['case']['value'] = $caseId;
+    $caseClient = CaseContact::get()
+      ->addSelect('contact_id')
+      ->addWhere('case_id', '=', $caseId)
+      ->execute()
+      ->first()['contact_id'] ?? NULL;
+
+    $form->setDefaults(array_merge($form->_defaultValues, ['contact_id' => $caseClient]));
   }
 
   /**
