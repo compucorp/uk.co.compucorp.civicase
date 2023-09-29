@@ -41,8 +41,8 @@ class CRM_Civicase_Hook_Post_CaseSalesOrderPayment {
       ->execute()
       ->first();
 
-    $this->updateQuotationFinancialStatuses($contribution['Opportunity_Details.Quotation']);
-    $this->updateCaseOpportunityFinancialDetails($contribution['Opportunity_Details.Case_Opportunity']);
+    $this->updateQuotationFinancialStatuses($contribution['Opportunity_Details.Quotation'] ?: NULL);
+    $this->updateCaseOpportunityFinancialDetails($contribution['Opportunity_Details.Case_Opportunity'] ?: NULL);
   }
 
   /**
@@ -51,7 +51,7 @@ class CRM_Civicase_Hook_Post_CaseSalesOrderPayment {
    * @param int $salesOrderID
    *   CaseSalesOrder ID.
    */
-  private function updateQuotationFinancialStatuses(int $salesOrderID): void {
+  private function updateQuotationFinancialStatuses(?int $salesOrderID): void {
     if (empty($salesOrderID)) {
       return;
     }
