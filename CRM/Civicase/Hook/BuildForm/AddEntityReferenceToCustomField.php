@@ -17,7 +17,7 @@ class CRM_Civicase_Hook_BuildForm_AddEntityReferenceToCustomField {
    *   Form Name.
    */
   public function run(CRM_Core_Form &$form, $formName) {
-    if (!$this->shouldRun($formName)) {
+    if (!$this->shouldRun($form, $formName)) {
       return;
     }
 
@@ -69,14 +69,17 @@ class CRM_Civicase_Hook_BuildForm_AddEntityReferenceToCustomField {
   /**
    * Checks if the hook should run.
    *
+   * @param \CRM_Core_Form $form
+   *   Form object.
    * @param string $formName
    *   Form Name.
    *
    * @return bool
    *   True if hook should run, otherwise false.
    */
-  public function shouldRun($formName) {
-    return $formName === "CRM_Contribute_Form_Contribution";
+  public function shouldRun($form, $formName) {
+    $addOrUpdate = ($form->getAction() & CRM_Core_Action::ADD) || ($form->getAction() & CRM_Core_Action::UPDATE);
+    return $formName === "CRM_Contribute_Form_Contribution" &&  $addOrUpdate;
   }
 
 }
