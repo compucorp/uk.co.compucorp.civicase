@@ -33,7 +33,6 @@
 
     $scope.isUpdate = false;
     $scope.formValid = true;
-    $scope.membeshipTypesProductDiscountPercentage = 0;
     $scope.roundTo = roundTo;
     $scope.formatMoney = formatMoney;
     $scope.submitInProgress = false;
@@ -43,6 +42,7 @@
     $scope.currencyCodes = CurrencyCodes.getAll();
     $scope.handleClientChange = handleClientChange;
     $scope.handleProductChange = handleProductChange;
+    $scope.membeshipTypesProductDiscountPercentage = 0;
     $scope.handleCurrencyChange = handleCurrencyChange;
     $scope.salesOrderStatus = SalesOrderStatus.getAll();
     $scope.defaultCaseId = $location.search().caseId || null;
@@ -316,6 +316,28 @@
 
       item.subtotal_amount = item.unit_price * item.quantity * ((100 - item.discounted_percentage) / 100) || 0;
       $scope.$emit('totalChange');
+      validateProductPrice(index);
+    }
+
+    /**
+     * Ensures the product price doesnt exceed the max price
+     *
+     * @param {number} index index of the sales order line item
+     */
+    function validateProductPrice (index) {
+      const productId = $scope.salesOrder.items[index].product_id;
+      const shouldCompareCost = productId && productsCache.has(productId) && parseFloat(productsCache.get(productId).cost) > 0;
+      if (!shouldCompareCost) {
+        return;
+      }
+
+      const cost = productsCache.get(productId).cost;
+      if ($scope.salesOrder.items[index].subtotal_amount > cost) {
+        $scope.salesOrder.items[index].quantity = 1;
+        $scope.salesOrder.items[index].unit_price = parseFloat(cost);
+        CRM.alert('The quotation line item(s) have been set to the maximum premium price', ts('info'), 'info');
+        calculateSubtotal(index);
+      }
     }
 
     /**
