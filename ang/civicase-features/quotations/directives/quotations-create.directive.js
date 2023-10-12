@@ -230,7 +230,7 @@
       const clientID = $scope.salesOrder.client_id;
       crmApi4('Membership', 'get', {
         select: ['membership_type_id.Product_Discounts.Product_Discount_Amount'],
-        where: [['contact_id', '=', clientID]]
+        where: [['contact_id', '=', clientID], ['status_id.is_current_member', '=', true]]
       }).then(function (results) {
         let discountPercentage = 0;
         results.forEach((membership) => {
