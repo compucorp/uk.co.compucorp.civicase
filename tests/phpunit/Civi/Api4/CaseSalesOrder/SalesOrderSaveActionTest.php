@@ -3,6 +3,7 @@
 use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\CaseSalesOrderLine;
 use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
+use CRM_Civicase_Test_Fabricator_Product as ProductFabricator;
 
 /**
  * CaseSalesOrder.SalesOrderSaveAction API Test Case.
@@ -17,7 +18,7 @@ class Civi_Api4_CaseSalesOrder_SalesOrderSaveActionTest extends BaseHeadlessTest
   /**
    * Setup data before tests run.
    */
-  public function setUp() {
+  public function setUp(): void {
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
   }
@@ -160,6 +161,32 @@ class Civi_Api4_CaseSalesOrder_SalesOrderSaveActionTest extends BaseHeadlessTest
 
     $this->assertCount(1, $salesOrderLine);
     $this->assertEquals($salesOrder['items'][0]['id'], $salesOrderLine[0]['id']);
+  }
+
+  /**
+   * Test line item subtotal doesnt exceed product maximum cost.
+   */
+  public function testSubTotalDoesntExceedProductCost() {
+    $productPrice = 200;
+    $salesOrder = $this->getCaseSalesOrderData();
+    $salesOrder['items'][] = $this->getCaseSalesOrderLineData(
+      ['unit_price' => 200, 'quantity' => 2]
+    );
+
+    $salesOrder['items'][0]['product_id'] = ProductFabricator::fabricate(['cost' => 200])['id'];
+
+    $salesOrderId = CaseSalesOrder::save()
+      ->addRecord($salesOrder)
+      ->execute()
+      ->jsonSerialize()[0]['id'];
+
+    $salesOrderLine = CaseSalesOrderLine::get()
+      ->addWhere('sales_order_id', '=', $salesOrderId)
+      ->execute()
+      ->jsonSerialize();
+
+    $this->assertNotEmpty($salesOrderLine);
+    $this->assertEquals($productPrice, $salesOrderLine[0]['subtotal_amount']);
   }
 
 }

@@ -7,6 +7,7 @@ use Civi\Api4\CaseSalesOrderLine;
 use Civi\Api4\Generic\AbstractSaveAction;
 use Civi\Api4\Generic\Result;
 use Civi\Api4\Generic\Traits\DAOActionTrait;
+use Civi\Api4\Product;
 use CRM_Civicase_BAO_CaseSalesOrder as CaseSalesOrderBAO;
 use CRM_Core_Transaction;
 
@@ -46,6 +47,7 @@ class SalesOrderSaveAction extends AbstractSaveAction {
       $output = [];
       foreach ($items as $salesOrder) {
         $lineItems = $salesOrder['items'];
+        $this->validateLinItemProductPrice($lineItems);
         $total = CaseSalesOrderBAO::computeTotal($lineItems);
         $salesOrder['total_before_tax'] = $total['totalBeforeTax'];
         $salesOrder['total_after_tax'] = $total['totalAfterTax'];
@@ -122,7 +124,7 @@ class SalesOrderSaveAction extends AbstractSaveAction {
       ->execute()
       ->first();
 
-    if (empty($caseSalesOrder)) {
+    if (empty($caseSalesOrder) || empty($caseSalesOrder['case_id'])) {
       return;
     }
 
@@ -141,6 +143,30 @@ class SalesOrderSaveAction extends AbstractSaveAction {
     $caseSaleOrderContributionService = new \CRM_Civicase_Service_CaseSalesOrderContributionCalculator($saleOrderId);
     $params['payment_status_id'] = $caseSaleOrderContributionService->calculateInvoicingStatus();
     $params['invoicing_status_id'] = $caseSaleOrderContributionService->calculatePaymentStatus();
+  }
+
+  /**
+   * Ensures the product price doesnt exceed the max price.
+   *
+   * @param array $lineItems
+   *   Sales Order line items.
+   */
+  protected function validateLinItemProductPrice(array &$lineItems) {
+    array_walk($lineItems, function (&$lineItem) {
+      if (!empty($lineItem['product_id'])) {
+        $product = Product::get()
+          ->addSelect('cost')
+          ->addWhere('id', '=', $lineItem['product_id'])
+          ->execute()
+          ->first();
+
+        if ($product && !empty($product['cost']) && $product['cost'] < $lineItem['subtotal_amount']) {
+          $lineItem['unit_price'] = $product['cost'];
+          $lineItem['quantity'] = 1;
+          $lineItem['subtotal_amount'] = CaseSalesOrderBAO::getSubTotal($lineItem);
+        }
+      }
+    });
   }
 
 }
