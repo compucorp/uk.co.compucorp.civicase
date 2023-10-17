@@ -23,12 +23,13 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotation {
       return;
     }
 
-    $rendered = $this->getContributionQuotationInvoice($params['tokenContext']['contributionId']);
+    $contributionId = $params['tokenContext']['contributionId'] ?? $params['tplParams']['id'];
+    $rendered = $this->getContributionQuotationInvoice($contributionId);
 
     $attachment = CRM_Utils_Mail::appendPDF('quotation_invoice.pdf', $rendered['html'], $rendered['format']);
 
     if ($attachment) {
-      $params['attachments'][] = $attachment;
+      $params['attachments']['quotaition_invoice'] = $attachment;
     }
   }
 
@@ -73,7 +74,7 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotation {
    */
   private function shouldRun(array $params, $context, $shouldAttachQuote) {
     $component = $params['tplParams']['component'] ?? '';
-    if ($component !== 'contribute' || $context !== 'messageTemplate' || empty($shouldAttachQuote)) {
+    if ($component !== 'contribute' || empty($shouldAttachQuote)) {
       return FALSE;
     }
 

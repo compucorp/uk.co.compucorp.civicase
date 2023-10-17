@@ -22,6 +22,7 @@ class CRM_Civicase_Hook_BuildForm_AttachQuotationToInvoiceMail {
     }
 
     $form->add('checkbox', 'attach_quote', ts('Attach Quotation'));
+    $form->setDefaults(array_merge($form->_defaultValues, ['attach_quote' => TRUE]));
 
     CRM_Core_Region::instance('page-body')->add([
       'template' => "CRM/Civicase/Form/Contribute/AttachQuotation.tpl",

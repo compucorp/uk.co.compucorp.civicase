@@ -123,6 +123,9 @@
       }).then(function (caseContacts) {
         if (Array.isArray(caseContacts) && caseContacts.length > 0) {
           $scope.salesOrder.client_id = caseContacts[0].contact_id ?? null;
+          if ($scope.salesOrder.client_id) {
+            handleClientChange();
+          }
         }
       });
     }
@@ -230,7 +233,7 @@
       const clientID = $scope.salesOrder.client_id;
       crmApi4('Membership', 'get', {
         select: ['membership_type_id.Product_Discounts.Product_Discount_Amount'],
-        where: [['contact_id', '=', clientID]]
+        where: [['contact_id', '=', clientID], ['status_id.is_current_member', '=', true]]
       }).then(function (results) {
         let discountPercentage = 0;
         results.forEach((membership) => {

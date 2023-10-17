@@ -9,6 +9,7 @@
 {literal}
   <script type="text/javascript">
     CRM.$(function ($) {
+      $('#attach_quote').prop('checked', 1)
       if ($('#html_message').length) {
         $('#html_message').parent().parent().after($('tr.attach-quote'))
 
