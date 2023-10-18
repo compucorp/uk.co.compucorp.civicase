@@ -211,18 +211,11 @@
       };
 
       const productId = $scope.salesOrder.items[index].product_id;
-      if (productsCache.has(productId)) {
-        updateProductDependentFields(productId);
-        return;
-      }
-
-      civicaseCrmApi('Product', 'get', { id: productId })
-        .then(function (result) {
-          if (result.count > 0) {
-            productsCache.set(productId, result.values[productId]);
-            updateProductDependentFields(productId);
-          }
-        });
+      getProduct(productId).then(function (result) {
+        if (result) {
+          updateProductDependentFields(productId);
+        }
+      });
     }
 
     /**
@@ -330,9 +323,14 @@
      *
      * @param {number} index index of the sales order line item
      */
-    function validateProductPrice (index) {
+    async function validateProductPrice (index) {
       const productId = $scope.salesOrder.items[index].product_id;
-      const shouldCompareCost = productId && productsCache.has(productId) && parseFloat(productsCache.get(productId).cost) > 0;
+      if (!productId) {
+        return;
+      }
+
+      const product = await getProduct(productId);
+      const shouldCompareCost = product && product.cost > 0;
       if (!shouldCompareCost) {
         return;
       }
@@ -418,6 +416,32 @@
      */
     function formatMoney (value, currency) {
       return CRM.formatMoney(value, true, CurrencyCodes.getFormat(currency));
+    }
+
+    /**
+     * Get product by ID
+     *
+     * @param {number} productId id of product to fetch
+     *
+     * @returns {Promise<any>} product
+     */
+    async function getProduct (productId) {
+      let product = null;
+      if (productsCache.has(productId)) {
+        return productsCache.get(productId);
+      }
+
+      try {
+        const result = await civicaseCrmApi('Product', 'get', { id: productId });
+        if (result.count > 0) {
+          product = result.values[productId];
+          productsCache.set(productId, product);
+        }
+      } catch (error) {
+        return null;
+      }
+
+      return product;
     }
   }
 })(angular, CRM.$, CRM._);
