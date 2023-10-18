@@ -226,6 +226,10 @@ function civicase_civicrm_buildForm($formName, &$form) {
   }
 
   $isSearchKit = CRM_Utils_Request::retrieve('sk', 'Positive');
+  if ($formName == 'CRM_Contribute_Form_Task_PDF' && $isSearchKit) {
+    $form->add('hidden', 'mail_task_from_sk', $isSearchKit);
+  }
+
   if ($formName == 'CRM_Contribute_Form_Task_Invoice' && $isSearchKit) {
     $form->add('hidden', 'mail_task_from_sk', $isSearchKit);
     CRM_Core_Resources::singleton()->addScriptFile(
@@ -309,7 +313,12 @@ function civicase_civicrm_postProcess($formName, &$form) {
     $form->ajaxResponse['civicase_reload'] = $api['values'];
   }
 
-  if ($formName == 'CRM_Contribute_Form_Task_Invoice' && !empty($form->getVar('_submitValues')['mail_task_from_sk'])) {
+  if (
+      in_array($formName, [
+        'CRM_Contribute_Form_Task_Invoice', 'CRM_Contribute_Form_Task_PDF',
+      ])
+      && !empty($form->getVar('_submitValues')['mail_task_from_sk'])
+    ) {
     CRM_Utils_System::redirect($_SERVER['HTTP_REFERER']);
   }
 }
@@ -603,5 +612,11 @@ function civicase_civicrm_searchTasks(string $objectName, array &$tasks) {
       'url' => 'civicrm/contribute/task?reset=1&task_item=invoice&sk=1',
       'key' => 'invoice',
     ];
+
+    foreach ($tasks as &$task) {
+      if ($task['class'] === 'CRM_Contribute_Form_Task_PDF') {
+        $task['url'] .= '&sk=1';
+      }
+    }
   }
 }
