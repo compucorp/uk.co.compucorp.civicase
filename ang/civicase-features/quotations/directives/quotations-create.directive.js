@@ -235,6 +235,9 @@
         select: ['membership_type_id.Product_Discounts.Product_Discount_Amount'],
         where: [['contact_id', '=', clientID], ['status_id.is_current_member', '=', true]]
       }).then(function (results) {
+        if (!results || results.length < 1) {
+          return;
+        }
         let discountPercentage = 0;
         results.forEach((membership) => {
           discountPercentage += membership['membership_type_id.Product_Discounts.Product_Discount_Amount'];
