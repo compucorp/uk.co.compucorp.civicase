@@ -1,7 +1,7 @@
 <table>
   <tr class="crm-email-element attach-quote">
     <td class="label">{$form.attach_quote.label}</td>
-    <td class="html-adjust">{$form.attach_quote.html} <span>Yes</span></td>
+    <td class="html-adjust">{$form.attach_quote.html} {if isset($form.attach_quote.html)}<span>Yes</span>{/if}</td>
   </tr>
 </table>
 <div id="editMessageDetails"></div>

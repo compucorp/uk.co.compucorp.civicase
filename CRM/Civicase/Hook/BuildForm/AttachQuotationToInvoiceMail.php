@@ -21,8 +21,21 @@ class CRM_Civicase_Hook_BuildForm_AttachQuotationToInvoiceMail {
       return;
     }
 
-    $form->add('checkbox', 'attach_quote', ts('Attach Quotation'));
-    $form->setDefaults(array_merge($form->_defaultValues, ['attach_quote' => TRUE]));
+    $contributionId = CRM_Utils_Request::retrieve('id', 'Positive', $form, FALSE);
+    $salesOrder = Contribution::get()
+      ->addSelect('Opportunity_Details.Quotation')
+      ->addWhere('Opportunity_Details.Quotation', 'IS NOT EMPTY')
+      ->addWhere('id', 'IN', explode(',', $contributionId))
+      ->addChain('salesOrder', CaseSalesOrder::get()
+        ->addWhere('id', '=', '$Opportunity_Details.Quotation')
+      )
+      ->execute()
+      ->getArrayCopy();
+
+    if (!empty($salesOrder)) {
+      $form->add('checkbox', 'attach_quote', ts('Attach Quotation'));
+      $form->setDefaults(array_merge($form->_defaultValues, ['attach_quote' => TRUE]));
+    }
 
     CRM_Core_Region::instance('page-body')->add([
       'template' => "CRM/Civicase/Form/Contribute/AttachQuotation.tpl",
@@ -53,17 +66,7 @@ class CRM_Civicase_Hook_BuildForm_AttachQuotationToInvoiceMail {
       return FALSE;
     }
 
-    $salesOrder = Contribution::get()
-      ->addSelect('Opportunity_Details.Quotation')
-      ->addWhere('Opportunity_Details.Quotation', 'IS NOT EMPTY')
-      ->addWhere('id', 'IN', explode(',', $contributionId))
-      ->addChain('salesOrder', CaseSalesOrder::get()
-        ->addWhere('id', '=', '$Opportunity_Details.Quotation')
-      )
-      ->execute()
-      ->getArrayCopy();
-
-    return !empty($salesOrder);
+    return TRUE;
   }
 
 }
