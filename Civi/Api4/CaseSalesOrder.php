@@ -73,4 +73,14 @@ class CaseSalesOrder extends DAOEntity {
       ->setCheckPermissions($checkPermissions);
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public static function permissions() {
+    return [
+      'meta' => ['access CiviCRM'],
+      'default' => ['access CiviCRM'],
+    ];
+  }
+
 }

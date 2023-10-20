@@ -13,4 +13,14 @@ use Civi\Api4\Generic\DAOEntity;
  */
 class CaseSalesOrderLine extends DAOEntity {
 
+  /**
+   * {@inheritDoc}
+   */
+  public static function permissions() {
+    return [
+      'meta' => ['access CiviCRM'],
+      'default' => ['access CiviCRM'],
+    ];
+  }
+
 }
