@@ -36,20 +36,29 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator extends CRM_Civi
    * @var float
    */
   private float $totalPaymentsAmount;
+  /**
+   * ID of contribution that is being deleted.
+   *
+   * @var null|int
+   */
+  private ?int $deletingContributionId;
 
   /**
    * Class constructor.
    *
    * @param string $salesOrderId
    *   Sales Order ID.
+   * @param null|int $deletingContributionId
+   *   ID of contribution that is being deleted.
    *
    * @throws API_Exception
    * @throws CiviCRM_API3_Exception
    * @throws \Civi\API\Exception\UnauthorizedException
    */
-  public function __construct($salesOrderId) {
+  public function __construct($salesOrderId, ?int $deletingContributionId = NULL) {
     parent::__construct();
     $this->salesOrder = $this->getSalesOrder($salesOrderId);
+    $this->deletingContributionId = $deletingContributionId;
     $this->contributions = $this->getContributions();
     $this->totalInvoicedAmount = $this->getTotalInvoicedAmount();
     $this->totalPaymentsAmount = $this->getTotalPaymentsAmount();
@@ -115,11 +124,12 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator extends CRM_Civi
       return $this->getValueFromOptionValues(parent::PAYMENT_STATUS_NO_PAYMENTS, $this->paymentStatusOptionValues);
     }
 
-    if ($this->totalPaymentsAmount < $this->totalInvoicedAmount) {
+    $quotationTotalAmount = $this->salesOrder['total_after_tax'];
+    if ($this->totalPaymentsAmount < $quotationTotalAmount) {
       return $this->getValueFromOptionValues(parent::PAYMENT_STATUS_PARTIALLY_PAID, $this->paymentStatusOptionValues);
     }
 
-    if ($this->totalPaymentsAmount > $this->totalInvoicedAmount) {
+    if ($this->totalPaymentsAmount > $quotationTotalAmount) {
       return $this->getValueFromOptionValues(parent::PAYMENT_STATUS_OVERPAID, $this->paymentStatusOptionValues);
     }
 
@@ -140,10 +150,14 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator extends CRM_Civi
       return [];
     }
 
-    return Contribution::get(FALSE)
-      ->addWhere('Opportunity_Details.Quotation', '=', $this->salesOrder['id'])
-      ->execute()
-      ->getArrayCopy();
+    $contributions = Contribution::get(FALSE)
+      ->addWhere('Opportunity_Details.Quotation', '=', $this->salesOrder['id']);
+
+    if ($this->deletingContributionId !== NULL) {
+      $contributions->addWhere('id', '!=', $this->deletingContributionId);
+    }
+
+    return $contributions->execute()->getArrayCopy();
   }
 
   /**

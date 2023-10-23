@@ -31,16 +31,25 @@ class CRM_Civicase_Service_CaseSalesOrderOpportunityCalculator extends CRM_Civic
    * @var string
    */
   private string $caseId;
+  /**
+   * ID of contribution that is being deleted.
+   *
+   * @var null|int
+   */
+  private ?int $deletingContributionId;
 
   /**
    * Constructor for CaseSalesOrderOpportunityCalculator class.
    *
    * @param string $caseId
    *   Case Id.
+   * @param null|int $deletingContributionId
+   *   ID of contribution that is being deleted.
    */
-  public function __construct($caseId) {
+  public function __construct($caseId, ?int $deletingContributionId = NULL) {
     parent::__construct();
     $this->caseId = $caseId;
+    $this->deletingContributionId = $deletingContributionId;
     $contributions = $this->getContributions($caseId);
     $this->calculateOpportunityFinancialAmount($contributions);
   }
@@ -104,11 +113,11 @@ class CRM_Civicase_Service_CaseSalesOrderOpportunityCalculator extends CRM_Civic
       return $this->getLabelFromOptionValues(parent::PAYMENT_STATUS_NO_PAYMENTS, $this->paymentStatusOptionValues);
     }
 
-    if ($this->totalPaidAmount < $this->totalInvoicedAmount) {
+    if ($this->totalPaidAmount < $this->totalQuotedAmount) {
       return $this->getLabelFromOptionValues(parent::PAYMENT_STATUS_PARTIALLY_PAID, $this->paymentStatusOptionValues);
     }
 
-    if ($this->totalPaidAmount > $this->totalInvoicedAmount) {
+    if ($this->totalPaidAmount > $this->totalQuotedAmount) {
       return $this->getLabelFromOptionValues(parent::PAYMENT_STATUS_OVERPAID, $this->paymentStatusOptionValues);
 
     }
@@ -122,7 +131,7 @@ class CRM_Civicase_Service_CaseSalesOrderOpportunityCalculator extends CRM_Civic
   public function updateOpportunityFinancialDetails(): void {
     CiviCase::update()
       ->addValue('Case_Opportunity_Details.Total_Amount_Quoted', $this->calculateTotalQuotedAmount())
-      ->addValue('Case_Opportunity_Details.Total_Amount_Invoiced', $this->calculateTotalQuotedAmount())
+      ->addValue('Case_Opportunity_Details.Total_Amount_Invoiced', $this->calculateTotalInvoicedAmount())
       ->addValue('Case_Opportunity_Details.Invoicing_Status', $this->calculateInvoicingStatus())
       ->addValue('Case_Opportunity_Details.Total_Amounts_Paid', $this->calculateTotalPaidAmount())
       ->addValue('Case_Opportunity_Details.Payments_Status', $this->calculatePaymentStatus())
@@ -161,11 +170,15 @@ class CRM_Civicase_Service_CaseSalesOrderOpportunityCalculator extends CRM_Civic
    *   List of contributions that link to the opportunity.
    */
   private function getContributions($caseId) {
-    return Contribution::get(FALSE)
+    $contributions = Contribution::get(FALSE)
       ->addSelect('*', 'Opportunity_Details.Quotation')
-      ->addWhere('Opportunity_Details.Case_Opportunity', '=', $caseId)
-      ->execute()
-      ->getArrayCopy();
+      ->addWhere('Opportunity_Details.Case_Opportunity', '=', $caseId);
+
+    if ($this->deletingContributionId !== NULL) {
+      $contributions->addWhere('id', '!=', $this->deletingContributionId);
+    }
+
+    return $contributions->execute()->getArrayCopy();
   }
 
 }
