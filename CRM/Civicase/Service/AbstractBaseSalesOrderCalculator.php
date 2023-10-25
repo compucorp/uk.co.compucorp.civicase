@@ -13,7 +13,7 @@ abstract class CRM_Civicase_Service_AbstractBaseSalesOrderCalculator {
     INVOICING_STATUS_FULLY_INVOICED = 'fully_invoiced',
     PAYMENT_STATUS_NO_PAYMENTS = 'no_payments',
     PAYMENT_STATUS_PARTIALLY_PAID = 'partially_paid',
-    PAYMENT_STATUS_OVERPAID = 'overpaid',
+    PAYMENT_STATUS_OVERPAID = 'over_paid',
     PAYMENT_STATUS_FULLY_PAID = 'fully_paid';
 
   /**

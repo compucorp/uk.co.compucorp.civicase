@@ -30,7 +30,10 @@ class CRM_Civicase_Hook_Pre_DeleteSalesOrderContribution {
       return;
     }
 
-    $caseSaleOrderContributionService = new CRM_Civicase_Service_CaseSalesOrderContributionCalculator($salesOrderId);
+    $caseSaleOrderContributionService = new CRM_Civicase_Service_CaseSalesOrderContributionCalculator(
+      $salesOrderId,
+      (int) $objectId
+    );
     $invoicingStatusId = $caseSaleOrderContributionService->calculateInvoicingStatus();
     $paymentStatusId = $caseSaleOrderContributionService->calculatePaymentStatus();
 
@@ -46,7 +49,10 @@ class CRM_Civicase_Hook_Pre_DeleteSalesOrderContribution {
       ->execute()
       ->first();
 
-    $caseSaleOrderContributionService = new \CRM_Civicase_Service_CaseSalesOrderOpportunityCalculator($caseSalesOrder['case_id']);
+    $caseSaleOrderContributionService = new \CRM_Civicase_Service_CaseSalesOrderOpportunityCalculator(
+      $caseSalesOrder['case_id'],
+      (int) $objectId
+    );
     $caseSaleOrderContributionService->updateOpportunityFinancialDetails();
   }
 
