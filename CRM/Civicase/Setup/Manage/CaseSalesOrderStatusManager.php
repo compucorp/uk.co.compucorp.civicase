@@ -58,6 +58,14 @@ class CRM_Civicase_Setup_Manage_CaseSalesOrderStatusManager extends CRM_Civicase
 
     CRM_Core_BAO_OptionValue::ensureOptionValueExists([
       'option_group_id' => self::SALE_ORDER_STATUS_NAME,
+      'name' => 'deposit_paid',
+      'label' => 'Deposit paid',
+      'is_active' => TRUE,
+      'is_reserved' => TRUE,
+    ]);
+
+    CRM_Core_BAO_OptionValue::ensureOptionValueExists([
+      'option_group_id' => self::SALE_ORDER_STATUS_NAME,
       'name' => 'declined',
       'label' => 'Declined',
       'is_active' => TRUE,
