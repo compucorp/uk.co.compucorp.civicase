@@ -58,7 +58,7 @@ $mgd = [
         'help_pre' => NULL,
         'help_post' => 'Specify a discount that will automatically be applied when adding a product line item to a quotation if the contact is a member of this type.',
         'mask' => NULL,
-        'attributes' => NULL,
+        'attributes' => ' pattern="([0-9]*[.])?[0-9]+" ',
         'javascript' => NULL,
         'is_active' => TRUE,
         'is_view' => FALSE,
