@@ -173,7 +173,7 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator extends CRM_Civi
    * @throws \Civi\API\Exception\UnauthorizedException
    */
   private function getSalesOrder($saleOrderId) {
-    return CaseSalesOrder::get()
+    return CaseSalesOrder::get(FALSE)
       ->addWhere('id', '=', $saleOrderId)
       ->execute()
       ->first();
