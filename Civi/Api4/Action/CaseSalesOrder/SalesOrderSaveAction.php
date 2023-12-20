@@ -64,7 +64,7 @@ class SalesOrderSaveAction extends AbstractSaveAction {
         $salesOrders = $this->writeObjects([$salesOrder]);
         $result = array_pop($salesOrders);
 
-        $caseSalesOrderLineAPI = CaseSalesOrderLine::save();
+        $caseSalesOrderLineAPI = CaseSalesOrderLine::save(FALSE);
         $this->removeStaleLineItems($salesOrder);
         if (!empty($result) && !empty($lineItems)) {
           array_walk($lineItems, function (&$lineItem) use ($result, $caseSalesOrderLineAPI) {
@@ -105,7 +105,7 @@ class SalesOrderSaveAction extends AbstractSaveAction {
       return;
     }
 
-    CaseSalesOrderLine::delete()
+    CaseSalesOrderLine::delete(FALSE)
       ->addWhere('sales_order_id', '=', $salesOrder['id'])
       ->addWhere('id', 'NOT IN', $lineItemsInUse)
       ->execute();
@@ -118,7 +118,7 @@ class SalesOrderSaveAction extends AbstractSaveAction {
    *   Sales Order Id.
    */
   private function updateOpportunityDetails($salesOrderId): void {
-    $caseSalesOrder = CaseSalesOrder::get()
+    $caseSalesOrder = CaseSalesOrder::get(FALSE)
       ->addSelect('case_id')
       ->addWhere('id', '=', $salesOrderId)
       ->execute()
@@ -154,7 +154,7 @@ class SalesOrderSaveAction extends AbstractSaveAction {
   protected function validateLinItemProductPrice(array &$lineItems) {
     array_walk($lineItems, function (&$lineItem) {
       if (!empty($lineItem['product_id'])) {
-        $product = Product::get()
+        $product = Product::get(FALSE)
           ->addSelect('cost')
           ->addWhere('id', '=', $lineItem['product_id'])
           ->execute()
