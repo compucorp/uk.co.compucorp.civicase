@@ -162,7 +162,7 @@
           });
 
           it('sets the case manager filter equal to my id', () => {
-            expect($scope.filters.case_manager).toEqual([CRM.config.user_contact_id]);
+            expect($scope.filters.case_manager).toEqual([CRM.config.cid]);
           });
         });
 
@@ -173,7 +173,7 @@
           });
 
           it('sets the contact id filter equal to my id', function () {
-            expect($scope.filters.contact_involved).toEqual([CRM.config.user_contact_id]);
+            expect($scope.filters.contact_involved).toEqual([CRM.config.cid]);
           });
 
           it('filters by case activities related to the involved contact', () => {
@@ -304,7 +304,7 @@
         });
 
         it('sets the case manager filter equal to the current logged in user id', () => {
-          expect($scope.filters.case_manager).toEqual([CRM.config.user_contact_id]);
+          expect($scope.filters.case_manager).toEqual([CRM.config.cid]);
         });
       });
 
@@ -324,7 +324,7 @@
         });
 
         it('sets the contact involved filter equal to the current logged in user id', () => {
-          expect($scope.filters.contact_involved).toEqual([CRM.config.user_contact_id]);
+          expect($scope.filters.contact_involved).toEqual([CRM.config.cid]);
         });
       });
     });
