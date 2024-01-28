@@ -154,6 +154,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
     new CRM_Civicase_Hook_BuildForm_AddSalesOrderLineItemsToContribution(),
     new CRM_Civicase_Hook_BuildForm_AddEntityReferenceToCustomField(),
     new CRM_Civicase_Hook_BuildForm_AttachQuotationToInvoiceMail(),
+    new CRM_Civicase_Hook_BuildForm_RefreshInvoiceListOnUpdate(),
   ];
 
   foreach ($hooks as $hook) {
