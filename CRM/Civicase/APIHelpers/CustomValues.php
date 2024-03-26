@@ -162,8 +162,8 @@ class CRM_Civicase_APIHelpers_CustomValues {
         unset($field['customValue']);
         if (!empty($fieldInfo['customValue'])) {
           $field['value'] = CRM_Utils_Array::first($fieldInfo['customValue']);
-          if (!$toReturn['custom_value'] || in_array('display', $toReturn['custom_value'])) {
-            $field['value']['display'] = CRM_Core_BAO_CustomField::displayValue($field['value']['data'], $fieldInfo);
+          if ((!$toReturn['custom_value'] || in_array('display', $toReturn['custom_value'])) && !empty($fieldInfo['id'])) {
+            $field['value']['display'] = CRM_Core_BAO_CustomField::displayValue($field['value']['data'], $fieldInfo['id']);
           }
           foreach (array_keys($field['value']) as $key) {
             if ($toReturn['custom_value'] && !in_array($key, $toReturn['custom_value'])) {
