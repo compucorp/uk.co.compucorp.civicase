@@ -147,7 +147,7 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
       'entity_table' => 'civicrm_contribution',
       'financial_type_id' => $item['financial_type_id'],
       'line_total' => round($item['total'], 2),
-      'unit_price' => round($item['unit_price'], 2),
+      'unit_price' => $item['unit_price'],
     ];
   }
 
