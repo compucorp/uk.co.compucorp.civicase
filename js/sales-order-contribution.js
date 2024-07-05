@@ -1,13 +1,15 @@
 (function ($, _) {
   const waitForElement = function ($, elementPath, callBack) {
-    (new window.MutationObserver(function () {
-      callBack($, $(elementPath));
-    })).observe(document.querySelector(elementPath), {
-      attributes: true
-    });
+    window.setTimeout(function () {
+      if ($(elementPath).length) {
+        callBack($, $(elementPath));
+      } else {
+        window.waitForElement($, elementPath, callBack);
+      }
+    }, 500);
   };
 
-  $(document).one('crmLoad', function () {
+  $(document).one('crmLoad', async function () {
     const params = CRM.vars['uk.co.compucorp.civicase'];
     const salesOrderId = params.sales_order;
     const salesOrderStatusId = params.sales_order_status_id;
@@ -29,29 +31,36 @@
     }];
 
     if (Array.isArray(lineItems)) {
+      CRM.$.blockUI();
+      CRM.$('form#Contribution').css('visibility', 'hidden');
+      await new Promise(resolve => setTimeout(resolve, 1000));
       CRM.api4(apiRequest).then(function (batch) {
         const caseSalesOrder = batch.caseSalesOrders[0];
 
         lineItems.forEach(lineItem => {
-          addLineItem(lineItem.qty, lineItem.unit_price, lineItem.label, lineItem.financial_type_id, lineItem.tax_amount);
+          setTimeout(
+            () => addLineItem(lineItem.qty, lineItem.unit_price, lineItem.label, lineItem.financial_type_id, lineItem.tax_amount),
+            2000
+          );
         });
 
-        $('#total_amount').val(0);
-        $('#lineitem-add-block').show().removeClass('hiddenElement');
+        $('input[id="total_amount"]').trigger('change');
         $('#contribution_status_id').val(batch.optionValues[0].value);
         $('#source').val(`Quotation ${caseSalesOrder.id}`).trigger('change');
         $('#contact_id').select2('val', caseSalesOrder.client_id).trigger('change');
-        $('input[id="total_amount"]', 'form.CRM_Contribute_Form_Contribution').trigger('change');
         $(`<input type="hidden" value="${salesOrderId}" name="sales_order" />`).insertBefore('#source');
         $(`<input type="hidden" value="${toBeInvoiced}" name="to_be_invoiced" />`).insertBefore('#source');
         $(`<input type="hidden" value="${percentValue}" name="percent_value" />`).insertBefore('#source');
         $(`<input type="hidden" value="${salesOrderStatusId}" name="sales_order_status_id" />`).insertBefore('#source');
-        $('#totalAmount, #totalAmountORaddLineitem, #totalAmountORPriceSet, #price_set_id, #choose-manual').hide();
+        $(' #totalAmountORaddLineitem, #totalAmountORPriceSet, #price_set_id, #choose-manual').hide();
 
         waitForElement($, '#customData', function ($, elem) {
           $(`[name^=${caseCustomField}_]`).val(caseSalesOrder.case_id).trigger('change');
           $(`[name^=${quotationCustomField}_]`).val(caseSalesOrder.id).trigger('change');
         });
+      }).finally(() => {
+        CRM.$.unblockUI();
+        CRM.$('form#Contribution').css('visibility', 'visible');
       });
     }
 
@@ -73,10 +82,9 @@
 
       const total = quantity * parseFloat(unitPrice);
 
-      $('input[id^="item_unit_price"]', row).val(unitPrice);
       $('input[id^="item_line_total"]', row).val(CRM.formatMoney(total, true));
-
       $('input[id^="item_tax_amount"]', row).val(taxAmount);
+      $('input[id^="item_unit_price"]', row).val(unitPrice).trigger('change');
 
       count++;
     }
