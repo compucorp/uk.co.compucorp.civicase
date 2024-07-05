@@ -34,7 +34,7 @@ class CRM_Civicase_Hook_BuildForm_AddStyleFieldToCaseCustomGroups {
     // This is the generic entity for all cases.
     $caseEntityNames[] = 'Case';
 
-    $contactTypes = array_merge($contactTypes, $caseEntityNames);
+    $contactTypes = (is_array($contactTypes) && is_array($caseEntityNames)) ? array_merge($contactTypes, $caseEntityNames) : [];
 
     $form->assign('contactTypes', json_encode($contactTypes));
     CRM_Core_Resources::singleton()->addSetting([
