@@ -279,6 +279,7 @@ function civicase_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     new CRM_Civicase_Hook_Post_PopulateCaseCategoryForCaseType(),
     new CRM_Civicase_Hook_Post_CaseCategoryCustomGroupSaver(),
     new CRM_Civicase_Hook_Post_UpdateCaseTypeListForCaseCategoryCustomGroup(),
+    new CRM_Civicase_Hook_Post_LinkCase(),
   ];
 
   foreach ($hooks as $hook) {

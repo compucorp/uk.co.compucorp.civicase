@@ -17,12 +17,14 @@
    *
    * @param {object} $scope the scope object.
    * @param {object} LinkCasesCaseAction the link case action service.
+   * @param {object} NewLinkCasesCaseAction the new link case action service.
    * @param {Function} civicaseCrmUrl crm url service.
    * @param {Function} civicaseCrmLoadForm service to load civicrm forms
    */
   function civicaseCaseDetailsLinkedCasesTabController ($scope,
-    LinkCasesCaseAction, civicaseCrmUrl, civicaseCrmLoadForm) {
+    LinkCasesCaseAction, NewLinkCasesCaseAction, civicaseCrmUrl, civicaseCrmLoadForm) {
     $scope.linkCase = linkCase;
+    $scope.newLinkCase = newLinkCase;
 
     /**
      * Opens a modal that allows the user to link the case stored in the scope with
@@ -34,6 +36,21 @@
       LinkCasesCaseAction.doAction([$scope.item])
         .then(function (linkCaseForm) {
           civicaseCrmLoadForm(civicaseCrmUrl(linkCaseForm.path, linkCaseForm.query))
+            .on('crmFormSuccess crmPopupFormSuccess', function () {
+              $scope.refresh();
+            });
+        });
+    }
+
+    /**
+     * Opens a modal that allows the user to open a new case and link it at the same time.
+     *
+     * The case details are refreshed after linking the cases.
+     */
+    function newLinkCase () {
+      NewLinkCasesCaseAction.doAction([$scope.item])
+        .then(function (openCaseForm) {
+          civicaseCrmLoadForm(civicaseCrmUrl(openCaseForm.path, openCaseForm.query))
             .on('crmFormSuccess crmPopupFormSuccess', function () {
               $scope.refresh();
             });
