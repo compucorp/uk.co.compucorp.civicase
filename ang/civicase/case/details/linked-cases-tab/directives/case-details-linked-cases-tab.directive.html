@@ -7,6 +7,13 @@
       <i class="fa fa-link"></i>
       {{ ts('Link Cases') }}
     </button>
+    <button
+      class="btn btn-large btn-primary"
+      ng-click="newLinkCase()"
+    >
+      <i class="fa fa-link"></i>
+      {{ ts('Create new linked Case') }}
+    </button>
   </div>
   <civicase-case-summary-other-cases
     ng-if="item.relatedCases.length"
@@ -20,10 +27,17 @@
     <div class="civicase__activity-card--big--empty-description">
       {{ ts('Click the button below to create a new link for this case') }}
     </div>
-    <a
-      class="civicase__activity-card--big--empty-button btn"
-      ng-click="linkCase()">
-      {{ ts('Link Cases') }}
-    </a>
+    <div>
+      <a
+        class="civicase__activity-card--big--empty-button btn"
+        ng-click="linkCase()">
+        {{ ts('Link Cases') }}
+      </a>
+      <a
+        class="civicase__activity-card--big--empty-button btn"
+        ng-click="newLinkCase()">
+        {{ ts('Create new linked Case') }}
+      </a>
+    </div>
   </div>
 </div>
