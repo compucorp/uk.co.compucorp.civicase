@@ -542,7 +542,7 @@ function civicase_civicrm_alterAngular(Manager $angular) {
  *   Entity types array.
  */
 function _civicase_add_case_category_case_type_entity(array &$entityTypes) {
-  $entityTypes['CRM_Case_DAO_CaseType']['fields_callback'][] = function ($class, &$fields) {
+  $entityTypes['CaseType']['fields_callback'][] = function ($class, &$fields) {
     $fields['case_type_category'] = [
       'name' => 'case_type_category',
       'type' => CRM_Utils_Type::T_INT,
