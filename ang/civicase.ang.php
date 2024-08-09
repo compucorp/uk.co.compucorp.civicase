@@ -73,7 +73,6 @@ function load_resources() {
     ->addSetting([
       'config' => [
         'enableComponents' => CRM_Core_Config::singleton()->enableComponents,
-        'user_contact_id' => (int) CRM_Core_Session::getLoggedInContactID(),
       ],
     ]);
 }

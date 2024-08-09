@@ -6,7 +6,7 @@
       'CiviReport',
       'CiviCase'
     ],
-    user_contact_id: 203,
+    cid: 203,
     isFrontend: false,
     wysisygScriptLocation: '/sites/all/modules/civicrm/js/wysiwyg/crm.ckeditor.js',
     CKEditorCustomConfig: {
