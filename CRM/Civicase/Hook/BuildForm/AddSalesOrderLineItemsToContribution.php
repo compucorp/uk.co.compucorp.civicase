@@ -1,5 +1,8 @@
 <?php
 
+use Civi\Api4\PriceField;
+use Civi\Api4\PriceFieldValue;
+use Civi\Api4\PriceSet;
 use CRM_Civicase_ExtensionUtil as E;
 use CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator as salesOrderlineItemGenerator;
 
@@ -27,6 +30,14 @@ class CRM_Civicase_Hook_BuildForm_AddSalesOrderLineItemsToContribution {
     }
     $lineItemGenerator = new salesOrderlineItemGenerator($salesOrderId, $toBeInvoiced, $percentValue);
     $lineItems = $lineItemGenerator->generateLineItems();
+    $priceField = $this->getDefaultPriceSetFields();
+    \Civi::cache('short')->set('sales_order_line_items', $lineItems);
+
+    $submittedValues = [];
+    foreach ($lineItems as $index => &$lineItem) {
+      $submittedValues[] = $priceField[$index]['id'];
+    }
+    $form->assign('lineItemSubmitted', json_encode($submittedValues));
 
     CRM_Core_Resources::singleton()
       ->addScriptFile(E::LONG_NAME, 'js/sales-order-contribution.js')
@@ -59,6 +70,27 @@ class CRM_Civicase_Hook_BuildForm_AddSalesOrderLineItemsToContribution {
     return $formName === 'CRM_Contribute_Form_Contribution'
       && $form->_action == CRM_Core_Action::ADD
       && !empty($salesOrderId);
+  }
+
+  /**
+   * Returns default contribution price set fields.
+   *
+   * @return array
+   *   Array of price fields
+   */
+  private function getDefaultPriceSetFields(): array {
+    $priceSet = PriceSet::get(FALSE)
+      ->addWhere('name', '=', 'default_contribution_amount')
+      ->addWhere('is_quick_config', '=', 1)
+      ->execute()
+      ->first();
+
+    return PriceField::get(FALSE)
+      ->addWhere('price_set_id', '=', $priceSet['id'])
+      ->addChain('price_field_value', PriceFieldValue::get(FALSE)
+        ->addWhere('price_field_id', '=', '$id')
+      )->execute()
+      ->getArrayCopy();
   }
 
 }
