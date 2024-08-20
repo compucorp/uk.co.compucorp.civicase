@@ -24,6 +24,18 @@
         if (field.value) {
           $(`[name^=${field.name}_]`).val(field.value).trigger('change');
         }
+
+        $(`[name^=${field.name}_]`).on('change', field, function (event) {
+          const f = event.data;
+
+          $(`[name^=${f.name}_]`)
+            .attr('placeholder', f.placeholder)
+            .attr('disabled', false)
+            .crmEntityRef({
+              entity: f.entity,
+              create: false
+            });
+        });
       });
     });
   });
