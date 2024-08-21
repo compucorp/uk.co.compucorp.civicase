@@ -61,3 +61,12 @@
   });
 </script>
 {/literal}
+
+{literal}
+
+  <style>
+    #bootstrap-theme #status {
+      appearance: auto;
+    }
+  </style>
+{/literal}
