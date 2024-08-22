@@ -632,3 +632,16 @@ function civicase_civicrm_searchTasks(string $objectName, array &$tasks) {
     }
   }
 }
+
+/**
+ * Implements hook_civicrm_alterContent().
+ */
+function civicase_civicrm_alterContent(&$content, $context, $tplName, &$object) {
+  $hooks = [
+    new CRM_Civicase_Hook_alterContent_AddSalesOrderLineToContribution($content, $context, $tplName),
+  ];
+
+  foreach ($hooks as $hook) {
+    $hook->run();
+  }
+}

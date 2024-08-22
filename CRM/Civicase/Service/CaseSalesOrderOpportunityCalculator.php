@@ -172,7 +172,10 @@ class CRM_Civicase_Service_CaseSalesOrderOpportunityCalculator extends CRM_Civic
   private function getContributions($caseId) {
     $contributions = Contribution::get(FALSE)
       ->addSelect('*', 'Opportunity_Details.Quotation')
-      ->addWhere('Opportunity_Details.Case_Opportunity', '=', $caseId);
+      ->addWhere('Opportunity_Details.Case_Opportunity', '=', $caseId)
+      ->addJoin('CaseSalesOrder AS case_sales_order', 'INNER',
+        ['Opportunity_Details.Quotation', '=', 'case_sales_order.id']
+      );
 
     if ($this->deletingContributionId !== NULL) {
       $contributions->addWhere('id', '!=', $this->deletingContributionId);
