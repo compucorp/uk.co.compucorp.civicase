@@ -32,12 +32,13 @@ class CRM_Civicase_Event_Listener_CaseTypeCategoryIsActiveToggler {
     $caseCategoryValue = self::getCaseCategoryValue($apiRequest['params']['id']);
     $caseCategoryInstance = CaseTypeCategoryHelper::getInstanceObject($caseCategoryValue);
     $handler = CaseTypeCategoryEventHandlerFactory::create();
-    $handler->onUpdate(
-      $caseCategoryInstance,
-      $apiRequest['params']['id'],
-      isset($apiRequest['params']['is_active']) ? $apiRequest['params']['is_active'] : NULL,
-      isset($apiRequest['params']['icon']) ? $apiRequest['params']['icon'] : NULL
-    );
+    $caseCategory = [
+      'id' => $apiRequest['params']['id'],
+      'is_active' => isset($apiRequest['params']['is_active']) ?? NULL,
+      'icon' => isset($apiRequest['params']['icon']) ?? NULL,
+    ];
+
+    $handler->onUpdate($caseCategoryInstance, $caseCategory);
   }
 
   /**
