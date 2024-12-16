@@ -51,9 +51,11 @@ class CRM_Civicase_APIHelpers_CustomFieldFilter {
     $value = $value['IN'] ?? $value;
     $table = $columnGroup[0];
     $column = $columnGroup[1];
+    $mysqlVersion = CRM_Core_DAO::executeQuery('SELECT VERSION() AS version;')->fetchValue();
+    $isMysql8 = version_compare($mysqlVersion, '8.0') !== -1;
 
-    $conditions = array_map(function ($param) use ($table, $column) {
-      return "custom_case_to_{$table}.{$column} REGEXP '[[:<:]]" . $param . "[[:>:]]'";
+    $conditions = array_map(function ($param) use ($table, $column, $isMysql8) {
+      return $isMysql8 ? "custom_case_to_{$table}.{$column} REGEXP '\\b" . $param . "\\b'" : "custom_case_to_{$table}.{$column} REGEXP '[[:<:]]" . $param . "[[:>:]]'";
     }, $value);
     $conditions = implode(" AND ", $conditions);
 
