@@ -7,6 +7,9 @@ use CRM_Civicase_Hook_Permissions_ExportCasesAndReports as ExportCasesAndReports
 use CRM_Civicase_Service_CaseCategoryCustomFieldsSetting as CaseCategoryCustomFieldsSetting;
 use CRM_Civicase_Service_CaseCategoryPermission as CaseCategoryPermission;
 use Civi\CCase\Utils as Utils;
+use CRM_Civicase_Service_CaseTypeCategoryFeatures as CaseTypeCategoryFeatures;
+use Civi\Api4\OptionValue;
+use Civi\Utils\CurrencyUtils;
 
 /**
  * Get a list of settings for angular pages.
@@ -46,6 +49,19 @@ class CRM_Civicase_Settings {
     self::setTagsToJsVars($options);
     self::addCaseTypeCategoriesToOptions($options);
     self::exposeSettings($options, ['caseCategoryId' => $caseCategoryId]);
+
+    return $options;
+  }
+
+  /**
+   * Get a list of features settings for angular pages.
+   */
+  public static function getFeaturesSettings(): array {
+    $options = [];
+
+    self::setCurrencyCodes($options);
+    self::setCaseTypesWithFeaturesEnabled($options);
+    self::setCaseSalesOrderStatus($options);
 
     return $options;
   }
@@ -356,6 +372,46 @@ class CRM_Civicase_Settings {
     }
 
     $options['caseTypeCategories'] = array_column($caseCategories['values'], NULL, 'value');
+  }
+
+  /**
+   * Exposes currency codes to Angular.
+   *
+   * @param array $options
+   *   List of options to pass to the front-end.
+   */
+  public static function setCurrencyCodes(array &$options): void {
+    $options['currencyCodes'] = CurrencyUtils::getCurrencies();
+  }
+
+  /**
+   * Exposes Case types that have features enabled to Angular.
+   *
+   * @param array $options
+   *   List of options to pass to the front-end.
+   */
+  public static function setCaseTypesWithFeaturesEnabled(array &$options): void {
+    $caseTypeCategoryFeatures = new CaseTypeCategoryFeatures();
+
+    array_map(function ($feature) use ($caseTypeCategoryFeatures, &$options) {
+      $caseTypeCategories = $caseTypeCategoryFeatures->retrieveCaseInstanceWithEnabledFeatures([$feature]);
+      $options['featureCaseTypes'][$feature] = array_keys($caseTypeCategories);
+    }, ['quotations', 'invoices']);
+  }
+
+  /**
+   * Exposes case sales order statuses to Angular.
+   *
+   * @param array $options
+   *   List of options to pass to the front-end.
+   */
+  public static function setCaseSalesOrderStatus(array &$options): void {
+    $optionValues = OptionValue::get(FALSE)
+      ->addSelect('id', 'value', 'name', 'label')
+      ->addWhere('option_group_id:name', '=', 'case_sales_order_status')
+      ->execute();
+
+    $options['salesOrderStatus'] = $optionValues->getArrayCopy();
   }
 
 }
