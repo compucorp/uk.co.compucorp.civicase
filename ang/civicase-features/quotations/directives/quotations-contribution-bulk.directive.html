@@ -30,6 +30,23 @@
       </div>
     </div>
 
+    <div class="form-group" ng-show="$ctrl.data.toBeInvoiced === 'percent'">
+      <label class="col-sm-2 control-label">
+        Products
+      </label>
+      <div class="col-sm-5 civicase__ui-range">
+        <input class="form-control"
+            ng-model="$ctrl.data.products"
+            name="products"
+            placeholder="All Products"
+            crm-entityref="{
+              entity: 'Product',
+              select: { allowClear: true, 'minimumInputLength': 0, create: false, multiple: true }
+            }"
+          />
+      </div>
+    </div>
+
     <div class="form-group">
       <label class="col-sm-2 control-label required-mark">
         Financial Type

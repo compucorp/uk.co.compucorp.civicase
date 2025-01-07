@@ -31,6 +31,7 @@
       percentValue: null,
       statusId: null,
       financialTypeId: null,
+      products: null,
       date: $.datepicker.formatDate('yy-mm-dd', new Date())
     };
     ctrl.salesOrderStatus = SalesOrderStatus.getAll();
@@ -53,6 +54,9 @@
         const chunkedIds = _.chunk(ctrl.ids, BATCH_SIZE);
         for (const salesOrderIds of chunkedIds) {
           try {
+            if (ctrl.data.products.length > 0) {
+              ctrl.data.products = ctrl.data.products.split(',');
+            }
             const result = await crmApi4('CaseSalesOrder', 'contributionCreateAction', { ...ctrl.data, salesOrderIds });
             contributionCreated += result.created_contributions_count ?? 0;
           } catch (error) {

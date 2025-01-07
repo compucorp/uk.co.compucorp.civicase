@@ -23,8 +23,14 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
   /**
    * Constructs CaseSalesOrderLineItemsGenerator service.
    */
-  public function __construct(private int $salesOrderId, private string $type, private ?string $percentValue) {
+  public function __construct(
+    private int $salesOrderId,
+    private string $type,
+    private ?string $percentValue,
+    private ?array $products,
+  ) {
     $this->setSalesOrder();
+    $this->products = array_filter($this->products);
   }
 
   /**
@@ -73,6 +79,11 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
       $item['quantity'] = ($this->type === self::INVOICE_PERCENT) ?
       ($this->percentValue / 100) * $item['quantity'] :
       $item['quantity'];
+
+      if (!empty($this->products) && $this->type === self::INVOICE_PERCENT && !in_array($item['product_id'], $this->products)) {
+        continue;
+      }
+
       $item['total'] = $item['quantity'] * floatval($item['unit_price']);
       $item['tax'] = empty($item['tax_rate']) ? 0 : $this->percent($item['tax_rate'], $item['total']);
 

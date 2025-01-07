@@ -50,6 +50,13 @@ class ContributionCreateAction extends AbstractAction {
   protected $percentValue;
 
   /**
+   * The products contribution should apply to.
+   *
+   * @var array
+   */
+  protected $products;
+
+  /**
    * Contribution Date.
    *
    * @var string
@@ -106,7 +113,7 @@ class ContributionCreateAction extends AbstractAction {
    *   Array of price fields.
    */
   private function createContributionWithLineItems(int $salesOrderId, array $priceField): array {
-    $salesOrderContribution = new salesOrderlineItemGenerator($salesOrderId, $this->toBeInvoiced, $this->percentValue ?? 0);
+    $salesOrderContribution = new salesOrderlineItemGenerator($salesOrderId, $this->toBeInvoiced, $this->percentValue ?? 0, $this->products ?? []);
     $lineItems = $salesOrderContribution->generateLineItems();
 
     $taxAmount = $lineTotal = 0;

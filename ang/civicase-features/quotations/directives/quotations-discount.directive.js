@@ -23,6 +23,7 @@
     $scope.ts = CRM.ts('civicase');
     const ctrl = angular.extend(this, $scope.model, searchTaskBaseTrait);
     ctrl.stage = 'form';
+    ctrl.products = [];
     $scope.submitInProgress = false;
 
     this.applyDiscount = () => {
@@ -47,5 +48,24 @@
         CRM.alert(`Discount applied to ${Object.values(updatedSalesOrder).length} Quotation(s) successfully`, ts('Success'), 'success');
       });
     };
+
+    $q(async function () {
+      CRM.$.blockUI();
+      const productIds = new Set();
+
+      for (const salesOrderId of ctrl.ids) {
+        const result = await CaseUtils.getSalesOrderAndLineItems(salesOrderId);
+        result.items.forEach((lineItem) => {
+          if (lineItem.product_id) {
+            productIds.add(lineItem.product_id);
+          }
+        });
+      }
+
+      ctrl.products = [...productIds];
+      CRM.$('.crm-product-ref').val([...productIds]);
+      CRM.$('.crm-product-ref').change();
+      CRM.$.unblockUI();
+    });
   }
 })(angular, CRM._);

@@ -46,6 +46,13 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
       'min' => 1,
     ], FALSE);
 
+    $this->addEntityRef('products', ts('All Products'), [
+      'entity' => 'Product',
+      'placeholder' => 'All Products',
+      'class' => 'form-control',
+      'select' => ['minimumInputLength' => 0],
+    ]);
+
     if ($this->hasRemainingBalance()) {
       $this->addElement('radio', 'to_be_invoiced', '', ts('Remaining Balance'),
         self::INVOICE_REMAIN,
@@ -228,6 +235,7 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
       'to_be_invoiced' => $values['to_be_invoiced'],
       'percent_value' => $values['to_be_invoiced'] ==
       self::INVOICE_PERCENT ? floatval($values['percent_value']) : 0,
+      'products' => $values['products'],
     ];
 
     $url = CRM_Utils_System::url('civicrm/contribute/add', $query);
