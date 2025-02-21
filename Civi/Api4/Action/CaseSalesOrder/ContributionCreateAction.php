@@ -11,6 +11,7 @@ use Civi\Api4\OptionValue;
 use Civi\Api4\PriceField;
 use Civi\Api4\PriceFieldValue;
 use Civi\Api4\PriceSet;
+use CRM_Civicase_Service_CaseSalesOrderContributionCalculator as CaseSalesOrderContributionCalculator;
 use CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator as salesOrderlineItemGenerator;
 use CRM_Contribute_BAO_Contribution as Contribution;
 use CRM_Core_Transaction;
@@ -48,6 +49,13 @@ class ContributionCreateAction extends AbstractAction {
    * @var int
    */
   protected $percentValue;
+
+  /**
+   * The products contribution should apply to.
+   *
+   * @var array
+   */
+  protected $products;
 
   /**
    * Contribution Date.
@@ -106,7 +114,7 @@ class ContributionCreateAction extends AbstractAction {
    *   Array of price fields.
    */
   private function createContributionWithLineItems(int $salesOrderId, array $priceField): array {
-    $salesOrderContribution = new salesOrderlineItemGenerator($salesOrderId, $this->toBeInvoiced, $this->percentValue ?? 0);
+    $salesOrderContribution = new salesOrderlineItemGenerator($salesOrderId, $this->toBeInvoiced, $this->percentValue ?? 0, $this->products ?? []);
     $lineItems = $salesOrderContribution->generateLineItems();
 
     $taxAmount = $lineTotal = 0;
@@ -174,7 +182,7 @@ class ContributionCreateAction extends AbstractAction {
       ->execute()
       ->first();
 
-    Api4Contribution::update()
+    Api4Contribution::update(FALSE)
       ->addValue('Opportunity_Details.Case_Opportunity', $salesOrder['case_id'])
       ->addValue('Opportunity_Details.Quotation', $salesOrderId)
       ->addWhere('id', '=', $contributionId)
@@ -188,9 +196,16 @@ class ContributionCreateAction extends AbstractAction {
    *   Sales Order Id.
    */
   private function updateCaseSalesOrderStatus(int $salesOrderId): void {
-    CaseSalesOrder::update()
+    $caseSaleOrderContributionService = new CaseSalesOrderContributionCalculator($salesOrderId);
+
+    $paymentStatusID = $caseSaleOrderContributionService->calculatePaymentStatus();
+    $invoicingStatusID = $caseSaleOrderContributionService->calculateInvoicingStatus();
+
+    CaseSalesOrder::update(FALSE)
       ->addWhere('id', '=', $salesOrderId)
       ->addValue('status_id', $this->statusId)
+      ->addValue('payment_status_id', $paymentStatusID)
+      ->addValue('invoicing_status_id', $invoicingStatusID)
       ->execute();
   }
 

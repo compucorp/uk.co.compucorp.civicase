@@ -21,6 +21,17 @@
         </div>
       </div>
 
+      <div class="form-group" id="product-select">
+        <div class="row">
+          <label class="col-sm-1 control-label">
+            {$form.products.label}
+          </label>
+          <div class="col-sm-5">
+            {$form.products.html}
+          </div>
+        </div>
+      </div>
+
       <div class="form-group">
         <div class="row">
           <label class="col-sm-12 control-label">
@@ -45,18 +56,22 @@
 
   CRM.$(function ($) {
     CRM.$('input[name="percent_amount"]').hide();
+    CRM.$('#product-select').hide()
     if ( CRM.$('input[name="to_be_invoiced"]').val() == 'percent') {
       $('input[name="to_be_invoiced"]#invoice_percent').prop("checked", true);
       CRM.$('input[name="percent_amount"]').show();
+      CRM.$('#product-select').show()
     }
 
     CRM.$('input[name="to_be_invoiced"]').on('input', (e) => {
       if (e.target.value == 'percent') {
         CRM.$('input[name="percent_amount"]').show();
+        CRM.$('#product-select').show();
         return
       }
 
       CRM.$('input[name="percent_amount"]').hide();
+      CRM.$('#product-select').hide();
     });
   });
 </script>

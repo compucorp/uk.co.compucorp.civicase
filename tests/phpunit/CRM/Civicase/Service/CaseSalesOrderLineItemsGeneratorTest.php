@@ -15,7 +15,7 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGeneratorsTest extends BaseHea
   /**
    * Setup data before tests run.
    */
-  public function setUp() {
+  public function setUp(): void {
     $this->generatePriceField();
   }
 
@@ -27,7 +27,7 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGeneratorsTest extends BaseHea
   public function testCorrectNumberOfLineItemsIsGeneratedWithoutPreviousContribution() {
     $salesOrder = $this->createCaseSalesOrder();
 
-    $salesOrderService = new SalesOrderService($salesOrder['id'], SalesOrderService::INVOICE_PERCENT, 25);
+    $salesOrderService = new SalesOrderService($salesOrder['id'], SalesOrderService::INVOICE_PERCENT, 25, []);
     $lineItems = $salesOrderService->generateLineItems();
 
     $this->assertCount(2, $lineItems);
@@ -53,7 +53,7 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGeneratorsTest extends BaseHea
         ->execute();
     }
 
-    $salesOrderService = new SalesOrderService($salesOrder['id'], SalesOrderService::INVOICE_REMAIN, 0);
+    $salesOrderService = new SalesOrderService($salesOrder['id'], SalesOrderService::INVOICE_REMAIN, 0, []);
     $lineItems = $salesOrderService->generateLineItems();
 
     $this->assertCount(($previousContributionCount * 2) + 2, $lineItems);
@@ -73,7 +73,7 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGeneratorsTest extends BaseHea
       ->execute()
       ->jsonSerialize()[0]['id'];
 
-    $salesOrderService = new SalesOrderService($salesOrder['id'], SalesOrderService::INVOICE_REMAIN, 0);
+    $salesOrderService = new SalesOrderService($salesOrder['id'], SalesOrderService::INVOICE_REMAIN, 0, []);
     $lineItems = $salesOrderService->generateLineItems();
 
     usort($lineItems, fn($a, $b) => $a['line_total'] <=> $b['line_total']);
@@ -96,7 +96,7 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGeneratorsTest extends BaseHea
       ->execute()
       ->jsonSerialize()[0]['id'];
 
-    $salesOrderService = new SalesOrderService($salesOrder['id'], SalesOrderService::INVOICE_REMAIN, 0);
+    $salesOrderService = new SalesOrderService($salesOrder['id'], SalesOrderService::INVOICE_REMAIN, 0, []);
     $lineItems = $salesOrderService->generateLineItems();
 
     $this->assertCount(1, $lineItems);
@@ -110,7 +110,7 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGeneratorsTest extends BaseHea
     $percent = rand(20, 40);
     $salesOrder = $this->createCaseSalesOrder();
 
-    $salesOrderService = new SalesOrderService($salesOrder['id'], SalesOrderService::INVOICE_PERCENT, $percent);
+    $salesOrderService = new SalesOrderService($salesOrder['id'], SalesOrderService::INVOICE_PERCENT, $percent, []);
     $lineItems = $salesOrderService->generateLineItems();
 
     $this->assertCount(2, $lineItems);

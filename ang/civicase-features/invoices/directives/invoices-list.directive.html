@@ -8,7 +8,7 @@
     {{:: ts('Create Invoice') }}
     </a>
 
-  <div class="panel panel-default">
+  <div class="panel panel-default invoice__list">
     <div class="panel-body">
       <afsearch-quotation-invoices></afsearch-quotation-invoices>
     </div>
@@ -18,5 +18,8 @@
   #bootstrap-theme crm-search-display-table p.alert-info {
     background-color: transparent;
     border: none;
+  }
+  .invoice__list .crm-search-display.crm-search-display-table {
+    box-shadow: unset;
   }
 </style>

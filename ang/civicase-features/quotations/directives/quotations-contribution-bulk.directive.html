@@ -30,6 +30,41 @@
       </div>
     </div>
 
+    <div class="form-group" ng-show="$ctrl.data.toBeInvoiced === 'percent'" ng-if="relevantProducts && relevantProducts.length > 0">
+      <label class="col-sm-2 control-label">
+        Products
+      </label>
+      <div class="col-sm-5 civicase__ui-range">
+        <input class="form-control"
+            ng-model="$ctrl.data.products"
+            name="products"
+            placeholder="All Products"
+            crm-entityref="{
+              entity: 'Product',
+              select: { allowClear: true, 'minimumInputLength': 0, create: false, multiple: true },
+              api: {params: {id: {'IN': relevantProducts}}}
+            }"
+          />
+      </div>
+    </div>
+    <div class="form-group" ng-show="$ctrl.data.toBeInvoiced === 'percent'" ng-if="!relevantProducts || relevantProducts.length == 0 ">
+      <label class="col-sm-2 control-label">
+        Products
+      </label>
+      <div class="col-sm-5 civicase__ui-range">
+        <input class="form-control"
+            ng-model="$ctrl.data.products"
+            name="empty-products"
+            placeholder="All Products"
+            crm-entityref="{
+              entity: 'Product',
+              select: { allowClear: true, 'minimumInputLength': 0, create: false, multiple: true },
+              api: {params: {id: {'IN': []}}}
+            }"
+          />
+      </div>
+    </div>
+
     <div class="form-group">
       <label class="col-sm-2 control-label required-mark">
         Financial Type

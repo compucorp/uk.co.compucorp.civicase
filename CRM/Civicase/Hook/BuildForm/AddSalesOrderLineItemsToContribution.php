@@ -24,11 +24,13 @@ class CRM_Civicase_Hook_BuildForm_AddSalesOrderLineItemsToContribution {
     $status = CRM_Utils_Request::retrieve('sales_order_status_id', 'Integer');
     $toBeInvoiced = CRM_Utils_Request::retrieve('to_be_invoiced', 'String');
     $percentValue = CRM_Utils_Request::retrieve('percent_value', 'Float');
+    $products = CRM_Utils_Request::retrieve('products', 'String') ?? "";
+    $products = explode(",", $products) ?? [];
 
     if (!$this->shouldRun($form, $formName, $salesOrderId)) {
       return;
     }
-    $lineItemGenerator = new salesOrderlineItemGenerator($salesOrderId, $toBeInvoiced, $percentValue);
+    $lineItemGenerator = new salesOrderlineItemGenerator($salesOrderId, $toBeInvoiced, $percentValue, $products);
     $lineItems = $lineItemGenerator->generateLineItems();
     $priceField = $this->getDefaultPriceSetFields();
     \Civi::cache('short')->set('sales_order_line_items', $lineItems);

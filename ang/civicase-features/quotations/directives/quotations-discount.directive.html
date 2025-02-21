@@ -7,21 +7,41 @@
       <div ng-show="$ctrl.stage === 'done'">{{$ctrl.completedMessage}}</div>
     </div>
 
-    <div class="form-group row" style="margin-bottom: 2em; display: flex; justify-content: center;">
-      <label class="col-sm-2 control-label required-mark">
+    <div class="form-group row" style="margin-bottom: 2em; display: flex; justify-content: center;"  ng-if="relevantProducts && relevantProducts.length > 0">
+      <label class="col-sm-2 control-label">
         Select Product
       </label>
       <div class="col-sm-5">
         <input class="form-control"
           ng-model="$ctrl.products"
-          placeholder="Product"
+          name="products"
+          placeholder="All Products"
+          crm-entityref="{
+            entity: 'Product',
+            select: { allowClear: true, 'minimumInputLength': 0, create: false, multiple: true },
+            api: {params: {id: {'IN': relevantProducts}}}
+          }"
+          ng-minlength="1"
+        />
+      </div>
+    </div>
+
+    <div class="form-group row" style="margin-bottom: 2em; display: flex; justify-content: center;"  ng-if="!relevantProducts || relevantProducts.length == 0 ">
+      <label class="col-sm-2 control-label">
+        Select Product
+      </label>
+      <div class="col-sm-5">
+        <input class="form-control"
+          ng-model="$ctrl.products"
+          name="empty-products"
+          ng-disabled="!relevantProducts || relevantProducts.length == 0"
+          placeholder="All Products"
           crm-entityref="{
             entity: 'Product',
             create: true,
             select: { allowClear: true, 'minimumInputLength': 0, create: true, multiple: true }
           }"
           ng-minlength="1"
-          required
         />
       </div>
     </div>

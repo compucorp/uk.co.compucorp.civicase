@@ -22,6 +22,7 @@
    */
   function quotationContributionBulkController ($q, $scope, crmApi4, searchTaskBaseTrait, CaseUtils, SalesOrderStatus) {
     $scope.ts = CRM.ts('civicase');
+    $scope.relevantProducts = false;
 
     const ctrl = angular.extend(this, $scope.model, searchTaskBaseTrait);
     ctrl.stage = 'form';
@@ -31,6 +32,7 @@
       percentValue: null,
       statusId: null,
       financialTypeId: null,
+      products: [],
       date: $.datepicker.formatDate('yy-mm-dd', new Date())
     };
     ctrl.salesOrderStatus = SalesOrderStatus.getAll();
@@ -53,6 +55,11 @@
         const chunkedIds = _.chunk(ctrl.ids, BATCH_SIZE);
         for (const salesOrderIds of chunkedIds) {
           try {
+            if (ctrl.data.products.length > 0) {
+              ctrl.data.products = ctrl.data.products.split(',');
+            } else {
+              ctrl.data.products = [];
+            }
             const result = await crmApi4('CaseSalesOrder', 'contributionCreateAction', { ...ctrl.data, salesOrderIds });
             contributionCreated += result.created_contributions_count ?? 0;
           } catch (error) {
@@ -71,5 +78,25 @@
         CRM.alert(message, ts('Success'), 'success');
       });
     };
+
+    $q(async function () {
+      CRM.$.blockUI();
+      const productIds = new Set();
+
+      for (const salesOrderId of ctrl.ids) {
+        const result = await CaseUtils.getSalesOrderAndLineItems(salesOrderId);
+        result.items.forEach((lineItem) => {
+          if (lineItem.product_id) {
+            productIds.add(lineItem.product_id);
+          }
+        });
+      }
+
+      $scope.$apply(() => {
+        $scope.relevantProducts = false;
+        $scope.relevantProducts = [...productIds];
+      });
+      CRM.$.unblockUI();
+    });
   }
 })(angular, CRM.$, CRM._);

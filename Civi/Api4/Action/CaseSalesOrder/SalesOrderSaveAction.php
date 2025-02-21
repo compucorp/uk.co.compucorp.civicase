@@ -54,8 +54,8 @@ class SalesOrderSaveAction extends AbstractSaveAction {
 
         $saleOrderId = $salesOrder['id'] ?? NULL;
         $caseSaleOrderContributionService = new \CRM_Civicase_Service_CaseSalesOrderContributionCalculator($saleOrderId);
-        $salesOrder['payment_status_id'] = $caseSaleOrderContributionService->calculateInvoicingStatus();
-        $salesOrder['invoicing_status_id'] = $caseSaleOrderContributionService->calculatePaymentStatus();
+        $salesOrder['invoicing_status_id'] = $caseSaleOrderContributionService->calculateInvoicingStatus();
+        $salesOrder['payment_status_id'] = $caseSaleOrderContributionService->calculatePaymentStatus();
 
         if (!is_null($saleOrderId)) {
           $this->updateOpportunityDetails($saleOrderId);
@@ -141,8 +141,8 @@ class SalesOrderSaveAction extends AbstractSaveAction {
   protected function fillMandatoryFields(&$params) {
     $saleOrderId = $params['id'] ?? NULL;
     $caseSaleOrderContributionService = new \CRM_Civicase_Service_CaseSalesOrderContributionCalculator($saleOrderId);
-    $params['payment_status_id'] = $caseSaleOrderContributionService->calculateInvoicingStatus();
-    $params['invoicing_status_id'] = $caseSaleOrderContributionService->calculatePaymentStatus();
+    $params['invoicing_status_id'] = $caseSaleOrderContributionService->calculateInvoicingStatus();
+    $params['payment_status_id'] = $caseSaleOrderContributionService->calculatePaymentStatus();
   }
 
   /**
