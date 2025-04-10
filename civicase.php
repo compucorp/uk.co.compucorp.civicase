@@ -75,10 +75,10 @@ function civicase_civicrm_config(&$config) {
     10
   );
 
-  Civi::dispatcher()->addListener(
-    'hook_civicrm_buildAsset',
-    ['CRM_Civicase_Event_Listener_AssetBuilder', 'addWordReplacements']
-  );
+  //Civi::dispatcher()->addListener(
+  //  'hook_civicrm_buildAsset',
+  //  ['CRM_Civicase_Event_Listener_AssetBuilder', 'addWordReplacements']
+  //);
 
   Civi::dispatcher()->addListener(
     'civi.token.list',
