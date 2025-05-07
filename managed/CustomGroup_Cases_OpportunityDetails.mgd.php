@@ -10,7 +10,7 @@ return [
     'name' => 'CustomGroup_Case_Opportunity_Details',
     'entity' => 'CustomGroup',
     'cleanup' => 'unused',
-    'update' => 'always',
+    'update' => 'unmodified',
     'params' => [
       'version' => 4,
       'values' => [
@@ -40,7 +40,7 @@ return [
     'name' => 'CustomGroup_Case_Opportunity_Details_CustomField_Total_Amount_Quoted',
     'entity' => 'CustomField',
     'cleanup' => 'unused',
-    'update' => 'always',
+    'update' => 'unmodified',
     'params' => [
       'version' => 4,
       'values' => [
@@ -79,7 +79,7 @@ return [
     'name' => 'CustomGroup_Case_Opportunity_Details_CustomField_Total_Amount_Invoiced',
     'entity' => 'CustomField',
     'cleanup' => 'unused',
-    'update' => 'always',
+    'update' => 'unmodified',
     'params' => [
       'version' => 4,
       'values' => [
@@ -118,7 +118,7 @@ return [
     'name' => 'CustomGroup_Case_Opportunity_Details_CustomField_Invoicing_Status',
     'entity' => 'CustomField',
     'cleanup' => 'unused',
-    'update' => 'always',
+    'update' => 'unmodified',
     'params' => [
       'version' => 4,
       'values' => [
@@ -157,7 +157,7 @@ return [
     'name' => 'CustomGroup_Case_Opportunity_Details_CustomField_Total_amounts_paid',
     'entity' => 'CustomField',
     'cleanup' => 'unused',
-    'update' => 'always',
+    'update' => 'unmodified',
     'params' => [
       'version' => 4,
       'values' => [
@@ -196,7 +196,7 @@ return [
     'name' => 'CustomGroup_Case_Opportunity_Details_CustomField_Payments_Status',
     'entity' => 'CustomField',
     'cleanup' => 'unused',
-    'update' => 'always',
+    'update' => 'unmodified',
     'params' => [
       'version' => 4,
       'values' => [
