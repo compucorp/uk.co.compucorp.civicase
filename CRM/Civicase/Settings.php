@@ -10,6 +10,7 @@ use CRM_Civicase_Hook_Permissions_ExportCasesAndReports as ExportCasesAndReports
 use CRM_Civicase_Service_CaseCategoryCustomFieldsSetting as CaseCategoryCustomFieldsSetting;
 use CRM_Civicase_Service_CaseCategoryPermission as CaseCategoryPermission;
 use CRM_Civicase_Service_CaseTypeCategoryFeatures as CaseTypeCategoryFeatures;
+use CRM_Civicase_Helper_CaseCategory as CaseCategoryHelper;
 
 /**
  * Get a list of settings for angular pages.
@@ -38,6 +39,8 @@ class CRM_Civicase_Settings {
 
     OptionValuesHelper::setToJsVariables($options);
     NewCaseWebform::addWebformDataToOptions($options, $caseCategorySetting);
+
+    CaseCategoryHelper::updateBreadcrumbs($caseCategoryId);
     self::setCaseActions($options, $caseCategoryPermissions);
     self::setContactTasks($options);
     self::setCaseTypesToJsVars($options);
