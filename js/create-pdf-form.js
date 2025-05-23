@@ -7,6 +7,12 @@
 
       $('body').off('submit', $form);
       $('body').on('submit', $form, openFileNamePopup);
+
+      // Update only the data-identifier on the button that already has it
+      $('button[data-identifier="buttons[_qf_PDF_submit_preview]"]').attr('data-identifier', '_qf_PDF_submit_preview');
+
+      // Update the name attribute on both buttons
+      $('button[name="buttons[_qf_PDF_submit_preview]"]').attr('name', '_qf_PDF_submit_preview');
     })();
 
     /**
