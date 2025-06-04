@@ -73,6 +73,8 @@ function civicrm_api3_activity_movebyquery(array $params) {
       $caseActivityParams['newSubject'] = $params['subject'];
     }
 
+    $activityQueryApiHelper->addTargetContactsToParams($activityId, $caseActivityParams);
+
     $result = CRM_Activity_Page_AJAX::_convertToCaseActivity($caseActivityParams);
     if (empty($result['error_msg']) && !empty($result['newId'])) {
       $activityIds[] = $result['newId'];

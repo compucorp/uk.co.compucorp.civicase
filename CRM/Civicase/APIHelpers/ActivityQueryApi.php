@@ -105,4 +105,21 @@ class CRM_Civicase_APIHelpers_ActivityQueryApi {
     return $dao->fetchAll();
   }
 
+  /**
+   * Add target contacts of an activity to params array.
+   *
+   * @param int $activityId
+   *   Activity id.
+   * @param array $params
+   *   All case params.
+   */
+  public function addTargetContactsToParams(int $activityId, array &$params): void {
+    $recordTypes = CRM_Activity_BAO_ActivityContact::buildOptions('record_type_id', 'validate');
+    $targetID = CRM_Utils_Array::key('Activity Targets', $recordTypes);
+    $targetContactIds = array_keys(CRM_Activity_BAO_ActivityContact::getNames($activityId, $targetID));
+    if (!empty($targetContactIds)) {
+      $params['targetContactIds'] = implode(',', $targetContactIds);
+    }
+  }
+
 }
