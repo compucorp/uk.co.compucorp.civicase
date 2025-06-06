@@ -83,7 +83,7 @@
     function getTags () {
       return civicaseCrmApi('Tag', 'get', {
         sequential: 1,
-        used_for: 'Cases',
+        used_for: { LIKE: '%case%' },
         options: { limit: 0, sort: 'name ASC' }
       }).then(function (data) {
         return filterTags(data.values);
