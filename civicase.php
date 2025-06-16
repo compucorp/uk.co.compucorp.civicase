@@ -355,6 +355,10 @@ function civicase_civicrm_apiWrappers(&$wrappers, $apiRequest) {
     $wrappers[] = new CRM_Civicase_Api_Wrapper_CaseList();
     $wrappers[] = new CRM_Civicase_Api_Wrapper_CaseGetList();
   }
+
+  if ($apiRequest['entity'] === 'Tag' && $apiRequest['action'] === 'get') {
+    $wrappers[] = new CRM_Civicase_Api_Wrapper_TagFilter();
+  }
 }
 
 /**
