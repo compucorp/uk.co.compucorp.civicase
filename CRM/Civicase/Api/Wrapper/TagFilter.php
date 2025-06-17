@@ -28,7 +28,7 @@ class CRM_Civicase_Api_Wrapper_TagFilter implements API_Wrapper {
     }
 
     // For non-regular tags we have a param 'parent_id' set in api request.
-    if (isset($apiRequest['params']['parent_id']) && ((int) $apiRequest['params']['parent_id']) > 0) {
+    if (isset($apiRequest['params']['parent_id']) && !is_array($apiRequest['params']['parent_id'])) {
       $tagData = civicrm_api4('Tag', 'get', [
         'select' => ['used_for'],
         'where' => [['id', '=', $apiRequest['params']['parent_id']]],
