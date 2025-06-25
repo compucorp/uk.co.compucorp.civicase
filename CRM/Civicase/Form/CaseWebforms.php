@@ -1,11 +1,16 @@
 <?php
 
 /**
- * This class generates form components for Civicase webforms
+ * This class generates form components for Civicase webforms.
  */
 class CRM_Civicase_Form_CaseWebforms extends CRM_Admin_Form {
 
-  private $webforms = array();
+  /**
+   * The case related webforms.
+   *
+   * @var array
+   */
+  private $webforms = [];
 
   /**
    * Builds the form object.
@@ -14,13 +19,13 @@ class CRM_Civicase_Form_CaseWebforms extends CRM_Admin_Form {
     parent::buildQuickForm();
 
     $webforms = civicrm_api3('Case', 'getwebforms');
-    $errorMsg = null;
-    $webformids = array();
+    $errorMsg = NULL;
+    $webformids = [];
 
     if (isset($webforms['values']) && count($webforms['values'])) {
       foreach ($webforms['values'] as $item) {
-        $webformids[] = 'webforms_'.$item['nid'];
-        $this->add('checkbox', 'webforms_'.$item['nid'], $item['title']);
+        $webformids[] = 'webforms_' . $item['nid'];
+        $this->add('checkbox', 'webforms_' . $item['nid'], $item['title']);
         $this->webforms[$item['nid']] = $item;
       }
     }
@@ -36,17 +41,17 @@ class CRM_Civicase_Form_CaseWebforms extends CRM_Admin_Form {
     $this->assign('errorMsg', $errorMsg);
 
     $this->addButtons(
-      array(
-        array(
+      [
+        [
           'type' => 'cancel',
           'name' => ts('Cancel'),
-        ),
-        array(
+        ],
+        [
           'type' => 'submit',
           'name' => ts('Save'),
           'isDefault' => TRUE,
-        ),
-      )
+        ],
+      ]
     );
   }
 
@@ -69,11 +74,11 @@ class CRM_Civicase_Form_CaseWebforms extends CRM_Admin_Form {
   }
 
   /**
-   * postProcess function.
+   * PostProcess function.
    */
   public function postProcess() {
     $values = $this->getSubmitValues();
-    $items = array();
+    $items = [];
     foreach ($values as $k => $value) {
       if (strpos($k, 'webforms_') === 0) {
         $id = substr($k, 9);
@@ -82,6 +87,13 @@ class CRM_Civicase_Form_CaseWebforms extends CRM_Admin_Form {
     }
     Civi::settings()->set('civi_drupal_webforms', $items);
     CRM_Core_Session::setStatus(ts('Your changes have been saved successfully.'), 'Case Webforms', 'success');
+  }
+
+  /**
+   * Explicitly declare the entity api name.
+   */
+  public function getDefaultEntity() {
+    return 'Case';
   }
 
 }
