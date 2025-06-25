@@ -1,5 +1,6 @@
 <?php
 
+use Civi\Api4\CaseType;
 use Civi\Api4\OptionValue;
 use Civi\CCase\Utils;
 use Civi\Utils\CurrencyUtils;
@@ -217,22 +218,23 @@ class CRM_Civicase_Settings {
    * Sets the case types to javascript global variable.
    */
   public static function setCaseTypesToJsVars(array &$options): void {
-    $caseTypes = civicrm_api3('CaseType', 'get', [
-      'return' => [
-        'id',
-        'name',
-        'title',
-        'description',
-        'definition',
-        'case_type_category',
-        'is_active',
-      ],
-      'options' => ['limit' => 0, 'sort' => 'weight'],
-    ]);
-    foreach ($caseTypes['values'] as &$item) {
-      CRM_Utils_Array::remove($item, 'is_forkable', 'is_forked');
+    $cacheKey = 'civicase_js_var_case_types';
+    $cache = \Civi::cache();
+
+    if (!($cached = $cache->get($cacheKey))) {
+      $cached = CaseType::get()
+        ->addSelect(
+          'id', 'name', 'title', 'description',
+          'definition', 'case_type_category', 'is_active'
+        )
+        ->addOrderBy('weight')
+        ->execute()
+        ->getArrayCopy();
+
+      $cache->set($cacheKey, $cached, 0);
     }
-    $options['caseTypes'] = $caseTypes['values'];
+
+    $options['caseTypes'] = $cached;
   }
 
   /**
