@@ -38,6 +38,9 @@ class CRM_Civicase_Helper_CaseCategory {
     $result = civicrm_api3('OptionValue', 'get', [
       'sequential' => 1,
       'option_group_id' => self::CASE_TYPE_CATEGORY_GROUP_NAME,
+      'options' => [
+        'cache' => TRUE,
+      ],
     ]);
 
     return $result['values'];
@@ -134,6 +137,7 @@ class CRM_Civicase_Helper_CaseCategory {
       $result = civicrm_api3('OptionValue', 'getsingle', [
         'option_group_id' => 'case_type_category_word_replacement_class',
         'name' => $optionName,
+        'options' => ['cache' => TRUE],
       ]);
 
     }
@@ -422,6 +426,7 @@ class CRM_Civicase_Helper_CaseCategory {
     $apiParams = [
       'sequential' => 1,
       'option_group_id' => 'case_type_categories',
+      'options' => ['cache' => TRUE],
     ];
     $apiParams = array_merge($apiParams, $params);
     $result = civicrm_api3('OptionValue', 'get', $apiParams);
@@ -440,6 +445,7 @@ class CRM_Civicase_Helper_CaseCategory {
       'sequential' => 1,
       'option_group_id' => 'case_type_categories',
       'name' => self::CASE_TYPE_CATEGORY_NAME,
+      'options' => ['cache' => TRUE],
       'return' => ['value'],
     ]);
 
