@@ -1,7 +1,6 @@
 <?php
 
 use Civi\Api4\CaseType;
-use Civi\Api4\OptionValue;
 use Civi\CCase\Utils;
 use Civi\Utils\CurrencyUtils;
 use CRM_Civicase_Helper_CaseUrl as CaseUrlHelper;
@@ -367,7 +366,7 @@ class CRM_Civicase_Settings {
     $caseCategories = civicrm_api3('OptionValue', 'get', [
       'is_sequential' => '1',
       'option_group_id' => 'case_type_categories',
-      'options' => ['limit' => 0],
+      'options' => ['limit' => 0, 'cache' => TRUE],
     ]);
 
     foreach ($caseCategories['values'] as &$caseCategory) {
@@ -411,12 +410,15 @@ class CRM_Civicase_Settings {
    *   List of options to pass to the front-end.
    */
   public static function setCaseSalesOrderStatus(array &$options): void {
-    $optionValues = OptionValue::get(FALSE)
-      ->addSelect('id', 'value', 'name', 'label')
-      ->addWhere('option_group_id:name', '=', 'case_sales_order_status')
-      ->execute();
+    $result = civicrm_api3('OptionValue', 'get', [
+      'option_group_id' => 'case_sales_order_status',
+      'return' => ['id', 'value', 'name', 'label'],
+      'options' => ['cache' => TRUE],
+      'sequential' => 1,
+    ]);
 
-    $options['salesOrderStatus'] = $optionValues->getArrayCopy();
+    // The API puts the rows under $result['values'].
+    $options['salesOrderStatus'] = $result['values'];
   }
 
 }
