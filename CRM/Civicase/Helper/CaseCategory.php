@@ -171,6 +171,69 @@ class CRM_Civicase_Helper_CaseCategory {
   }
 
   /**
+   * Gets counts of cases per case-type category for a given contact.
+   *
+   * Implements:
+   *   1. Per-request static cache.
+   *   2. 15-minute shared cache via Civi::cache('short').
+   *
+   * @param int $contactId
+   *   The CiviCRM contact ID.
+   * @param bool $forceRefresh
+   *   If TRUE, ignore all caches and re-run the query.
+   *
+   * @return int[]
+   *   Associative array [ category_name => case_count, … ].
+   */
+  public static function getAllCaseCounts(int $contactId, bool $forceRefresh = FALSE): array {
+    // Use In-memory per-request cache.
+    static $requestCache = [];
+    if (!$forceRefresh && isset($requestCache[$contactId])) {
+      return $requestCache[$contactId];
+    }
+
+    // Tier 2 - Shared cache (short bin, 15-minute TTL).
+    $cacheKey = "civicase_case_counts_{$contactId}";
+    $cache    = \Civi::cache('short');
+    if (!$forceRefresh) {
+      $cached = $cache->get($cacheKey);
+      if ($cached !== NULL) {
+        return $requestCache[$contactId] = $cached;
+      }
+    }
+
+    $sql = "
+      SELECT
+        ov.name      AS category_name,
+        COUNT(cc.id) AS case_count
+      FROM civicrm_case_contact cc
+      INNER JOIN civicrm_case        c  ON c.id              = cc.case_id
+      INNER JOIN civicrm_case_type   ct ON ct.id             = c.case_type_id
+      INNER JOIN civicrm_option_group og ON og.name         = 'case_type_categories'
+      INNER JOIN civicrm_option_value ov ON ov.option_group_id = og.id
+                                         AND ov.value          = ct.case_type_category
+                                         AND ov.is_active      = 1
+      WHERE cc.contact_id = %1
+      GROUP BY ov.name
+      ORDER BY ov.name
+    ";
+
+    $dao = CRM_Core_DAO::executeQuery($sql, [
+      1 => [$contactId, 'Integer'],
+    ]);
+
+    $counts = [];
+    while ($dao->fetch()) {
+      $counts[$dao->category_name] = (int) $dao->case_count;
+    }
+
+    // TTL = 900s = 15min.
+    $cache->set($cacheKey, $counts, 900);
+
+    return $requestCache[$contactId] = $counts;
+  }
+
+  /**
    * Return case count for contact for a case category.
    *
    * @param string $caseTypeCategoryName
@@ -182,18 +245,10 @@ class CRM_Civicase_Helper_CaseCategory {
    *   Case count.
    */
   public static function getCaseCount($caseTypeCategoryName, $contactId) {
-    $params = [
-      'is_deleted' => 0,
-      'contact_id' => $contactId,
-      'case_type_id.case_type_category' => $caseTypeCategoryName,
-    ];
-    try {
-      return civicrm_api3('Case', 'getcount', $params);
-    }
-    catch (CiviCRM_API3_Exception $e) {
-      // Lack of permissions will throw an exception.
-      return 0;
-    }
+    $caseCounts = self::getAllCaseCounts($contactId);
+
+    // O(1) lookup.
+    return $caseCounts[$caseTypeCategoryName] ?? 0;
   }
 
   /**
