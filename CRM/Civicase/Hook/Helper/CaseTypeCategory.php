@@ -40,7 +40,7 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
    */
   public static function getCaseTypesForCategory($caseCategoryName) {
     if (!$caseCategoryName) {
-      return NULL;
+      return [];
     }
 
     try {
@@ -52,14 +52,14 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
         return $ids;
       }
 
-      $rows = CaseType::get()
+      $rows = CaseType::get(FALSE)
         ->addSelect('id')
-        ->addFilter('case_type_category', $caseCategoryName)
-        ->addFilter('is_active', 1)
+        ->addWhere('case_type_category', '=', $caseCategoryName)
+        ->addWhere('is_active', '=', 1)
         ->execute()
         ->getArrayCopy();
 
-      $ids = !empty($rows) ? array_column($rows, 'id') : NULL;
+      $ids = !empty($rows) ? array_column($rows, 'id') : [];
 
       // 0 = never expire; hook_post clears when a type changes.
       $cache->set($cacheKey, $ids, 0);
@@ -67,7 +67,9 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
       return $ids;
     }
     catch (Exception $e) {
-      return NULL;
+      \Civi::log()->error("Error fetching case types for category '$caseCategoryName': " . $e->getMessage());
+
+      return [];
     }
 
   }
