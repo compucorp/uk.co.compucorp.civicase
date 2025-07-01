@@ -218,22 +218,48 @@ class CRM_Civicase_Settings {
    */
   public static function setCaseTypesToJsVars(array &$options): void {
     $cacheKey = 'civicase_js_var_case_types';
-    $cache = \Civi::cache();
+    $cache = \Civi::cache('long');
 
-    if (!($cached = $cache->get($cacheKey))) {
-      $cached = CaseType::get()
-        ->addSelect(
-          'id', 'name', 'title', 'description',
-          'definition', 'case_type_category', 'is_active'
-        )
-        ->addOrderBy('weight')
-        ->execute()
-        ->getArrayCopy();
-
-      $cache->set($cacheKey, $cached, 0);
+    // Try to get from cache first.
+    $cached = $cache->get($cacheKey);
+    if ($cached !== NULL) {
+      $options['caseTypes'] = $cached;
+      return;
     }
 
-    $options['caseTypes'] = $cached;
+    try {
+      $caseTypes = CaseType::get(FALSE)
+        ->addSelect(
+          'id',
+          'name',
+          'title',
+          'description',
+          'definition',
+          'case_type_category',
+          'is_active'
+        )
+        ->addOrderBy('weight', 'ASC')
+        ->setLimit(0)
+        ->execute();
+
+      $processed = [];
+      foreach ($caseTypes as $caseType) {
+        // Ensure we have an array (API v4 can return ArrayObject)
+        $item = is_array($caseType) ? $caseType : $caseType->getArrayCopy();
+        $processed[$item['id']] = $item;
+      }
+
+      $cache->set($cacheKey, $processed, 0);
+      $options['caseTypes'] = $processed;
+
+    }
+    catch (\Exception $e) {
+      // Log the error but don't break the application.
+      \Civi::log()->error('Failed to load case types: ' . $e->getMessage());
+
+      // Set empty array to prevent repeated failed attempts.
+      $options['caseTypes'] = [];
+    }
   }
 
   /**
