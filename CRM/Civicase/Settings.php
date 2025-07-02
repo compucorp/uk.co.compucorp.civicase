@@ -1,6 +1,6 @@
 <?php
 
-use Civi\Api4\OptionValue;
+use Civi\Api4\CaseType;
 use Civi\CCase\Utils;
 use Civi\Utils\CurrencyUtils;
 use CRM_Civicase_Helper_CaseUrl as CaseUrlHelper;
@@ -217,22 +217,49 @@ class CRM_Civicase_Settings {
    * Sets the case types to javascript global variable.
    */
   public static function setCaseTypesToJsVars(array &$options): void {
-    $caseTypes = civicrm_api3('CaseType', 'get', [
-      'return' => [
-        'id',
-        'name',
-        'title',
-        'description',
-        'definition',
-        'case_type_category',
-        'is_active',
-      ],
-      'options' => ['limit' => 0, 'sort' => 'weight'],
-    ]);
-    foreach ($caseTypes['values'] as &$item) {
-      CRM_Utils_Array::remove($item, 'is_forkable', 'is_forked');
+    $cacheKey = 'civicase_js_var_case_types';
+    $cache = \Civi::cache('long');
+
+    // Try to get from cache first.
+    $cached = $cache->get($cacheKey);
+    if ($cached !== NULL) {
+      $options['caseTypes'] = $cached;
+      return;
     }
-    $options['caseTypes'] = $caseTypes['values'];
+
+    try {
+      $caseTypes = CaseType::get(FALSE)
+        ->addSelect(
+          'id',
+          'name',
+          'title',
+          'description',
+          'definition',
+          'case_type_category',
+          'is_active'
+        )
+        ->addOrderBy('weight', 'ASC')
+        ->setLimit(0)
+        ->execute();
+
+      $processed = [];
+      foreach ($caseTypes as $caseType) {
+        // Ensure we have an array (API v4 can return ArrayObject)
+        $item = is_array($caseType) ? $caseType : $caseType->getArrayCopy();
+        $processed[$item['id']] = $item;
+      }
+
+      $cache->set($cacheKey, $processed, 0);
+      $options['caseTypes'] = $processed;
+
+    }
+    catch (\Exception $e) {
+      // Log the error but don't break the application.
+      \Civi::log()->error('Failed to load case types: ' . $e->getMessage());
+
+      // Set empty array to prevent repeated failed attempts.
+      $options['caseTypes'] = [];
+    }
   }
 
   /**
@@ -365,7 +392,7 @@ class CRM_Civicase_Settings {
     $caseCategories = civicrm_api3('OptionValue', 'get', [
       'is_sequential' => '1',
       'option_group_id' => 'case_type_categories',
-      'options' => ['limit' => 0],
+      'options' => ['limit' => 0, 'cache' => TRUE],
     ]);
 
     foreach ($caseCategories['values'] as &$caseCategory) {
@@ -409,12 +436,15 @@ class CRM_Civicase_Settings {
    *   List of options to pass to the front-end.
    */
   public static function setCaseSalesOrderStatus(array &$options): void {
-    $optionValues = OptionValue::get(FALSE)
-      ->addSelect('id', 'value', 'name', 'label')
-      ->addWhere('option_group_id:name', '=', 'case_sales_order_status')
-      ->execute();
+    $result = civicrm_api3('OptionValue', 'get', [
+      'option_group_id' => 'case_sales_order_status',
+      'return' => ['id', 'value', 'name', 'label'],
+      'options' => ['cache' => TRUE],
+      'sequential' => 1,
+    ]);
 
-    $options['salesOrderStatus'] = $optionValues->getArrayCopy();
+    // The API puts the rows under $result['values'].
+    $options['salesOrderStatus'] = $result['values'];
   }
 
 }

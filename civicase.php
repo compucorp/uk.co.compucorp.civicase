@@ -6,6 +6,7 @@
  */
 
 use Civi\Angular\Manager;
+use Civi\Api4\CaseContact;
 
 require_once 'civicase.civix.php';
 
@@ -275,10 +276,35 @@ function civicase_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     new CRM_Civicase_Hook_Post_CaseCategoryCustomGroupSaver(),
     new CRM_Civicase_Hook_Post_UpdateCaseTypeListForCaseCategoryCustomGroup(),
     new CRM_Civicase_Hook_Post_LinkCase(),
+    new CRM_Civicase_Hook_Post_CaseTypeCache(),
   ];
 
   foreach ($hooks as $hook) {
     $hook->run($op, $objectName, $objectId, $objectRef);
+  }
+
+  if ($objectName !== 'Case' || !in_array($op, ['create', 'delete'], TRUE)) {
+    return;
+  }
+
+  if (empty($objectId)) {
+    return;
+  }
+
+  $rows = CaseContact::get(FALSE)
+    ->addSelect('contact_id')
+    ->addWhere('case_id', '=', $objectId)
+    ->execute()
+    ->getArrayCopy();
+
+  if (empty($rows)) {
+    return;
+  }
+
+  $cache = \Civi::cache('short');
+  foreach ($rows as $row) {
+    $cid = (int) $row['contact_id'];
+    $cache->delete("civicase_case_counts_{$cid}");
   }
 }
 

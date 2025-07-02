@@ -56,8 +56,8 @@ class CRM_Civicase_Hook_Permissions_CaseCategory {
   private function addCivicaseDefaultPermissions() {
     $caseCategoryPermissions = $this->permissionService->get();
     $this->permissions[$caseCategoryPermissions['BASIC_CASE_CATEGORY_INFO']['name']] = [
-      $caseCategoryPermissions['BASIC_CASE_CATEGORY_INFO']['label'],
-      $caseCategoryPermissions['BASIC_CASE_CATEGORY_INFO']['description'],
+      'label' => $caseCategoryPermissions['BASIC_CASE_CATEGORY_INFO']['label'],
+      'description' => $caseCategoryPermissions['BASIC_CASE_CATEGORY_INFO']['description'],
     ];
 
     $this->permissions['Update cases with user role via webform'] = [
@@ -82,8 +82,8 @@ class CRM_Civicase_Hook_Permissions_CaseCategory {
       $caseCategoryPermissions = $this->permissionService->get($caseTypeCategory);
       foreach ($caseCategoryPermissions as $caseCategoryPermission) {
         $this->permissions[$caseCategoryPermission['name']] = [
-          $caseCategoryPermission['label'],
-          $caseCategoryPermission['description'],
+          'label' => $caseCategoryPermission['label'],
+          'description' => $caseCategoryPermission['description'],
         ];
       }
     }

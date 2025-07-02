@@ -1,7 +1,7 @@
 <?php
 
 /**
- * CRM_Civicase_Helper_OptionValues class.
+ * OptionValue Helper class with useful functions that sets JS variables.
  */
 class CRM_Civicase_Helper_OptionValues {
 
@@ -16,7 +16,11 @@ class CRM_Civicase_Helper_OptionValues {
           'is_active', 'weight', 'filter',
         ],
         'option_group_id' => $option,
-        'options' => ['limit' => 0, 'sort' => 'weight'],
+        'options' => [
+          'limit' => 0,
+          'sort' => 'weight',
+          'cache' => TRUE,
+        ],
       ]);
       $option = [];
       foreach ($result['values'] as $item) {

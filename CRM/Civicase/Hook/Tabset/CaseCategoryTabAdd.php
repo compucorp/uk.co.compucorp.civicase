@@ -51,6 +51,9 @@ class CRM_Civicase_Hook_Tabset_CaseCategoryTabAdd {
     $result = civicrm_api3('OptionValue', 'get', [
       'option_group_id' => 'case_type_categories',
       'is_active' => 1,
+      'options' => [
+        'cache' => TRUE,
+      ],
     ]);
 
     if (empty($result['values'])) {

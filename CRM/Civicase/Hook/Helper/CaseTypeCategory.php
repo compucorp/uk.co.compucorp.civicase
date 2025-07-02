@@ -1,5 +1,6 @@
 <?php
 
+use Civi\Api4\CaseType;
 use CRM_Civicase_ExtensionUtil as E;
 use CRM_Civicase_Helper_CaseCategory as CaseCategoryHelper;
 use CRM_Civicase_Service_CaseCategorySetting as CaseCategorySetting;
@@ -38,21 +39,37 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
    *   The case type id's e.g [1, 2, 3]
    */
   public static function getCaseTypesForCategory($caseCategoryName) {
-    try {
-      $result = civicrm_api3('CaseType', 'get', [
-        'return' => ['id'],
-        'is_active' => 1,
-        'case_type_category' => $caseCategoryName,
-        'options' => ['limit' => 0],
-      ]);
+    if (!$caseCategoryName) {
+      return [];
+    }
 
-      if ($result['count'] == 0) {
-        return NULL;
+    try {
+      $cacheKey = 'civicase_case_type_for_' . $caseCategoryName;
+      $cache = \Civi::cache();
+      $ids = $cache->get($cacheKey);
+
+      if ($ids !== NULL) {
+        return $ids;
       }
 
-      return array_column($result['values'], 'id');
+      $rows = CaseType::get(FALSE)
+        ->addSelect('id')
+        ->addWhere('case_type_category', '=', $caseCategoryName)
+        ->addWhere('is_active', '=', 1)
+        ->execute()
+        ->getArrayCopy();
+
+      $ids = !empty($rows) ? array_column($rows, 'id') : [];
+
+      // 0 = never expire; hook_post clears when a type changes.
+      $cache->set($cacheKey, $ids, 0);
+
+      return $ids;
     }
     catch (Exception $e) {
+      \Civi::log()->error("Error fetching case types for category '$caseCategoryName': " . $e->getMessage());
+
+      return [];
     }
 
   }
