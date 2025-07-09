@@ -246,10 +246,11 @@ class CRM_Civicase_Settings {
       foreach ($caseTypes as $caseType) {
         // Ensure we have an array (API v4 can return ArrayObject)
         $item = is_array($caseType) ? $caseType : $caseType->getArrayCopy();
+        $item["definition"] = $item["definition"] ?? [];
         $processed[$item['id']] = $item;
       }
 
-      $cache->set($cacheKey, $processed, 0);
+      $cache->set($cacheKey, $processed, NULL);
       $options['caseTypes'] = $processed;
 
     }
