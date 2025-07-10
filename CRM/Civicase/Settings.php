@@ -218,7 +218,7 @@ class CRM_Civicase_Settings {
    */
   public static function setCaseTypesToJsVars(array &$options): void {
     $cacheKey = 'civicase_js_var_case_types';
-    $cache = \Civi::cache('long');
+    $cache = \Civi::cache();
 
     // Try to get from cache first.
     $cached = $cache->get($cacheKey);
