@@ -61,8 +61,8 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
 
       $ids = !empty($rows) ? array_column($rows, 'id') : [];
 
-      // 0 = never expire; hook_post clears when a type changes.
-      $cache->set($cacheKey, $ids, 0);
+      // 1 week; hook_post clears when a type changes before expiry.
+      $cache->set($cacheKey, $ids, 60 * 60 * 24 * 7);
 
       return $ids;
     }
