@@ -3,6 +3,7 @@
 use Civi\Api4\CaseType;
 use Civi\CCase\Utils;
 use Civi\Utils\CurrencyUtils;
+use CRM_Civicase_Helper_CaseCategory as CaseCategoryHelper;
 use CRM_Civicase_Helper_CaseUrl as CaseUrlHelper;
 use CRM_Civicase_Helper_NewCaseWebform as NewCaseWebform;
 use CRM_Civicase_Helper_OptionValues as OptionValuesHelper;
@@ -10,7 +11,6 @@ use CRM_Civicase_Hook_Permissions_ExportCasesAndReports as ExportCasesAndReports
 use CRM_Civicase_Service_CaseCategoryCustomFieldsSetting as CaseCategoryCustomFieldsSetting;
 use CRM_Civicase_Service_CaseCategoryPermission as CaseCategoryPermission;
 use CRM_Civicase_Service_CaseTypeCategoryFeatures as CaseTypeCategoryFeatures;
-use CRM_Civicase_Helper_CaseCategory as CaseCategoryHelper;
 
 /**
  * Get a list of settings for angular pages.
@@ -218,7 +218,7 @@ class CRM_Civicase_Settings {
    */
   public static function setCaseTypesToJsVars(array &$options): void {
     $cacheKey = 'civicase_js_var_case_types';
-    $cache = \Civi::cache('long');
+    $cache = \Civi::cache();
 
     // Try to get from cache first.
     $cached = $cache->get($cacheKey);
@@ -228,6 +228,8 @@ class CRM_Civicase_Settings {
     }
 
     try {
+      // 1 week in seconds
+      $ttl = 60 * 60 * 24 * 7;
       $caseTypes = CaseType::get(FALSE)
         ->addSelect(
           'id',
@@ -246,10 +248,11 @@ class CRM_Civicase_Settings {
       foreach ($caseTypes as $caseType) {
         // Ensure we have an array (API v4 can return ArrayObject)
         $item = is_array($caseType) ? $caseType : $caseType->getArrayCopy();
+        $item["definition"] = $item["definition"] ?? [];
         $processed[$item['id']] = $item;
       }
 
-      $cache->set($cacheKey, $processed, 0);
+      $cache->set($cacheKey, $processed, $ttl);
       $options['caseTypes'] = $processed;
 
     }
