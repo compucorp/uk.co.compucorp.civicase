@@ -18,9 +18,20 @@ use CRM_Civicase_Service_CaseTypeCategoryFeatures as CaseTypeCategoryFeatures;
 class CRM_Civicase_Settings {
 
   /**
+   * Holds the settings for angular pages.
+   *
+   * @var array|null
+   */
+  private static ?array $options = NULL;
+
+  /**
    * Get a list of settings for angular pages.
    */
   public static function getAll(): array {
+    if (is_array(self::$options)) {
+      return self::$options;
+    }
+
     $options = [
       'activityTypes' => 'activity_type',
       'activityStatuses' => 'activity_status',
@@ -30,17 +41,14 @@ class CRM_Civicase_Settings {
       'caseCategoryInstanceType' => 'case_category_instance_type',
     ];
 
+    OptionValuesHelper::setToJsVariables($options);
+
     [$caseCategoryId, $caseCategoryName] = CaseUrlHelper::getCategoryParamsFromUrl();
 
-    CRM_Civicase_Hook_Helper_CaseTypeCategory::addWordReplacements($caseCategoryName);
+    $caseCategorySetting = new CRM_Civicase_Service_CaseCategorySetting();
+    NewCaseWebform::addWebformDataToOptions($options, $caseCategorySetting);
     $permissionService = new CaseCategoryPermission();
     $caseCategoryPermissions = $permissionService->get($caseCategoryName);
-    $caseCategorySetting = new CRM_Civicase_Service_CaseCategorySetting();
-
-    OptionValuesHelper::setToJsVariables($options);
-    NewCaseWebform::addWebformDataToOptions($options, $caseCategorySetting);
-
-    CaseCategoryHelper::updateBreadcrumbs($caseCategoryId);
     self::setCaseActions($options, $caseCategoryPermissions);
     self::setContactTasks($options);
     self::setCaseTypesToJsVars($options);
@@ -48,12 +56,19 @@ class CRM_Civicase_Settings {
     self::setRelationshipTypesToJsVars($options);
     self::setFileCategoriesToJsVars($options);
     self::setActivityStatusTypesToJsVars($options);
-    self::setCustomFieldsInfoToJsVars($options);
     self::setTagsToJsVars($options);
     self::addCaseTypeCategoriesToOptions($options);
     self::exposeSettings($options, ['caseCategoryId' => $caseCategoryId]);
 
-    return $options;
+    if (str_contains(CRM_Utils_System::currentPath(), '/case')) {
+      CRM_Civicase_Hook_Helper_CaseTypeCategory::addWordReplacements($caseCategoryName);
+      CaseCategoryHelper::updateBreadcrumbs($caseCategoryId);
+      self::setCustomFieldsInfoToJsVars($options);
+    }
+
+    self::$options = $options;
+
+    return self::$options;
   }
 
   /**
@@ -287,18 +302,39 @@ class CRM_Civicase_Settings {
    *   Default values to use when exposing settings.
    */
   public static function exposeSettings(array &$options, array $defaults): void {
-    $options['allowMultipleCaseClients'] = (bool) Civi::settings()->get('civicaseAllowMultipleClients');
-    $options['showComingSoonCaseSummaryBlock'] = (bool) Civi::settings()->get('civicaseShowComingSoonCaseSummaryBlock');
-    $options['allowCaseLocks'] = (bool) Civi::settings()->get('civicaseAllowCaseLocks');
-    $options['allowLinkedCasesTab'] = (bool) Civi::settings()->get('civicaseAllowLinkedCasesTab');
-    $options['showWebformsListSeparately'] = (bool) Civi::settings()->get('civicaseShowWebformsListSeparately');
-    $options['webformsDropdownButtonLabel'] = Civi::settings()->get('civicaseWebformsDropdownButtonLabel');
-    $options['showFullContactNameOnActivityFeed'] = (bool) Civi::settings()->get('showFullContactNameOnActivityFeed');
-    $options['includeActivitiesForInvolvedContact'] = (bool) Civi::settings()->get('includeActivitiesForInvolvedContact');
-    $options['civicaseSingleCaseRolePerType'] = (bool) Civi::settings()->get('civicaseSingleCaseRolePerType');
-    $options['caseTypeCategoriesWhereUserCanAccessActivities'] =
-      CRM_Civicase_Helper_CaseCategory::getWhereUserCanAccessActivities();
-    $options['currentCaseCategory'] = $defaults['caseCategoryId'] ?: NULL;
+    try {
+      $settingsValues = civicrm_api3('Setting', 'get', [
+        'return' => [
+          'civicaseAllowMultipleClients',
+          'civicaseShowComingSoonCaseSummaryBlock',
+          'civicaseAllowCaseLocks',
+          'civicaseAllowLinkedCasesTab',
+          'civicaseShowWebformsListSeparately',
+          'civicaseWebformsDropdownButtonLabel',
+          'showFullContactNameOnActivityFeed',
+          'includeActivitiesForInvolvedContact',
+          'civicaseSingleCaseRolePerType',
+        ],
+      ]);
+
+      $domainId                                                  = CRM_Core_Config::domainID();
+      $settings                                                  = $settingsValues['values'][$domainId];
+      $options['allowMultipleCaseClients']                       = (bool) $settings['civicaseAllowMultipleClients'];
+      $options['showComingSoonCaseSummaryBlock']                 = (bool) $settings['civicaseShowComingSoonCaseSummaryBlock'];
+      $options['allowCaseLocks']                                 = (bool) $settings['civicaseAllowCaseLocks'];
+      $options['allowLinkedCasesTab']                            = (bool) $settings['civicaseAllowLinkedCasesTab'];
+      $options['showWebformsListSeparately']                     = (bool) $settings['civicaseShowWebformsListSeparately'];
+      $options['webformsDropdownButtonLabel']                    = $settings['civicaseWebformsDropdownButtonLabel'];
+      $options['showFullContactNameOnActivityFeed']              = (bool) $settings['showFullContactNameOnActivityFeed'];
+      $options['includeActivitiesForInvolvedContact']            = (bool) $settings['includeActivitiesForInvolvedContact'];
+      $options['civicaseSingleCaseRolePerType']                  = (bool) $settings['civicaseSingleCaseRolePerType'];
+      $options['caseTypeCategoriesWhereUserCanAccessActivities'] =
+        CRM_Civicase_Helper_CaseCategory::getWhereUserCanAccessActivities();
+      $options['currentCaseCategory']                            = $defaults['caseCategoryId'] ?: NULL;
+    }
+    catch (Throwable $e) {
+      Civi::log()->error('Error in Civicase exposeSettings: ' . $e->getMessage());
+    }
   }
 
   /**
