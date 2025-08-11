@@ -32,7 +32,7 @@
     $scope.fileFilterParams = {
       case_id: $scope.item.id,
       text: '',
-      options: { xref: 1, limit: 0 },
+      options: { xref: 0, limit: 0 },
       is_file: true
     };
 
@@ -40,6 +40,7 @@
     $scope.toggleSelected = toggleSelected;
     $scope.refresh = refresh;
     $scope.loadActivities = loadActivities;
+    $scope.loadActivityDetails = loadActivityDetails;
 
     (function init () {
       loadActivities();
@@ -86,6 +87,37 @@
     }
 
     /**
+     * Load full activity details on demand
+     * Called when user interacts with an activity that needs more data
+     *
+     * @param {object} activity - the activity to load details for
+     * @returns {Promise} promise
+     */
+    function loadActivityDetails (activity) {
+      if (activity.detailsLoaded || activity.loadingDetails) {
+        return;
+      }
+
+      activity.loadingDetails = true;
+      
+      return civicaseCrmApi('Activity', 'getsingle', {
+        id: activity.activity_id,
+        return: ['subject', 'details', 'activity_type_id', 'status_id',
+                 'source_contact_name', 'target_contact_name', 'assignee_contact_name',
+                 'activity_date_time', 'is_star', 'original_id', 'tag_id.name',
+                 'tag_id.description', 'tag_id.color', 'file_id', 'is_overdue', 'case_id']
+      }).then(function (details) {
+        // Merge the detailed data into the activity
+        _.extend(activity, details);
+        activity.detailsLoaded = true;
+        delete activity.loadingDetails;
+        formatActivity(activity);
+      }).catch(function () {
+        delete activity.loadingDetails;
+      });
+    }
+
+    /**
      * Get List of Activities
      */
     function loadActivities () {
@@ -93,15 +125,40 @@
       $scope.activities = [];
       civicaseCrmApi('Case', 'getfiles', $scope.fileFilterParams)
         .then(function (result) {
-          $scope.activities = result.xref
-            ? _.chain(result.xref.activity)
+          // Handle response without xref - just get basic file info
+          if (result.values) {
+            $scope.activities = _.chain(result.values)
+              .map(function (file) {
+                // Transform file data to activity format
+                return {
+                  id: file.activity_id,
+                  activity_id: file.activity_id,
+                  subject: file.subject || file.description || 'File attachment',
+                  activity_date_time: file.activity_date_time,
+                  file_id: [file.id],
+                  file_uri: file.uri,
+                  file_mime_type: file.mime_type,
+                  can_be_deleted: true,
+                  // Mark that we need to load full details on demand
+                  detailsLoaded: false
+                };
+              })
               .each(formatActivity)
               .sortBy('activity_date_time')
               .reverse()
-              .value()
-            : [];
+              .value();
+          } else if (result.xref) {
+            // Fallback to original xref handling if available
+            $scope.activities = _.chain(result.xref.activity)
+              .each(formatActivity)
+              .sortBy('activity_date_time')
+              .reverse()
+              .value();
+          } else {
+            $scope.activities = [];
+          }
 
-          $scope.totalCount = $scope.activities.length;
+          $scope.totalCount = result.count || $scope.activities.length;
         })
         .finally(function () {
           $scope.isLoading = false;

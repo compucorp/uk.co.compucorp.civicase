@@ -148,7 +148,7 @@ function _civicrm_api3_case_getfiles_select(array $params) {
     ->join('ef', 'INNER JOIN civicrm_entity_file ef ON (ef.entity_table = "civicrm_activity" AND ef.entity_id = act.id) ')
     ->join('et', 'LEFT JOIN civicrm_entity_tag et ON (et.entity_table = "civicrm_activity" AND et.entity_id = act.id) ')
     ->join('f', 'INNER JOIN civicrm_file f ON ef.file_id = f.id')
-    ->select('f.id as fid, act.activity_date_time, act.original_id, act.is_current_revision, act.id')
+    ->select('f.id as fid, act.activity_date_time, act.original_id, act.is_current_revision, act.id, act.subject, f.uri, f.mime_type, f.description')
     ->distinct();
 
   if (isset($params['tag_id'])) {
@@ -227,7 +227,7 @@ function _civicrm_api3_case_getfiles_select(array $params) {
 
   $select = CRM_Utils_SQL_Select::from('civicrm_case_activity caseact')
     ->strict()
-    ->select('caseact.case_id as case_id, caseact.activity_id as activity_id, act.fid as id, act.activity_date_time')
+    ->select('caseact.case_id as case_id, caseact.activity_id as activity_id, act.fid as id, act.activity_date_time, act.subject, act.uri, act.mime_type, act.description')
     ->distinct();
 
   if (isset($params['case_id'])) {
