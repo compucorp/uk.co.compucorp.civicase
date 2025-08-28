@@ -64,8 +64,8 @@
 
         beforeEach(() => {
           const caseTypes = CaseType.getAll();
-          const caseTypeId = _.chain(caseTypes).keys().sample().value();
-          const caseType = CaseType.getById(caseTypeId);
+          const caseType = _.sample(caseTypes);
+          const caseTypeId = caseType.id;
           const caseTypeCategory = _.find(CaseTypeCategory.getAll(), {
             value: caseType.case_type_category
           });
