@@ -218,6 +218,7 @@ class CRM_Civicase_Helper_CaseCategory {
                                          AND ov.value          = ct.case_type_category
                                          AND ov.is_active      = 1
       WHERE cc.contact_id = %1
+        AND c.is_deleted = 0
       GROUP BY ov.name
       ORDER BY ov.name
     ";
