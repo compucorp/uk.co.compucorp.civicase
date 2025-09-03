@@ -88,7 +88,11 @@
      * @returns {object[]} all active case types.
      */
     function getAllActive () {
-      return _.pick(caseTypes, _.matches({ is_active: '1' }));
+      // Normalize is_active to boolean: treat '1', 1, and true as active.
+      // This is necessary because the data source may provide inconsistent types.
+      return _.filter(caseTypes, function (caseType) {
+        return caseType.is_active === true || caseType.is_active === 1 || caseType.is_active === '1';
+      });
     }
 
     /**

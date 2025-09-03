@@ -12,7 +12,7 @@
       beforeEach(() => initModulesAndServices());
 
       beforeEach(() => {
-        activeCaseTypes = _.pick(CaseTypesData, (caseType) => caseType.is_active === '1');
+        activeCaseTypes = _.values(_.pick(CaseTypesData, (caseType) => caseType.is_active === '1'));
         returnedCaseTypes = CaseType.getAll();
       });
 

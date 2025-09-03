@@ -307,7 +307,7 @@
       }
 
       return _.filter(caseTypes, function (caseType) {
-        return caseType.case_type_category === caseTypeCategory.value;
+        return parseInt(caseType.case_type_category) === parseInt(caseTypeCategory.value);
       });
     }
 
