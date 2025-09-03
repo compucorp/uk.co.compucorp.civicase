@@ -85,9 +85,22 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
       return;
     }
 
-    CRM_Core_Resources::singleton()->flushStrings()->resetCacheCode();
-    CRM_Core_Session::singleton()->set('current_case_category', $caseCategoryName);
-    $wordReplacements = CaseCategoryHelper::getWordReplacements($caseCategoryName);
+    $currentCaseCategory = CRM_Core_Session::singleton()->get('current_case_category');
+    if ($currentCaseCategory !== $caseCategoryName) {
+      CRM_Core_Resources::singleton()->flushStrings()->resetCacheCode();
+      CRM_Core_Session::singleton()->set('current_case_category', $caseCategoryName);
+    }
+
+    $cacheKey = 'civicase_word_replacement_for_' . $caseCategoryName;
+    $cache = \Civi::cache();
+    $wordReplacements = $cache->get($cacheKey);
+
+    if ($wordReplacements === NULL) {
+      $wordReplacements = CaseCategoryHelper::getWordReplacements($caseCategoryName);
+      // A month.
+      $cache->set($cacheKey, $wordReplacements, 60 * 60 * 24 * 30);
+    }
+
     if (empty($wordReplacements)) {
       return;
     }
