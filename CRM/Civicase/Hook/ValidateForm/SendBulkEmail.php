@@ -106,6 +106,17 @@ class CRM_Civicase_Hook_ValidateForm_SendBulkEmail {
       // though the only thing being changed for each form is the  case ID
       // and to field.
       $emailForm = clone $this->form;
+      // Set isValidated on CRM_Core_Form to prevent reencoding.
+      try {
+        $reflection = new ReflectionClass('CRM_Core_Form');
+        if ($reflection->hasProperty('isValidated')) {
+          $isValidatedProperty = $reflection->getProperty('isValidated');
+          $isValidatedProperty->setAccessible(TRUE);
+          $isValidatedProperty->setValue($emailForm, TRUE);
+        }
+      }
+      catch (ReflectionException $e) {
+      }
       $this->sendEmailForCase($emailForm, $caseId, $contactIds);
 
       $messageSentCount += count($contactIds);
@@ -247,6 +258,19 @@ class CRM_Civicase_Hook_ValidateForm_SendBulkEmail {
     }
 
     $data['values']['Email']['to'] = $form->_submitValues['to'] = implode(',', $toContactEmails);
+
+    // Remove all data attributes that break Smarty parsing.
+    if (!empty($data['values']['Email']['html_message'])) {
+      $htmlMessage = $data['values']['Email']['html_message'];
+
+      // Remove all data attributes.
+      $htmlMessage = preg_replace('/\s*data-[^=]*="[^"]*"/i', '', $htmlMessage);
+
+      // Fix double HTML encoding.
+      $htmlMessage = str_replace('&amp;amp;', '&amp;', $htmlMessage);
+
+      $data['values']['Email']['html_message'] = $htmlMessage;
+    }
 
     $form->submit($form->exportValues());
   }
