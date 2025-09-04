@@ -29,6 +29,23 @@
       'street_address',
       'tag'
     ];
+    
+    /**
+     * PERFORMANCE OPTIMIZATION: Get appropriate fields based on context
+     * Different parts of the application need different levels of contact detail
+     * @param {string} context - Usage context: 'dashboard', 'calendar', 'full'
+     * @returns {array} Array of field names to load
+     */
+    function getFieldsForContext(context) {
+      var fieldMap = {
+        'dashboard': ['display_name', 'image_URL', 'contact_type'],
+        'calendar': ['display_name'],
+        'minimal': ['display_name', 'contact_type'],
+        'full': requiredContactFields
+      };
+      
+      return fieldMap[context] || fieldMap['full'];
+    }
 
     /**
      * Add data to the ContactsData service and fetches Profile Pic and Contact Type
@@ -37,7 +54,7 @@
      * @returns {Promise} resolves to undefined when the information for the given contacts
      * has been fetched and stored.
      */
-    this.add = function (contacts) {
+    this.add = function (contacts, context) {
       contacts = _.uniq(contacts);
       var newContacts = _.difference(contacts, savedContacts);
       savedContacts = savedContacts.concat(newContacts);
@@ -49,26 +66,32 @@
 
       defer = $q.defer();
 
+      // PERFORMANCE OPTIMIZATION: Context-aware field loading
+      // Load only necessary fields based on usage context to reduce data transfer and processing
+      var contextFields = getFieldsForContext(context);
+      
       return civicaseCrmApi('Contact', 'get', {
         sequential: 1,
         id: { IN: newContacts },
-        return: requiredContactFields,
+        return: contextFields,
         options: { limit: 0 },
-        'api.Phone.get': {
+        // PERFORMANCE OPTIMIZATION: Only load additional data for 'full' context
+        // Dashboard and calendar don't need phone numbers, groups, or tags
+        'api.Phone.get': context === 'full' ? {
           contact_id: '$value.id',
           'phone_type_id.name': { IN: ['Mobile', 'Phone'] },
           return: ['phone', 'phone_type_id.name', 'location_type_id'],
           'api.LocationType.get': { id: '$value.location_type_id' }
-        },
-        'api.GroupContact.get': {
+        } : {},
+        'api.GroupContact.get': context === 'full' ? {
           contact_id: '$value.id',
           return: ['title']
-        },
-        'api.EntityTag.get': {
+        } : {},
+        'api.EntityTag.get': context === 'full' ? {
           entity_table: 'civicrm_contact',
           entity_id: '$value.id',
           return: ['tag_id.name', 'tag_id.description', 'tag_id.color']
-        }
+        } : {}
       }).then(function (data) {
         savedContactDetails = _.extend(savedContactDetails, _.indexBy(data.values, 'contact_id'));
         defer.resolve();
@@ -91,7 +114,12 @@
 
       formatContactPhoneNumbers(contact);
 
-      contact.groups = _.map(contact['api.GroupContact.get'].values, 'title').join(', ');
+      // Safely handle groups data
+      contact.groups = '';
+      if (contact['api.GroupContact.get'] && contact['api.GroupContact.get'].values) {
+        contact.groups = _.map(contact['api.GroupContact.get'].values, 'title').join(', ');
+      }
+      
       contact.tags = (contact.tags + '').split(',').join(', '); // Adds spacing to the tags
 
       delete contact['api.Phone.get'];
@@ -128,12 +156,23 @@
     function formatContactPhoneNumbers (contact) {
       var phoneNumbers = [];
 
-      _.each(contact['api.Phone.get'].values, function (numberObject) {
-        phoneNumbers.push({
-          type: numberObject['api.LocationType.get'].values[0].display_name + ' ' + numberObject['phone_type_id.name'],
-          number: numberObject.phone || numberObject.mobile
+      // Check if phone data exists before processing
+      if (contact['api.Phone.get'] && contact['api.Phone.get'].values) {
+        _.each(contact['api.Phone.get'].values, function (numberObject) {
+          // Check if LocationType data exists before accessing it
+          var locationType = '';
+          if (numberObject['api.LocationType.get'] && 
+              numberObject['api.LocationType.get'].values && 
+              numberObject['api.LocationType.get'].values.length > 0) {
+            locationType = numberObject['api.LocationType.get'].values[0].display_name + ' ';
+          }
+          
+          phoneNumbers.push({
+            type: locationType + (numberObject['phone_type_id.name'] || 'Phone'),
+            number: numberObject.phone || numberObject.mobile
+          });
         });
-      });
+      }
 
       contact.phoneNumbers = phoneNumbers;
     }

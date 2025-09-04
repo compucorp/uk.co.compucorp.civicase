@@ -84,7 +84,10 @@ function civicrm_api3_case_getstats(array $params) {
     $query->where($permClauses);
   }
   // Filter out deleted contacts.
-  $query->where("a.id IN (SELECT case_id FROM civicrm_case_contact ccc, civicrm_contact cc WHERE ccc.contact_id = cc.id AND cc.is_deleted = 0)");
+  // PERFORMANCE OPTIMIZATION: Use JOINs instead of subquery for better performance
+  // The original subquery was executed for every case, now using efficient JOINs
+  $query->join('ccc', 'INNER JOIN civicrm_case_contact ccc ON ccc.case_id = a.id');
+  $query->join('cc', 'INNER JOIN civicrm_contact cc ON cc.id = ccc.contact_id AND cc.is_deleted = 0');
   $isDeleted = (int) CRM_Utils_Array::value('is_deleted', $params, 0);
   $query->where('a.is_deleted = ' . $isDeleted);
 
