@@ -239,15 +239,21 @@
      * Initializes the controller watchers
      */
     function initWatchers () {
+      // PERFORMANCE OPTIMIZATION: Add debouncing to prevent excessive API calls on rapid filter changes
+      var debouncedRefresh = _.debounce(function(forceReload) {
+        refresh(forceReload);
+      }, 300);
+      
       $scope.$on('civicase::dashboard-filters::updated', function () {
-        refresh(true);
+        debouncedRefresh(true);
       });
-      $scope.$watchCollection('filters.caseRelationshipType', function (newType, oldType) {
-        if (newType === oldType) {
+      $scope.$watchCollection('filters.caseRelationshipType', function (newType, oldValue) {
+        if (newType === oldValue) {
           return;
         }
 
-        refresh();
+        // PERFORMANCE OPTIMIZATION: Use debounced refresh for filter changes
+        debouncedRefresh();
       });
 
       // When the involvement filters change, broadcast the event that will be
@@ -325,9 +331,11 @@
      * @param {object} queryParams params
      */
     function rangeHandler (property, format, selectedRange, queryParams) {
+      // PERFORMANCE OPTIMIZATION: Clone moment objects to avoid mutations
+      // Original code mutated the moment object, causing unnecessary object recreation
       var now = moment();
-      var start = now.startOf(selectedRange).format(format);
-      var end = now.endOf(selectedRange).format(format);
+      var start = now.clone().startOf(selectedRange).format(format);
+      var end = now.clone().endOf(selectedRange).format(format);
 
       queryParams[property] = { BETWEEN: [start, end] };
     }
@@ -343,13 +351,14 @@
      * @returns {Promise} results
      */
     function resultsHandler (formatFn, contactsProp, results) {
-      // Flattened list of all the contact ids of all the contacts of all the cases
+      // PERFORMANCE OPTIMIZATION: Use dashboard context for minimal contact loading
+      // Dashboard only needs display names, not full contact details with phone/groups/tags
       var contactIds = _(results).pluck(contactsProp).flatten().pluck('contact_id').uniq().value();
       var formattedResults = _.map(results, formatFn);
       // The try/catch block is necessary because the service does not
       // return a Promise if it doesn't find any new contacts to fetch
       try {
-        return ContactsCache.add(contactIds)
+        return ContactsCache.add(contactIds, 'dashboard')
           .then(function () {
             return formattedResults;
           });
