@@ -216,8 +216,8 @@ function civicrm_api3_case_getdetails(array $params) {
       static $unreadStatusId = null;
       
       if ($emailTypeId === null) {
-        $emailTypeId = CRM_Core_DAO::singleValueQuery("SELECT value FROM civicrm_option_value WHERE name = 'Inbound Email' AND option_group_id = (SELECT id FROM civicrm_option_group WHERE name = 'activity_type')");
-        $unreadStatusId = CRM_Core_DAO::singleValueQuery("SELECT value FROM civicrm_option_value WHERE name = 'Unread' AND option_group_id = (SELECT id FROM civicrm_option_group WHERE name = 'activity_status')");
+        $emailTypeId = CRM_Core_PseudoConstant::getKey('activity_type', 'Inbound Email');
+        $unreadStatusId = CRM_Core_PseudoConstant::getKey('activity_status', 'Unread');
       }
       
       $query = "SELECT COUNT(a.id) as count, ca.case_id
