@@ -158,15 +158,24 @@ function civicrm_api3_case_getdetails(array $params) {
     }
     // Get activity count.
     if (in_array('activity_count', $toReturn)) {
+      // PERFORMANCE OPTIMIZATION: Use single batch query instead of individual queries per case
+      // This eliminates N+1 query pattern that was causing 1 query per case
+      $query = "SELECT COUNT(a.id) as count, a.activity_type_id, ca.case_id
+        FROM civicrm_activity a
+        INNER JOIN civicrm_case_activity ca ON ca.activity_id = a.id
+        WHERE a.is_current_revision = 1 AND a.is_test = 0 AND ca.case_id IN (" . implode(',', $ids) . ")
+        GROUP BY a.activity_type_id, ca.case_id";
+      $dao = CRM_Core_DAO::executeQuery($query);
+      
+      // Initialize activity_count for all cases to ensure consistent structure
       foreach ($result['values'] as $id => &$case) {
-        $query = "SELECT COUNT(a.id) as count, a.activity_type_id
-          FROM civicrm_activity a
-          INNER JOIN civicrm_case_activity ca ON ca.activity_id = a.id
-          WHERE a.is_current_revision = 1 AND a.is_test = 0 AND ca.case_id = $id
-          GROUP BY a.activity_type_id";
-        $dao = CRM_Core_DAO::executeQuery($query);
-        while ($dao->fetch()) {
-          $case['activity_count'][$dao->activity_type_id] = $dao->count;
+        $case['activity_count'] = [];
+      }
+      
+      // Distribute results back to cases
+      while ($dao->fetch()) {
+        if (isset($result['values'][$dao->case_id])) {
+          $result['values'][$dao->case_id]['activity_count'][$dao->activity_type_id] = $dao->count;
         }
       }
     }
@@ -201,13 +210,29 @@ function civicrm_api3_case_getdetails(array $params) {
     }
     // Unread email activity count.
     if (in_array('unread_email_count', $toReturn)) {
+      // PERFORMANCE OPTIMIZATION: Cache option value lookups to avoid nested subqueries
+      // Previously used triple-nested subqueries which were executed for every case
+      static $emailTypeId = null;
+      static $unreadStatusId = null;
+      
+      if ($emailTypeId === null) {
+        $emailTypeId = CRM_Core_PseudoConstant::getKey('activity_type', 'Inbound Email');
+        $unreadStatusId = CRM_Core_PseudoConstant::getKey('activity_status', 'Unread');
+      }
+      
       $query = "SELECT COUNT(a.id) as count, ca.case_id
         FROM civicrm_activity a, civicrm_case_activity ca
         WHERE ca.activity_id = a.id AND a.is_current_revision = 1 AND a.is_test = 0 AND ca.case_id IN (" . implode(',', $ids) . ")
-        AND a.activity_type_id = (SELECT value FROM civicrm_option_value WHERE name = 'Inbound Email' AND option_group_id = (SELECT id FROM civicrm_option_group WHERE name = 'activity_type'))
-        AND a.status_id = (SELECT value FROM civicrm_option_value WHERE name = 'Unread' AND option_group_id = (SELECT id FROM civicrm_option_group WHERE name = 'activity_status'))
+        AND a.activity_type_id = $emailTypeId
+        AND a.status_id = $unreadStatusId
         GROUP BY ca.case_id";
       $dao = CRM_Core_DAO::executeQuery($query);
+      
+      // Initialize unread_email_count for all cases
+      foreach ($result['values'] as $id => &$case) {
+        $case['unread_email_count'] = 0;
+      }
+      
       while ($dao->fetch()) {
         $result['values'][$dao->case_id]['unread_email_count'] = (int) $dao->count;
       }
@@ -221,10 +246,22 @@ function civicrm_api3_case_getdetails(array $params) {
 
     // Get case type category.
     if (in_array('case_type_category', $toReturn)) {
-      foreach ($result['values'] as $id => &$case) {
-        $caseType = civicrm_api3_case_type_get(['id' => $case['case_type_id']]);
-        if (!empty($caseType['values']) && is_array($caseType['values'])) {
-          $case['case_type_category'] = $caseType['values'][$case['case_type_id']]['case_type_category'];
+      // PERFORMANCE OPTIMIZATION: Batch load case types instead of individual API calls per case
+      // This eliminates N+1 pattern where each case triggered a separate CaseType.get API call
+      $caseTypeIds = array_unique(array_column($result['values'], 'case_type_id'));
+      
+      if (!empty($caseTypeIds)) {
+        $caseTypes = civicrm_api3('CaseType', 'get', [
+          'id' => ['IN' => $caseTypeIds],
+          'return' => ['case_type_category'],
+          'options' => ['limit' => 0]
+        ]);
+        
+        // Map results back to cases
+        foreach ($result['values'] as $id => &$case) {
+          if (isset($caseTypes['values'][$case['case_type_id']])) {
+            $case['case_type_category'] = $caseTypes['values'][$case['case_type_id']]['case_type_category'];
+          }
         }
       }
     }

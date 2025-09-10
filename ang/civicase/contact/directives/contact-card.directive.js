@@ -44,18 +44,31 @@
             if (_.isPlainObject($scope.data)) {
               _.each($scope.data, function (name, contactID) {
                 if ($scope.isAvatar) {
-                  prepareAvatarData(ContactsCache.getCachedContact(contactID));
+                  var cachedContact = ContactsCache.getCachedContact(contactID);
+                  if (cachedContact) {
+                    prepareAvatarData(cachedContact);
+                  }
                 } else {
                   $scope.contacts.push({ display_name: name, contact_id: contactID });
                 }
               });
             } else if (typeof $scope.data === 'string') {
-              if ($scope.isAvatar) {
-                prepareAvatarData(ContactsCache.getCachedContact($scope.data));
+              var cachedContact = ContactsCache.getCachedContact($scope.data);
+              if (cachedContact) {
+                if ($scope.isAvatar) {
+                  prepareAvatarData(cachedContact);
+                } else {
+                  $scope.contacts = [{
+                    contact_id: $scope.data,
+                    display_name: cachedContact.display_name
+                  }];
+                }
               } else {
+                // Handle case where contact is not cached yet
+                // Use contact ID as display name temporarily to avoid breaking CiviCRM
                 $scope.contacts = [{
                   contact_id: $scope.data,
-                  display_name: ContactsCache.getCachedContact($scope.data).display_name
+                  display_name: 'Loading...for contact ID ' + $scope.data
                 }];
               }
             } else {
@@ -117,6 +130,10 @@
        * @param {object} contactObj the contact object.
        */
       function prepareAvatarData (contactObj) {
+        if (!contactObj) {
+          return;
+        }
+
         var avatarText;
 
         if (validateEmail(contactObj.display_name)) {
