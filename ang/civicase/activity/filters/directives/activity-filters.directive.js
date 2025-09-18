@@ -3,7 +3,7 @@
 
   module.directive('civicaseActivityFilters', function ($rootScope, $timeout, ts,
     ActivityCategory, ActivityStatus, ActivityType, CustomActivityField,
-    CaseTypeCategory) {
+    CaseTypeCategory, CaseTypeCategoryTranslationService, UrlParameters) {
     return {
       restrict: 'A',
       scope: {
@@ -47,6 +47,20 @@
       $scope.showIncludeCasesOption = showIncludeCasesOption;
 
       (function init () {
+        // Get the current case type category from URL and restore its translations
+        // This ensures the activity filters show the correct context-specific text
+        var urlParams = UrlParameters.parse(window.location.href);
+        var currentCaseTypeCategory = urlParams.case_type_category || 'Cases';
+
+        // Find the category and restore its translations
+        var currentCategory = _.find($scope.caseTypeCategories, function (category) {
+          return category.name === currentCaseTypeCategory;
+        });
+
+        if (currentCategory) {
+          CaseTypeCategoryTranslationService.restoreTranslation(currentCategory.value);
+        }
+
         if ($scope.canSelectCaseTypeCategory) {
           $scope.filters.case_type_category = $scope.caseTypeCategories[0].name;
         }
