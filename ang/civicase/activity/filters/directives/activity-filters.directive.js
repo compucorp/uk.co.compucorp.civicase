@@ -3,7 +3,7 @@
 
   module.directive('civicaseActivityFilters', function ($rootScope, $timeout, ts,
     ActivityCategory, ActivityStatus, ActivityType, CustomActivityField,
-    CaseTypeCategory) {
+    CaseTypeCategory, CaseTypeCategoryTranslationService, UrlParameters) {
     return {
       restrict: 'A',
       scope: {
@@ -45,8 +45,28 @@
         text: true
       };
       $scope.showIncludeCasesOption = showIncludeCasesOption;
+      $scope.getShowCaseActivitiesLabel = getShowCaseActivitiesLabel;
 
       (function init () {
+        // Get the current case type category from URL and restore its translations
+        // This ensures the activity filters show the correct context-specific text
+        var urlParams = UrlParameters.parse(window.location.href);
+        var currentCaseTypeCategory = urlParams.case_type_category || 'Cases';
+
+        // Find the category and restore its translations
+        var currentCategory = _.find($scope.caseTypeCategories, function (category) {
+          return category.name === currentCaseTypeCategory;
+        });
+
+        if (currentCategory) {
+          CaseTypeCategoryTranslationService.restoreTranslation(currentCategory.value);
+          // Cache the correct label after restoring translations
+          $scope.showCaseActivitiesLabel = ts('Show case activities');
+        } else {
+          // Fallback if category not found
+          $scope.showCaseActivitiesLabel = ts('Show case activities');
+        }
+
         if ($scope.canSelectCaseTypeCategory) {
           $scope.filters.case_type_category = $scope.caseTypeCategories[0].name;
         }
@@ -57,6 +77,16 @@
           $scope.exposedFilters[key] = true;
         });
       }());
+
+      /**
+       * Returns the correct label for "Show case activities" that won't be affected
+       * by word replacements from other case category instances
+       *
+       * @returns {string} The correct label text
+       */
+      function getShowCaseActivitiesLabel () {
+        return $scope.showCaseActivitiesLabel;
+      }
 
       /**
        * Exposes the selected filter in the UI
