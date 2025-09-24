@@ -5,6 +5,15 @@
     (function init () {
       var $form = $('.CRM_Contact_Form_Task_PDF');
 
+      if ($form.length) {
+        $form.on('click', 'button[name="_qf_PDF_submit_preview"]', function () {
+          // delaying it by 100ms so that it runs after the form submit handler in misc/form-single-submit.js
+          setTimeout(function () {
+            $form.attr('data-drupal-form-submit-last', '');
+          }, 100);
+        });
+      }
+
       $('body').off('submit', $form);
       $('body').on('submit', $form, openFileNamePopup);
 
