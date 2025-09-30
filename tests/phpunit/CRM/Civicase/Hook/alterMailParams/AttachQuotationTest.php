@@ -7,10 +7,16 @@
  */
 class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadlessTest {
 
+  /**
+   * Set up before tests.
+   */
   public function setUp(): void {
     parent::setUp();
   }
 
+  /**
+   * Clean up after tests.
+   */
   public function tearDown(): void {
     parent::tearDown();
   }
@@ -18,14 +24,14 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadless
   /**
    * Test that LRU cache properly stores and retrieves quotation data.
    */
-  public function testQuotationLRUCache(): void {
+  public function testQuotationLruCache(): void {
     $params = [
       'tokenContext' => ['contributionId' => 123],
     ];
 
     $handler = new CRM_Civicase_Hook_alterMailParams_AttachQuotation();
 
-    // Test basic functionality
+    // Test basic functionality.
     $this->assertInstanceOf(
       'CRM_Civicase_Hook_alterMailParams_AttachQuotation',
       $handler
@@ -36,7 +42,7 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadless
    * Test LRU cache eviction when reaching maximum capacity.
    */
   public function testCacheEviction(): void {
-    // Create multiple instances to test cache behavior
+    // Create multiple instances to test cache behavior.
     for ($i = 1; $i <= 5; $i++) {
       $handler = new CRM_Civicase_Hook_alterMailParams_AttachQuotation();
       $this->assertInstanceOf(
@@ -45,7 +51,7 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadless
       );
     }
 
-    // Test that cache eviction works properly
+    // Test that cache eviction works properly.
     $this->assertTrue(TRUE);
   }
 
@@ -53,7 +59,7 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadless
    * Test memory management during bulk operations.
    */
   public function testBulkProcessingMemoryManagement(): void {
-    // Test batch processing with multiple quotation operations
+    // Test batch processing with multiple quotation operations.
     for ($i = 1; $i <= 10; $i++) {
       $handler = new CRM_Civicase_Hook_alterMailParams_AttachQuotation();
       $this->assertInstanceOf(
@@ -62,7 +68,7 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadless
       );
     }
 
-    // Verify memory management doesn't break functionality
+    // Verify memory management doesn't break functionality.
     $this->assertTrue(TRUE);
   }
 
@@ -73,7 +79,7 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadless
     $handler1 = new CRM_Civicase_Hook_alterMailParams_AttachQuotation();
     $handler2 = new CRM_Civicase_Hook_alterMailParams_AttachQuotation();
 
-    // Test that dual cache system works properly
+    // Test that dual cache system works properly.
     $this->assertInstanceOf(
       'CRM_Civicase_Hook_alterMailParams_AttachQuotation',
       $handler1
@@ -90,7 +96,7 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadless
   public function testErrorHandling(): void {
     $handler = new CRM_Civicase_Hook_alterMailParams_AttachQuotation();
 
-    // Test that error handling works properly
+    // Test that error handling works properly.
     $this->assertInstanceOf(
       'CRM_Civicase_Hook_alterMailParams_AttachQuotation',
       $handler
@@ -101,12 +107,12 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadless
    * Test garbage collection manager integration.
    */
   public function testGarbageCollectionIntegration(): void {
-    // Test that GC manager is properly integrated
+    // Test that GC manager is properly integrated.
     $this->assertTrue(
       class_exists('CRM_Civicase_Common_GCManager')
     );
 
-    // Verify that GC manager has proper methods
+    // Verify that GC manager has proper methods.
     $this->assertTrue(
       method_exists('CRM_Civicase_Common_GCManager', 'maybeCollectGarbage')
     );
@@ -115,11 +121,11 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadless
   /**
    * Test PDF generation memory optimization.
    */
-  public function testPDFGenerationOptimization(): void {
-    // Test PDF generation memory management
+  public function testPdfGenerationOptimization(): void {
+    // Test PDF generation memory management.
     $handler = new CRM_Civicase_Hook_alterMailParams_AttachQuotation();
 
-    // Verify that PDF processing is optimized
+    // Verify that PDF processing is optimized.
     $this->assertInstanceOf(
       'CRM_Civicase_Hook_alterMailParams_AttachQuotation',
       $handler

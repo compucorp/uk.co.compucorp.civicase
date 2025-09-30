@@ -155,7 +155,7 @@ class CRM_Civicase_Common_GCManager {
 
     // Memory-threshold triggered collections don't affect iteration interval.
     if ($reason === 'memory_threshold') {
-      // Keep iteration interval stable, memory threshold is the primary control.
+      // Keep iteration interval stable, memory threshold is primary.
     }
   }
 
@@ -202,7 +202,7 @@ class CRM_Civicase_Common_GCManager {
   }
 
   /**
-   * Get GC statistics for monitoring
+   * Get GC statistics for monitoring.
    */
   public static function getStats() {
     return self::$gcStats;
