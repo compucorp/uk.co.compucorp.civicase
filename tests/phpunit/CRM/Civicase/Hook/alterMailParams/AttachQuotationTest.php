@@ -8,20 +8,6 @@
 class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadlessTest {
 
   /**
-   * Set up before tests.
-   */
-  public function setUp(): void {
-    parent::setUp();
-  }
-
-  /**
-   * Clean up after tests.
-   */
-  public function tearDown(): void {
-    parent::tearDown();
-  }
-
-  /**
    * Test that LRU cache properly stores and retrieves quotation data.
    */
   public function testQuotationLruCache(): void {

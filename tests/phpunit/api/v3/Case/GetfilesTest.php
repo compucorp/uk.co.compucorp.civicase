@@ -28,7 +28,7 @@ require_once 'BaseTestCase.php';
  *
  * @group headless
  */
-class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
+class Api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
 
   /**
    * Holds logged in case creator id.
@@ -278,7 +278,7 @@ class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements Headl
     if ($expectMatch) {
       $attId = $attachment['id'];
       $this->assertEquals(1, $getfiles['count']);
-      // Get the first (and only) result from values array
+      // Get the first (and only) result from values array.
       $result = reset($getfiles['values']);
       $this->assertEquals($cases[0]['id'], $result['case_id']);
       $this->assertEquals($medEval['id'], $result['activity_id']);
@@ -345,7 +345,7 @@ class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements Headl
     if ($expectMatch) {
       $attId = $attachment['id'];
       $this->assertEquals(1, $getfiles['count']);
-      // Get the first (and only) result from values array
+      // Get the first (and only) result from values array.
       $result = reset($getfiles['values']);
       $this->assertEquals($cases[0]['id'], $result['case_id']);
       $this->assertEquals($update['id'], $result['activity_id']);
@@ -412,7 +412,7 @@ class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements Headl
     if ($expectMatch) {
       $attId = $attachment['id'];
       $this->assertEquals(1, $getfiles['count']);
-      // Get the first (and only) result from values array
+      // Get the first (and only) result from values array.
       $result = reset($getfiles['values']);
       $this->assertEquals($cases[0]['id'], $result['case_id']);
       $this->assertEquals($update['id'], $result['activity_id']);
