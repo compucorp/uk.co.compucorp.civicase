@@ -461,7 +461,7 @@ class Api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements Headl
     ]);
     $this->assertEquals(1, $getfiles['count']);
     $attId = $attachment['id'];
-    // Get the first (and only) result from values array
+    // Get the first (and only) result from values array.
     $result = reset($getfiles['values']);
     $this->assertEquals($cases[0]['id'], $result['case_id']);
     $this->assertEquals($medEval['id'], $result['activity_id']);
