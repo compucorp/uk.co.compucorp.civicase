@@ -8,6 +8,13 @@ use Civi\Api4\Contribution;
  */
 class CRM_Civicase_Hook_alterMailParams_AttachQuotation {
 
+  private static $contributionCache = [];
+  private static $contributionCacheOrder = [];
+  private static $salesOrderCache = [];
+  private static $salesOrderCacheOrder = [];
+  private static $processedQuotations = 0;
+  private static $maxCacheSize = 100;
+
   /**
    * Attaches quotation to single invoice.
    *
@@ -24,15 +31,26 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotation {
     }
 
     $contributionId = $params['tokenContext']['contributionId'] ?? $params['tplParams']['id'];
-    $rendered = $this->getContributionQuotationInvoice($contributionId);
-    if (empty($rendered)) {
-      return;
+    
+    try {
+      $rendered = $this->getContributionQuotationInvoice($contributionId);
+      if (empty($rendered)) {
+        return;
+      }
+
+      $attachment = CRM_Utils_Mail::appendPDF('quotation_invoice.pdf', $rendered['html'], $rendered['format']);
+
+      if ($attachment) {
+        $params['attachments']['quotaition_invoice'] = $attachment;
+      }
+      
+      // Increment counter and manage memory adaptively
+      self::$processedQuotations++;
+      $this->performMemoryManagement();
     }
-
-    $attachment = CRM_Utils_Mail::appendPDF('quotation_invoice.pdf', $rendered['html'], $rendered['format']);
-
-    if ($attachment) {
-      $params['attachments']['quotaition_invoice'] = $attachment;
+    catch (Exception $e) {
+      \Civi::log()->error('AttachQuotation processing failed: ' . $e->getMessage());
+      throw $e;
     }
   }
 
@@ -43,6 +61,19 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotation {
    *   The contribution ID.
    */
   private function getContributionQuotationInvoice($contributionId) {
+    // Check cache first (LRU access)
+    if (isset(self::$contributionCache[$contributionId])) {
+      // Move to end of order array (most recently used)
+      $this->updateLRUOrder(self::$contributionCacheOrder, $contributionId);
+      
+      $quotationId = self::$contributionCache[$contributionId];
+      if (isset(self::$salesOrderCache[$quotationId])) {
+        // Move to end of order array (most recently used)
+        $this->updateLRUOrder(self::$salesOrderCacheOrder, $quotationId);
+        return self::$salesOrderCache[$quotationId];
+      }
+    }
+    
     try {
       $salesOrder = Contribution::get(FALSE)
         ->addSelect('Opportunity_Details.Quotation')
@@ -62,9 +93,65 @@ class CRM_Civicase_Hook_alterMailParams_AttachQuotation {
       return;
     }
 
+    $quotationId = $salesOrder[0]['id'];
+    
+    // Cache the contribution->quotation mapping with LRU
+    $this->addToLRUCache(self::$contributionCache, self::$contributionCacheOrder, $contributionId, $quotationId);
+
     /** @var \CRM_Civicase_Service_CaseSalesOrderInvoice */
     $invoiceService = new \CRM_Civicase_Service_CaseSalesOrderInvoice(new CRM_Civicase_WorkflowMessage_SalesOrderInvoice());
-    return $invoiceService->render($salesOrder[0]['id']);
+    $rendered = $invoiceService->render($quotationId);
+    
+    // Cache the rendered result with LRU
+    if ($rendered) {
+      $this->addToLRUCache(self::$salesOrderCache, self::$salesOrderCacheOrder, $quotationId, $rendered);
+    }
+    
+    return $rendered;
+  }
+  
+  /**
+   * Manages memory using adaptive garbage collection.
+   * Uses event-based GC after PDF generation (heavy operation).
+   */
+  private function performMemoryManagement() {
+    // Event-based GC: After PDF generation (creates complex object graphs)
+    CRM_Civicase_Common_GCManager::maybeCollectGarbage('pdf_generation');
+  }
+  
+  /**
+   * Updates LRU order by moving item to end (most recently used).
+   */
+  private function updateLRUOrder(&$orderArray, $key) {
+    $index = array_search($key, $orderArray);
+    if ($index !== FALSE) {
+      // Remove from current position
+      unset($orderArray[$index]);
+    }
+    // Add to end (most recently used)
+    $orderArray[] = $key;
+  }
+  
+  /**
+   * Adds item to LRU cache, evicting least recently used if at capacity.
+   */
+  private function addToLRUCache(&$cache, &$orderArray, $key, $value) {
+    // If already exists, update value and move to end
+    if (isset($cache[$key])) {
+      $cache[$key] = $value;
+      $this->updateLRUOrder($orderArray, $key);
+      return;
+    }
+    
+    // If at capacity, remove least recently used item
+    if (count($cache) >= self::$maxCacheSize) {
+      $lruKey = array_shift($orderArray);
+      unset($cache[$lruKey]);
+    }
+    
+    // Add new item
+    $cache[$key] = $value;
+    $orderArray[] = $key;
   }
 
   /**
