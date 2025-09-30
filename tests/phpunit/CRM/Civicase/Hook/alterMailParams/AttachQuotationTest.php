@@ -2,8 +2,10 @@
 
 /**
  * Test class for AttachQuotation memory optimization functionality.
+ *
+ * @group headless
  */
-class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends CRM_Civicase_BaseTest {
+class CRM_Civicase_Hook_alterMailParams_AttachQuotationTest extends BaseHeadlessTest {
 
   public function setUp(): void {
     parent::setUp();
