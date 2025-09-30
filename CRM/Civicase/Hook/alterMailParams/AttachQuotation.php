@@ -8,11 +8,46 @@ use Civi\Api4\Contribution;
  */
 class CRM_Civicase_Hook_alterMailParams_AttachQuotation {
 
+  /**
+   * LRU cache for contribution data.
+   *
+   * @var array
+   */
   private static $contributionCache = [];
+
+  /**
+   * LRU order tracking for contribution cache.
+   *
+   * @var array
+   */
   private static $contributionCacheOrder = [];
+
+  /**
+   * LRU cache for sales order data.
+   *
+   * @var array
+   */
   private static $salesOrderCache = [];
+
+  /**
+   * LRU order tracking for sales order cache.
+   *
+   * @var array
+   */
   private static $salesOrderCacheOrder = [];
+
+  /**
+   * Counter for processed quotations.
+   *
+   * @var int
+   */
   private static $processedQuotations = 0;
+
+  /**
+   * Maximum cache size for LRU eviction.
+   *
+   * @var int
+   */
   private static $maxCacheSize = 100;
 
   /**
