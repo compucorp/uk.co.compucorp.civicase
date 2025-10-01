@@ -52,9 +52,18 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
         return $ids;
       }
 
+      // Convert category name to category ID/value for comparison.
+      $caseCategoryOptions = CRM_Case_BAO_CaseType::buildOptions('case_type_category', 'validate');
+      $caseCategoryId = array_search($caseCategoryName, $caseCategoryOptions);
+
+      if ($caseCategoryId === FALSE) {
+        // Category name not found, return empty array.
+        return [];
+      }
+
       $rows = CaseType::get(FALSE)
         ->addSelect('id')
-        ->addWhere('case_type_category', '=', $caseCategoryName)
+        ->addWhere('case_type_category', '=', $caseCategoryId)
         ->addWhere('is_active', '=', 1)
         ->execute()
         ->getArrayCopy();
