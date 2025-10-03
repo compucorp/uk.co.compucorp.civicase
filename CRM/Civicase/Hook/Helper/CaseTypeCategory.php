@@ -33,18 +33,21 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
    * Returns the case type ids for a case type category.
    *
    * @param string $caseCategoryName
-   *   Case category name.
+   *   Case category name or ID.
+   * @param bool $byName
+   *   If TRUE, treats $caseCategoryName as a category name and converts to ID.
+   *   If FALSE, treats $caseCategoryName as a category ID directly.
    *
    * @return array|null
    *   The case type id's e.g [1, 2, 3]
    */
-  public static function getCaseTypesForCategory($caseCategoryName) {
+  public static function getCaseTypesForCategory($caseCategoryName, $byName = FALSE) {
     if (!$caseCategoryName) {
       return [];
     }
 
     try {
-      $cacheKey = 'civicase_case_type_for_' . $caseCategoryName;
+      $cacheKey = 'civicase_case_type_for_' . $caseCategoryName . '_' . ($byName ? 'byname' : 'byid');
       $cache = \Civi::cache();
       $ids = $cache->get($cacheKey);
 
@@ -52,13 +55,19 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
         return $ids;
       }
 
-      // Convert category name to category ID/value for comparison.
-      $caseCategoryOptions = CRM_Case_BAO_CaseType::buildOptions('case_type_category', 'validate');
-      $caseCategoryId = array_search($caseCategoryName, $caseCategoryOptions);
+      if ($byName) {
+        // Convert category name to category ID/value for comparison.
+        $caseCategoryOptions = CRM_Case_BAO_CaseType::buildOptions('case_type_category', 'validate');
+        $caseCategoryId = array_search($caseCategoryName, $caseCategoryOptions);
 
-      if ($caseCategoryId === FALSE) {
-        // Category name not found, return empty array.
-        return [];
+        if ($caseCategoryId === FALSE) {
+          // Category name not found, return empty array.
+          return [];
+        }
+      }
+      else {
+        // Use the provided value as category ID directly.
+        $caseCategoryId = $caseCategoryName;
       }
 
       $rows = CaseType::get(FALSE)
