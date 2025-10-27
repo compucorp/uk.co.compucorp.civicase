@@ -32,7 +32,7 @@ class CRM_Civicase_Hook_BuildForm_FilterByCaseCategoryOnChangeCaseType {
    */
   private function filterCaseTypeOptionsByCaseCategory(CRM_Core_Form $form) {
     $caseCategoryName = CaseCategoryHelper::getCategoryName($form->_caseId[0]);
-    $caseTypesInCategory = CaseTypeCategoryHelper::getCaseTypesForCategory($caseCategoryName);
+    $caseTypesInCategory = CaseTypeCategoryHelper::getCaseTypesForCategory($caseCategoryName, TRUE);
 
     if (!$caseTypesInCategory) {
       $caseTypesInCategory = [];
