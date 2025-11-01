@@ -606,6 +606,10 @@ function civicase_civicrm_alterMailParams(&$params, $context) {
   foreach ($hooks as &$hook) {
     $hook->run($params, $context);
   }
+
+  // Adaptive memory management for bulk email operations.
+  // Uses iteration-count trigger with conservative starting interval.
+  CRM_Civicase_Common_GCManager::maybeCollectGarbage('bulk_email');
 }
 
 /**
