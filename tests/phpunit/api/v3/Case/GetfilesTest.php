@@ -28,7 +28,7 @@ require_once 'BaseTestCase.php';
  *
  * @group headless
  */
-class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements HeadlessInterface, HookInterface, TransactionalInterface {
+class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements HeadlessInterface, HookInterface, TransactionalInterface { // phpcs:ignore
 
   /**
    * Holds logged in case creator id.
@@ -276,11 +276,10 @@ class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements Headl
       'case_id' => $cases[0]['id'],
     ]);
     if ($expectMatch) {
-      $attId = $attachment['id'];
       $this->assertEquals(1, $getfiles['count']);
-      $this->assertEquals($cases[0]['id'], $getfiles['values'][$attId]['case_id']);
-      $this->assertEquals($medEval['id'], $getfiles['values'][$attId]['activity_id']);
-      $this->assertEquals($attachment['id'], $getfiles['values'][$attId]['id']);
+      $this->assertEquals($cases[0]['id'], $getfiles['values'][0]['case_id']);
+      $this->assertEquals($medEval['id'], $getfiles['values'][0]['activity_id']);
+      $this->assertEquals($attachment['id'], $getfiles['values'][0]['id']);
       $this->assertTrue(!isset($getfiles['xref']));
     }
     else {
@@ -341,11 +340,10 @@ class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements Headl
       'case_id' => $cases[0]['id'],
     ]);
     if ($expectMatch) {
-      $attId = $attachment['id'];
       $this->assertEquals(1, $getfiles['count']);
-      $this->assertEquals($cases[0]['id'], $getfiles['values'][$attId]['case_id']);
-      $this->assertEquals($update['id'], $getfiles['values'][$attId]['activity_id']);
-      $this->assertEquals($attachment['id'], $getfiles['values'][$attId]['id']);
+      $this->assertEquals($cases[0]['id'], $getfiles['values'][0]['case_id']);
+      $this->assertEquals($update['id'], $getfiles['values'][0]['activity_id']);
+      $this->assertEquals($attachment['id'], $getfiles['values'][0]['id']);
       $this->assertTrue(!isset($getfiles['xref']));
     }
     else {
@@ -406,11 +404,10 @@ class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements Headl
       'case_id' => $cases[0]['id'],
     ]);
     if ($expectMatch) {
-      $attId = $attachment['id'];
       $this->assertEquals(1, $getfiles['count']);
-      $this->assertEquals($cases[0]['id'], $getfiles['values'][$attId]['case_id']);
-      $this->assertEquals($update['id'], $getfiles['values'][$attId]['activity_id']);
-      $this->assertEquals($attachment['id'], $getfiles['values'][$attId]['id']);
+      $this->assertEquals($cases[0]['id'], $getfiles['values'][0]['case_id']);
+      $this->assertEquals($update['id'], $getfiles['values'][0]['activity_id']);
+      $this->assertEquals($attachment['id'], $getfiles['values'][0]['id']);
       $this->assertTrue(!isset($getfiles['xref']));
     }
     else {
@@ -455,9 +452,9 @@ class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements Headl
     ]);
     $this->assertEquals(1, $getfiles['count']);
     $attId = $attachment['id'];
-    $this->assertEquals($cases[0]['id'], $getfiles['values'][$attId]['case_id']);
-    $this->assertEquals($medEval['id'], $getfiles['values'][$attId]['activity_id']);
-    $this->assertEquals($attachment['id'], $getfiles['values'][$attId]['id']);
+    $this->assertEquals($cases[0]['id'], $getfiles['values'][0]['case_id']);
+    $this->assertEquals($medEval['id'], $getfiles['values'][0]['activity_id']);
+    $this->assertEquals($attachment['id'], $getfiles['values'][0]['id']);
 
     $this->assertEquals('The subject', $getfiles['xref']['activity'][$medEval['id']]['subject']);
     $this->assertEquals('The details', $getfiles['xref']['activity'][$medEval['id']]['details']);
