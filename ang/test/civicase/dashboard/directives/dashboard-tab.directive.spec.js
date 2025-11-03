@@ -21,6 +21,14 @@
       $provide.value('formatCase', formatCase);
     }));
 
+    beforeEach(function () {
+      spyOn(_, 'debounce').and.callFake(function (func) {
+        return function () {
+          return func.apply(this, arguments);
+        };
+      });
+    });
+
     beforeEach(inject(function (_$controller_, _$rootScope_, _civicaseCrmApi_,
       _formatActivity_, _formatCase_, _ActivityStatusType_, _CaseTypesMockData_) {
       $controller = _$controller_;

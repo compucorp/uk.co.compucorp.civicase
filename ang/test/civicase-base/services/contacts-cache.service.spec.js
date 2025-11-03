@@ -54,21 +54,9 @@
             'street_address',
             'tag'
           ],
-          'api.Phone.get': {
-            contact_id: '$value.id',
-            'phone_type_id.name': { IN: ['Mobile', 'Phone'] },
-            return: ['phone', 'phone_type_id.name', 'location_type_id'],
-            'api.LocationType.get': { id: '$value.location_type_id' }
-          },
-          'api.GroupContact.get': {
-            contact_id: '$value.id',
-            return: ['title']
-          },
-          'api.EntityTag.get': {
-            entity_table: 'civicrm_contact',
-            entity_id: '$value.id',
-            return: ['tag_id.name', 'tag_id.description', 'tag_id.color']
-          }
+          'api.Phone.get': {},
+          'api.GroupContact.get': {},
+          'api.EntityTag.get': {}
         };
       });
 
