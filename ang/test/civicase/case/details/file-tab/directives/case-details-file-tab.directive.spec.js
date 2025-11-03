@@ -31,7 +31,7 @@
         expect($scope.fileFilterParams).toEqual({
           case_id: $scope.item.id,
           text: '',
-          options: { xref: 1, limit: 0 },
+          options: { xref: 0, limit: 0 },
           is_file: true
         });
       });
