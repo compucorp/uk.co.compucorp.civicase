@@ -39,6 +39,8 @@ class CRM_Civicase_Hook_Post_CaseTypeCache {
     else {
       $this->purgeByPrefix($cache, self::PREFIX_CAT);
     }
+
+    \Civi::cache('metadata')->clear();
   }
 
   /**
