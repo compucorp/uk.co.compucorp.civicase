@@ -13,7 +13,7 @@
      * @params {String} id
      */
     function loadPanes(id) {
-      var url = "{/literal}{crmURL p=`$currentPath` q="qfKey=`$qfKey`&filterPane=" h=0}{literal}" + id;
+      var url = "{/literal}{crmURL p=$currentPath q="qfKey=$qfKey&filterPane=" h=0}{literal}" + id;
       var header = $('#' + id);
       var body = $('.crm-accordion-body.' + id);
       if (header.length > 0 && body.length > 0) {
