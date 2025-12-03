@@ -19,7 +19,7 @@ class CRM_Civicase_Hook_PostProcess_HandleDraftActivity {
     );
     parse_str($urlParams, $urlParams);
 
-    if (!$this->shouldRun($formName, $urlParams)) {
+    if (!$this->shouldRun($formName, $urlParams, $form)) {
       return;
     }
 
@@ -77,14 +77,16 @@ class CRM_Civicase_Hook_PostProcess_HandleDraftActivity {
    *   The name for the current form.
    * @param object $urlParams
    *   URL parameters.
+   * @param CRM_Core_Form $form
+   *   The submitted form instance.
    *
    * @return bool
    *   Whether the hook should run or not.
    */
-  private function shouldRun($formName, $urlParams) {
+  private function shouldRun($formName, $urlParams, CRM_Core_Form $form) {
     $specialForms = ['CRM_Contact_Form_Task_PDF', 'CRM_Case_Form_Task_Email'];
 
-    return in_array($formName, $specialForms) && !empty($urlParams['draft_id']);
+    return in_array($formName, $specialForms) && !empty($urlParams['draft_id']) && !empty($form->getVar('_submitValues')['buttons']);
   }
 
 }
