@@ -44,6 +44,7 @@ class CRM_Civicase_Settings {
     OptionValuesHelper::setToJsVariables($options);
 
     [$caseCategoryId, $caseCategoryName] = CaseUrlHelper::getCategoryParamsFromUrl();
+    CRM_Civicase_Hook_Helper_CaseTypeCategory::addWordReplacements($caseCategoryName);
 
     $caseCategorySetting = new CRM_Civicase_Service_CaseCategorySetting();
     NewCaseWebform::addWebformDataToOptions($options, $caseCategorySetting);
