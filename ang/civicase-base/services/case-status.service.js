@@ -41,7 +41,7 @@
     function getLabelsForValues (statusValues) {
       return _.map(statusValues, function (statusValue) {
         var caseStatus = _.find(allCaseStatuses, function (caseStatus) {
-          return caseStatus.value === statusValue;
+          return parseInt(caseStatus.value, 10) === parseInt(statusValue, 10);
         });
 
         return caseStatus.label;
