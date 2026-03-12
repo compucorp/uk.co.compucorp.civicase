@@ -394,8 +394,8 @@ function civicase_civicrm_apiWrappers(&$wrappers, $apiRequest) {
  */
 function civicase_civicrm_alterAPIPermissions($entity, $action, &$params, &$permissions) {
   $hooks = [
-    new CRM_Civicase_Hook_alterAPIPermissions_CaseCategory(),
-    new CRM_Civicase_Hook_alterAPIPermissions_CaseGetList(),
+    new CRM_Civicase_Hook_AlterAPIPermissions_CaseCategory(),
+    new CRM_Civicase_Hook_AlterAPIPermissions_CaseGetList(),
   ];
 
   foreach ($hooks as $hook) {
