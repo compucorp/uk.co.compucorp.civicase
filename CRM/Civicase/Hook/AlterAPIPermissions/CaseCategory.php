@@ -4,9 +4,9 @@ use CRM_Civicase_Helper_CaseCategory as CaseCategoryHelper;
 use CRM_Civicase_Service_CaseCategoryPermission as CaseCategoryPermission;
 
 /**
- * Class CRM_Civicase_Hook_APIPermissions_alterPermissions.
+ * Adds api permissions for different case categories.
  */
-class CRM_Civicase_Hook_alterAPIPermissions_CaseCategory {
+class CRM_Civicase_Hook_AlterAPIPermissions_CaseCategory {
 
   /**
    * Case category name.
@@ -145,8 +145,41 @@ class CRM_Civicase_Hook_alterAPIPermissions_CaseCategory {
     }
 
     if ($entity == 'custom_value' && ($action == 'gettreevalues' || $action == 'getalltreevalues')) {
+      return $this->getCaseCategoryNameForCustomValueEntity($params);
+    }
+  }
+
+  /**
+   * Returns case category name for custom value entities.
+   *
+   * @param array $params
+   *   API parameters.
+   *
+   * @return string|null
+   *   Case category name.
+   */
+  private function getCaseCategoryNameForCustomValueEntity(array $params): ?string {
+    if (empty($params['entity_type']) || $params['entity_type'] === 'Case') {
       return $this->getCaseCategoryNameFromCaseId($params, 'entity_id');
     }
+
+    if ($params['entity_type'] !== 'Activity' || empty($params['entity_id']) || !is_numeric($params['entity_id'])) {
+      return NULL;
+    }
+
+    $caseActivity = civicrm_api4('CaseActivity', 'get', [
+      'select' => ['case_id'],
+      'where' => [['activity_id', '=', (int) $params['entity_id']]],
+      'orderBy' => ['case_id' => 'ASC'],
+      'limit' => 1,
+      'checkPermissions' => FALSE,
+    ])->first();
+
+    if (empty($caseActivity['case_id'])) {
+      return NULL;
+    }
+
+    return CaseCategoryHelper::getCategoryName($caseActivity['case_id']);
   }
 
   /**
