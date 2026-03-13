@@ -4,9 +4,9 @@ use CRM_Civicase_Helper_CaseCategory as CaseCategoryHelper;
 use CRM_Civicase_Service_CaseCategoryPermission as CaseCategoryPermission;
 
 /**
- * Class CRM_Civicase_Hook_alterAPIPermissions_CaseGetList.
+ * Adds api permissions for case.getList api.
  */
-class CRM_Civicase_Hook_alterAPIPermissions_CaseGetList {
+class CRM_Civicase_Hook_AlterAPIPermissions_CaseGetList {
 
   /**
    * Alters the API permissions.
