@@ -34,15 +34,28 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplay {
    *   Form Object.
    */
   private function setDefaultFormValueForCaseCategory(CRM_Core_Form &$form) {
-    $defaults = $form->getVar('_defaults');
-    $extendsId = $defaults['extends_entity_column_id'];
-    $caseTypeCategories = (CRM_Case_BAO_CaseType::buildOptions('case_type_category', 'validate'));
-    $defaults['extends'][0] = $caseTypeCategories[$extendsId];
-    $hierSelect = $form->getElement('extends');
-    $hierSelectElements = $hierSelect->getElements();
-    $hierSelectElements[1]->_options = [];
+    $defaults = $form->getVar('_defaultValues');
+    $extendsId = $defaults['extends_entity_column_id'] ?? NULL;
+    if (empty($extendsId)) {
+      return;
+    }
 
-    $hierSelect->setValue([$caseTypeCategories[$extendsId]]);
+    $caseTypeCategories = (CRM_Case_BAO_CaseType::buildOptions('case_type_category', 'validate'));
+    if (!isset($caseTypeCategories[$extendsId])) {
+      return;
+    }
+
+    $defaults['extends'] = $caseTypeCategories[$extendsId];
+    $defaults['extends_entity_column_value'] = [];
+    $form->setDefaults($defaults);
+
+    $hierSelect = $form->getElement('extends_entity_column_value');
+    $extendSelect = $form->getElement('extends');
+    $hierSelectAttrs = $hierSelect->getAttributes();
+    $hierSelectAttrs['data-select-params'] = json_encode(['data' => []]);
+    $hierSelect->setAttributes($hierSelectAttrs);
+    $extendSelect->setValue($caseTypeCategories[$extendsId]);
+    $hierSelect->setValue(NULL);
   }
 
   /**
@@ -59,9 +72,9 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplay {
    *   returns a boolean to determine if hook will run or not.
    */
   private function shouldRun($formName, CRM_Core_Form $form) {
-    $defaults = $form->getVar('_defaults');
-    $extends = !empty($defaults['extends'][0]) ? $defaults['extends'][0] : [];
-    if (empty($extends)) {
+    $defaults = $form->getVar('_defaultValues');
+    $extends = !empty($defaults['extends']) ? $defaults['extends'] : '';
+    if ($extends === '') {
       return FALSE;
     }
 
