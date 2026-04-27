@@ -1,0 +1,41 @@
+# Gemini Code Assist configuration
+# See: https://developers.google.com/gemini-code-assist/docs/customize-gemini-behavior-github
+
+# Files/directories Gemini should ignore during review
+ignore_patterns:
+  - "*.civix.php"
+  - "CRM/*/DAO/*.php"
+  - "xml/schema/*.entityType.php"
+  - "vendor/**"
+  - "node_modules/**"
+  - "*.min.js"
+  - "*.min.css"
+
+# Persistent memory for this repository (learns from past reviews)
+memory_config:
+  disabled: false
+
+# Code review settings
+code_review:
+  # Set to true to disable Gemini on PRs
+  disable: false
+
+  # Minimum severity for review comments (LOW, MEDIUM, HIGH, CRITICAL)
+  comment_severity_threshold: MEDIUM
+
+  # Maximum number of review comments (-1 for unlimited)
+  max_review_comments: -1
+
+  # What happens when a PR is opened
+  pull_request_opened:
+    # Post a help message explaining how to interact with Gemini
+    help: false
+
+    # Post a PR summary (overview of changes)
+    summary: true
+
+    # Post code review comments
+    code_review: true
+
+    # Also review draft PRs
+    include_drafts: false
