@@ -49,6 +49,7 @@ class CRM_Civicase_Service_CaseManagementCustomGroupDisplayFormatter extends Bas
    */
   public function processDisplay(array &$row) {
     $row['extends_display'] = $this->cgExtendValues[$this->caseTypeCategories[$row['extends_entity_column_id']]];
+    $row['extends_entity_column_value'] = ts('Any');
   }
 
 }
