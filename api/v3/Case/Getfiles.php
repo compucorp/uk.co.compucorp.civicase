@@ -125,7 +125,7 @@ function _civicrm_api3_case_getfiles_find(array $params, array $options) {
   $dao = \CRM_Core_DAO::executeQuery($select->toSQL());
   $matches = [];
 
-  // Simply return all files - the JavaScript will group them by activity
+  // Simply return all files - the JavaScript will group them by activity.
   while ($dao->fetch()) {
     $matches[] = $dao->toArray();
   }
@@ -138,7 +138,6 @@ function _civicrm_api3_case_getfiles_find(array $params, array $options) {
 
 /**
  * Return select query for getting files.
- * OPTIMIZED VERSION: Uses direct joins and filters by case_id first for performance.
  *
  * @param array $params
  *   Parameters.
@@ -148,7 +147,8 @@ function _civicrm_api3_case_getfiles_find(array $params, array $options) {
  */
 function _civicrm_api3_case_getfiles_select(array $params) {
   // Get activity contact type IDs from CiviCRM's option values
-  // These values are standard in CiviCRM but using the API ensures compatibility
+  // These values are standard in CiviCRM but using the
+  // API ensures compatibility.
   static $contactTypes = NULL;
   if ($contactTypes === NULL) {
     $contactTypes = [
@@ -157,15 +157,16 @@ function _civicrm_api3_case_getfiles_select(array $params) {
       'target' => CRM_Core_PseudoConstant::getKey('CRM_Activity_BAO_ActivityContact', 'record_type_id', 'Activity Targets'),
     ];
   }
-  
-  // Build the main query with direct joins - filter by case FIRST for performance
+
+  // Build the main query with direct joins - filter by case FIRST
+  // for performance.
   $select = CRM_Utils_SQL_Select::from('civicrm_case_activity caseact')
     ->strict()
     ->join('act', 'INNER JOIN civicrm_activity act ON (caseact.activity_id = act.id AND act.is_current_revision = 1)')
     ->join('ef', 'INNER JOIN civicrm_entity_file ef ON (ef.entity_table = "civicrm_activity" AND ef.entity_id = act.id)')
     ->join('f', 'INNER JOIN civicrm_file f ON ef.file_id = f.id')
     // Use separate JOINs for tag display vs filtering
-    // et_display: Always gets ALL tags for display purposes
+    // et_display: Always gets ALL tags for display purposes.
     ->join('et_display', 'LEFT JOIN civicrm_entity_tag et_display ON (et_display.entity_table = "civicrm_activity" AND et_display.entity_id = act.id)')
     ->join('tag_display', 'LEFT JOIN civicrm_tag tag_display ON et_display.tag_id = tag_display.id')
     ->join('source_ac', 'LEFT JOIN civicrm_activity_contact source_ac ON (source_ac.activity_id = act.id AND source_ac.record_type_id = #sourceType)', [
@@ -182,7 +183,7 @@ function _civicrm_api3_case_getfiles_select(array $params) {
     ->join('assignee_contact', 'LEFT JOIN civicrm_contact assignee_contact ON assignee_ac.contact_id = assignee_contact.id')
     ->select([
       'caseact.case_id as case_id',
-      'caseact.activity_id as activity_id', 
+      'caseact.activity_id as activity_id',
       'f.id as id',
       'act.activity_date_time',
       'act.subject',
@@ -198,12 +199,12 @@ function _civicrm_api3_case_getfiles_select(array $params) {
       'GROUP_CONCAT(DISTINCT target_contact.display_name) as target_contact_names',
       'GROUP_CONCAT(DISTINCT assignee_contact.id) as assignee_contact_ids',
       'GROUP_CONCAT(DISTINCT assignee_contact.display_name) as assignee_contact_names',
-      'GROUP_CONCAT(DISTINCT CONCAT(tag_display.id, "|", tag_display.name, "|", COALESCE(tag_display.color, ""), "|", COALESCE(tag_display.description, ""))) as tag_data'
+      'GROUP_CONCAT(DISTINCT CONCAT(tag_display.id, "|", tag_display.name, "|", COALESCE(tag_display.color, ""), "|", COALESCE(tag_display.description, ""))) as tag_data',
     ])
     ->groupBy('f.id, act.id, caseact.case_id, caseact.activity_id')
     ->distinct();
 
-  // Apply case_id filter FIRST for performance
+  // Apply case_id filter FIRST for performance.
   if (isset($params['case_id'])) {
     $select->where('caseact.case_id = #caseIDs', [
       'caseIDs' => $params['case_id'],
@@ -212,28 +213,32 @@ function _civicrm_api3_case_getfiles_select(array $params) {
 
   // Apply tag filter using INNER JOIN (more performant than EXISTS)
   if (isset($params['tag_id'])) {
-    // Build the filter condition for OR logic (show activities with ANY of the selected tags)
+    // Build the filter condition for OR logic
+    // (show activities with ANY of the selected tags)
     if (is_array($params['tag_id'])) {
-      // Handle format: { IN: [128, 130] } from JavaScript
+      // Handle format: { IN: [128, 130] } from JavaScript.
       if (isset($params['tag_id']['IN'])) {
         $tagIds = $params['tag_id']['IN'];
-      } else {
+      }
+      else {
         $tagIds = $params['tag_id'];
       }
-    } else {
+    }
+    else {
       $tagIds = explode(',', $params['tag_id']);
     }
-    
-    // Use INNER JOIN for performance - duplicates are handled by DISTINCT and GROUP BY
+
+    // Use INNER JOIN for performance - duplicates are handled by
+    // DISTINCT and GROUP BY.
     if (!empty($tagIds)) {
       $select->join('et_filter', 'INNER JOIN civicrm_entity_tag et_filter ON (et_filter.entity_table = "civicrm_activity" AND et_filter.entity_id = act.id)')
-             ->where('et_filter.tag_id IN (#tagIds)', [
-               '#tagIds' => $tagIds,
-             ]);
+        ->where('et_filter.tag_id IN (#tagIds)', [
+          '#tagIds' => $tagIds,
+        ]);
     }
   }
 
-  // Apply text search filter
+  // Apply text search filter.
   if (isset($params['text'])) {
     // The end of the uri contains a hash which we want to ignore.
     // So we match from the start of the file uri as a cheap fix. CRM-20096.
@@ -243,8 +248,8 @@ function _civicrm_api3_case_getfiles_select(array $params) {
     ]);
   }
 
-  // Apply mime type category filter
-  if (isset($params['mime_type_cat'])) {
+  // Apply mime type category filter.
+  if (!empty($params['mime_type_cat'])) {
     if (is_string($params['mime_type_cat'])) {
       $cats = [$params['mime_type_cat']];
     }
@@ -257,7 +262,7 @@ function _civicrm_api3_case_getfiles_select(array $params) {
     $select->where(CRM_Civicase_FileCategory::createSqlFilter('f.mime_type', $cats));
   }
 
-  // Apply mime type filter
+  // Apply mime type filter.
   if (isset($params['mime_type'])) {
     if (is_array($params['mime_type'])) {
       $select->where(CRM_Core_DAO::createSqlFilter('f.mime_type', $params['mime_type'], 'String'));
@@ -269,7 +274,7 @@ function _civicrm_api3_case_getfiles_select(array $params) {
     }
   }
 
-  // Apply activity type grouping filter
+  // Apply activity type grouping filter.
   if (isset($params['activity_type_id.grouping'])) {
     $groupingFilter = is_array($params['activity_type_id.grouping'])
       ? $params['activity_type_id.grouping']
@@ -290,7 +295,7 @@ function _civicrm_api3_case_getfiles_select(array $params) {
     }
   }
 
-  // Apply activity type filter
+  // Apply activity type filter.
   if (isset($params['activity_type_id'])) {
     if (is_array($params['activity_type_id'])) {
       $select->where(CRM_Core_DAO::createSqlFilter('act.activity_type_id', $params['activity_type_id'], 'String'));
@@ -302,17 +307,15 @@ function _civicrm_api3_case_getfiles_select(array $params) {
     }
   }
 
-  // Apply ordering at the end, after filtering
+  // Apply ordering at the end, after filtering.
   $select->orderBy(['act.activity_date_time DESC, act.id DESC, f.id DESC']);
 
   // Handle original_id for revised activities using UNION
   // If we need to support revised activities, we'll need to build a UNION query
-  // For now, keeping the simpler direct join approach
-  // TODO: Add UNION support if revised activities are needed
-
+  // For now, keeping the simpler direct join approach.
+  // @todo Add UNION support if revised activities are needed.
   return $select;
 }
-
 
 /**
  * Lookup any cross-references in the `getfiles` data.
