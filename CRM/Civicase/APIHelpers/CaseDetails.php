@@ -21,6 +21,17 @@ class CRM_Civicase_APIHelpers_CaseDetails {
     $resultMetadata = [];
     $params += ['return' => []];
 
+    // Search using multiselect fields not bringing back results
+    // Change operation from IN to LIKE
+    foreach($params as $key => $value) {
+      // Check if this is custom field and multi select (will have 'IN' array)
+      if (substr($key, 0, 7) == 'custom_' && !empty($params[$key]['IN'])) {
+        $svals = $params[$key]['IN'];
+        unset($params[$key]);
+        $params[$key]['LIKE'] = '%' . reset($svals) . '%';
+      }
+    }
+
     if (is_string($params['return'])) {
       $params['return'] = explode(',', str_replace(' ', '', $params['return']));
     }
@@ -64,6 +75,10 @@ class CRM_Civicase_APIHelpers_CaseDetails {
 
     // Set page number dynamically based on selected record.
     if (!empty($params['options']['page_of_record'])) {
+      /*Sort by contact_id doesn't match the api call. Resulting in the paging/offset being incorrect and the selected record not showing. Instead it triggers showClearfiltersUi.*/
+      if (!empty($params['options']['sort']) && FALSE !== strpos($params['options']['sort'], 'contact_id')) {
+        unset($params['options']['sort']);
+      }
       $prParams = ['sequential' => 1] + $params;
       $prParams['return'] = ['id'];
       $prParams['options']['limit'] = $prParams['options']['offset'] = 0;
