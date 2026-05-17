@@ -1,0 +1,28 @@
+/**
+ * Styles for the rich-text inline editor used by the `crm-editable` directive.
+ */
+
+.civicase__rich-text-editable {
+  cursor: pointer;
+}
+
+.civicase__rich-text-editing {
+  cursor: default;
+}
+
+.civicase__rich-text-form {
+  width: 100%;
+
+  .crm-form-wysiwyg {
+    width: 100%;
+  }
+}
+
+.civicase__rich-text-form__actions {
+  margin-top: 6px;
+  text-align: right;
+}
+
+.civicase__rich-text-form__btn {
+  margin-left: 4px;
+}

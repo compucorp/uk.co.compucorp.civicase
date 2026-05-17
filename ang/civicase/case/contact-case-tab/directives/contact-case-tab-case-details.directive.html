@@ -108,13 +108,14 @@
           class="civicase__summary-tab__description crm-entity"
           data-entity="Case"
           data-id="{{ item.id }}">
-          <p
+          <div
             ng-if="item['case_type_id.is_active'] !== '0'"
             crm-editable="item"
             data-field="details"
             data-type="textarea"
+            data-rich-text="true"
             data-placeholder="{{ ts('This case doesn\'t currently have a description. Click here to add now.') }}">
-          </p>
+          </div>
           <div
             ng-if="item['case_type_id.is_active'] === '0'"
             ng-bind-html="trustAsHtml(item.details)"
