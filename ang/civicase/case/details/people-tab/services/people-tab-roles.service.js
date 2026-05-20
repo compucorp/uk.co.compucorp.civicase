@@ -92,7 +92,7 @@
       ) + (relType.description || '');
 
       return _.assign({}, {
-        role: relType.label_b_a,
+        role: relType.label_a_b,
         contact_type: relType.contact_type_b,
         contact_sub_type: relType.contact_sub_type_b,
         relationship_type_id: relType.id,
