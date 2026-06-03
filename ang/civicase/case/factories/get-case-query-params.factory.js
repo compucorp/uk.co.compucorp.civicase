@@ -8,6 +8,11 @@
   // generous bound still covers realistic cases without that cost.
   var RELATED_BY_CONTACT_LIMIT = 300;
 
+  // Upper bound for explicitly linked cases. Links are created by deliberate
+  // user action (the reported case had 74), but a safe cap avoids pathological
+  // payload sizes from bulk imports or scripted linking.
+  var LINKED_CASES_LIMIT = 500;
+
   module.factory('getCaseQueryParams', function (currentCaseCategory) {
     var DEFAULT_FILTERS = {
       caseTypeCategory: currentCaseCategory,
@@ -56,7 +61,7 @@
           'case_type_id.case_type_category': filters.caseTypeCategory,
           id: { IN: '$value.related_case_ids' },
           is_deleted: 0,
-          options: { limit: 0 },
+          options: { limit: LINKED_CASES_LIMIT },
           return: caseListReturnParams
         },
         // For the "recent communication" panel
