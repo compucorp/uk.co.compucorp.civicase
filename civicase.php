@@ -237,7 +237,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
     $form->add('hidden', 'mail_task_from_sk', $isSearchKit);
   }
 
-  if ($formName == 'CRM_Contribute_Form_Task_Invoice' && $isSearchKit) {
+  if (in_array($formName, ['CRM_Contribute_Form_Task_Invoice', 'CRM_Invoicehelper_Contribute_Form_Task_Invoice'], TRUE) && $isSearchKit) {
     $form->add('hidden', 'mail_task_from_sk', $isSearchKit);
     CRM_Core_Resources::singleton()->addScriptFile(
       CRM_Civicase_ExtensionUtil::LONG_NAME,
