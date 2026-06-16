@@ -18,6 +18,10 @@ function _civicrm_api3_activity_getactionlinks_spec(array &$spec) {
   $spec['source_record_id']['api.required'] = 1;
   $spec['activity_id']['api.required'] = 1;
   $spec['case_id']['api.required'] = 0;
+  // Contact whose record is being viewed. Used to build the cid in action
+  // link URLs so that, e.g., closing the activity view returns the user to
+  // the contact they were reviewing rather than their own contact record.
+  $spec['contact_id']['api.required'] = 0;
 }
 
 /**
@@ -72,9 +76,14 @@ function _civicrm_api3_activity_getActivityActionLinks(array $params) {
   $caseId = (array) CRM_Utils_Array::value('case_id', $params);
   $caseId = ((array) $caseId)[0] ?? NULL;
 
+  $cid = CRM_Utils_Array::value('contact_id', $params);
+  if (empty($cid)) {
+    $cid = CRM_Core_Session::getLoggedInContactID();
+  }
+
   $values = [
     'id' => $params['activity_id'],
-    'cid' => CRM_Core_Session::getLoggedInContactID(),
+    'cid' => $cid,
     'cxt' => '',
     'caseid' => $caseId,
   ];
