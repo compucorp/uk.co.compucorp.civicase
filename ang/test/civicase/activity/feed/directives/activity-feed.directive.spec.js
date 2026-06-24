@@ -94,6 +94,34 @@
           });
         });
 
+        describe('when viewing a specific contact\'s activities', () => {
+          const contactId = '42';
+
+          beforeEach(() => {
+            $scope.filters.$contact_id = contactId;
+
+            $scope.$digest();
+          });
+
+          it('passes the viewed contact id to the action links chained api call', () => {
+            const actsParams = civicaseCrmApi.calls.mostRecent().args[0].acts[2];
+
+            expect(actsParams['api.Activity.getactionlinks'].contact_id).toBe(contactId);
+          });
+        });
+
+        describe('when not viewing a specific contact', () => {
+          beforeEach(() => {
+            $scope.$digest();
+          });
+
+          it('still sends contact_id (as null) to the action links chained api call so the server can fall back to the logged-in contact', () => {
+            const actsParams = civicaseCrmApi.calls.mostRecent().args[0].acts[2];
+
+            expect(actsParams['api.Activity.getactionlinks'].contact_id).toBeNull();
+          });
+        });
+
         describe('when the filters are updated', () => {
           let expectedFilters;
 
