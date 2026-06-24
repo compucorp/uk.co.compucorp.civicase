@@ -1,6 +1,18 @@
 (function (angular, $, _, CRM) {
   var module = angular.module('civicase');
 
+  // Upper bound for cases fetched by shared contact. A contact such as a
+  // local-authority employer can be related to thousands of cases; an
+  // unbounded fetch here would bloat the payload and the per-row contact
+  // lookup in prepareRelatedCases(). The panel paginates client-side, so a
+  // generous bound still covers realistic cases without that cost.
+  var RELATED_BY_CONTACT_LIMIT = 300;
+
+  // Upper bound for explicitly linked cases. Links are created by deliberate
+  // user action (the reported case had 74), but a safe cap avoids pathological
+  // payload sizes from bulk imports or scripted linking.
+  var LINKED_CASES_LIMIT = 500;
+
   module.factory('getCaseQueryParams', function (currentCaseCategory) {
     var DEFAULT_FILTERS = {
       caseTypeCategory: currentCaseCategory,
@@ -41,6 +53,7 @@
           contact_id: { IN: '$value.contact_id' },
           id: { '!=': '$value.id' },
           is_deleted: 0,
+          options: { limit: RELATED_BY_CONTACT_LIMIT },
           return: caseListReturnParams
         },
         // Linked cases
@@ -48,6 +61,7 @@
           'case_type_id.case_type_category': filters.caseTypeCategory,
           id: { IN: '$value.related_case_ids' },
           is_deleted: 0,
+          options: { limit: LINKED_CASES_LIMIT },
           return: caseListReturnParams
         },
         // For the "recent communication" panel
