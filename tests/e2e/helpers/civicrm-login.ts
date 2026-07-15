@@ -8,20 +8,21 @@
 
 import type { Page } from '@playwright/test';
 
+const notLoginPage = (url: URL) => !url.pathname.endsWith('/user/login');
+
 export async function civiLogin(page: Page) {
   const user = process.env.CIVICRM_ADMIN_USER || 'compuco_admin';
   const pass = process.env.CIVICRM_ADMIN_PASS || 'compuco_admin';
 
-  await page.goto('/user/login');
-  await page.waitForTimeout(2_000);
+  await page.goto('/user/login', { waitUntil: 'domcontentloaded' });
 
-  // Already logged in?
+  // Already logged in? (Drupal redirects to the user page.)
   if (page.url().match(/\/user\/\d/)) {
     return;
   }
 
   const passwordField = page.locator('#edit-pass');
-  const isFullForm = await passwordField.isVisible({ timeout: 2_000 }).catch(() => false);
+  const isFullForm = await passwordField.isVisible({ timeout: 5_000 }).catch(() => false);
 
   if (isFullForm) {
     const usernameField = page.locator('#user-login input[name="name"]:visible');
@@ -39,6 +40,7 @@ export async function civiLogin(page: Page) {
     await page.locator('#user-login button[type="submit"]:visible, #user-login input[type="submit"]:visible').first().click();
   }
 
-  await page.waitForURL(/(?!.*\/user\/login).*/, { timeout: 15_000 }).catch(() => {});
-  await page.waitForTimeout(2_000);
+  // Wait for login to complete: a redirect away from the login page.
+  await page.waitForURL(notLoginPage, { timeout: 15_000 }).catch(() => {});
+  await page.waitForLoadState('domcontentloaded');
 }
