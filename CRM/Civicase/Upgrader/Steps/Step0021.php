@@ -13,21 +13,14 @@ class CRM_Civicase_Upgrader_Steps_Step0021 {
   /**
    * Performs Upgrade.
    *
+   * Exceptions are intentionally allowed to propagate so a failed upgrade is
+   * surfaced by the upgrade queue rather than silently marked as successful.
+   *
    * @return bool
-   *   Return value in boolean.
+   *   TRUE on success.
    */
   public function apply(): bool {
-    try {
-      (new EnableMultiRecordSupportForCaseCustomGroups())->apply();
-    }
-    catch (\Throwable $th) {
-      \Civi::log()->error('Error upgrading Civicase', [
-        'context' => [
-          'backtrace' => $th->getTraceAsString(),
-          'message' => $th->getMessage(),
-        ],
-      ]);
-    }
+    (new EnableMultiRecordSupportForCaseCustomGroups())->apply();
 
     return TRUE;
   }

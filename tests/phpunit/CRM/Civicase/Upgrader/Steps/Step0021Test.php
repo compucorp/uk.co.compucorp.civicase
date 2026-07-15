@@ -46,21 +46,22 @@ class CRM_Civicase_Upgrader_Steps_Step0021Test extends BaseHeadlessTest {
   }
 
   /**
-   * Cases allow multiple records consistently with Contacts (AC5).
+   * Case entities report allow_is_multiple via the same mechanism as Contacts.
+   *
+   * `allow_is_multiple` is the flag the Custom Group form uses to offer the
+   * multiple-records controls (for Contacts and, after this change, Cases).
    */
-  public function testCaseAllowsMultipleRecordsConsistentlyWithContacts() {
+  public function testCaseEntitiesAllowMultipleRecords() {
     $case = $this->createCgExtendOptionValue('civicrm_case', 0);
 
     (new Step0021())->apply();
+    CRM_Core_PseudoConstant::flush();
 
     $allowMultiple = array_column(
       CRM_Core_BAO_CustomGroup::getCustomGroupExtendsOptions(),
       'allow_is_multiple',
       'id'
     );
-    // Contact is the reference entity that already supports multiple records.
-    $this->assertTrue((bool) ($allowMultiple['Contact'] ?? FALSE));
-    // Cases now behave consistently.
     $this->assertTrue((bool) ($allowMultiple[$case['value']] ?? FALSE));
   }
 

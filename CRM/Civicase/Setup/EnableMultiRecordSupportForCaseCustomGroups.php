@@ -22,18 +22,11 @@ class CRM_Civicase_Setup_EnableMultiRecordSupportForCaseCustomGroups {
    *   TRUE on success.
    */
   public function apply(): bool {
-    CRM_Core_DAO::executeQuery('
-      UPDATE civicrm_option_value ov
-      INNER JOIN civicrm_option_group og ON og.id = ov.option_group_id
-      SET ov.filter = 1
-      WHERE og.name = %1
-        AND ov.name IN (%2, %3)
-        AND (ov.filter IS NULL OR ov.filter <> 1)
-    ', [
-      1 => ['cg_extend_objects', 'String'],
-      2 => ['civicrm_case', 'String'],
-      3 => ['civicrm_case_type', 'String'],
-    ]);
+    \Civi\Api4\OptionValue::update(FALSE)
+      ->addWhere('option_group_id:name', '=', 'cg_extend_objects')
+      ->addWhere('name', 'IN', ['civicrm_case', 'civicrm_case_type'])
+      ->addValue('filter', 1)
+      ->execute();
 
     return TRUE;
   }
