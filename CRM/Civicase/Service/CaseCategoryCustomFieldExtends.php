@@ -37,6 +37,13 @@ class CRM_Civicase_Service_CaseCategoryCustomFieldExtends {
       'description' => $entityTypeFunction,
       'is_active' => TRUE,
       'is_reserved' => TRUE,
+      // Allow repeatable (multi-record) custom field sets for Cases, in line
+      // with the functionality available for Contacts. `filter = 1` maps to
+      // `allow_is_multiple` in
+      // CRM_Core_BAO_CustomGroup::getCustomGroupExtendsOptions(), which is what
+      // makes the core Custom Group admin form expose the "Allow multiple
+      // records", "Maximum records" and "Tab with table" options for Cases.
+      'filter' => 1,
     ]);
   }
 
