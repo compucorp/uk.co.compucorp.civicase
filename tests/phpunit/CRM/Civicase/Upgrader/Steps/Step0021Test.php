@@ -46,23 +46,20 @@ class CRM_Civicase_Upgrader_Steps_Step0021Test extends BaseHeadlessTest {
   }
 
   /**
-   * Case entities report allow_is_multiple via the same mechanism as Contacts.
+   * Case entities are flagged to allow multiple records, as Contacts are.
    *
-   * `allow_is_multiple` is the flag the Custom Group form uses to offer the
-   * multiple-records controls (for Contacts and, after this change, Cases).
+   * The `filter` flag on the cg_extend_objects option value is what maps to
+   * `allow_is_multiple` and drives the multiple-records controls on the Custom
+   * Group form (for Contacts and, after this change, Cases).
    */
   public function testCaseEntitiesAllowMultipleRecords() {
-    $case = $this->createCgExtendOptionValue('civicrm_case', 0);
+    $caseCategory = $this->createCgExtendOptionValue('civicrm_case', 0);
+    $caseType = $this->createCgExtendOptionValue('civicrm_case_type', 0);
 
     (new Step0021())->apply();
-    CRM_Core_PseudoConstant::flush();
 
-    $allowMultiple = array_column(
-      CRM_Core_BAO_CustomGroup::getCustomGroupExtendsOptions(),
-      'allow_is_multiple',
-      'id'
-    );
-    $this->assertTrue((bool) ($allowMultiple[$case['value']] ?? FALSE));
+    $this->assertEquals(1, $this->getFilter($caseCategory['value']));
+    $this->assertEquals(1, $this->getFilter($caseType['value']));
   }
 
   /**

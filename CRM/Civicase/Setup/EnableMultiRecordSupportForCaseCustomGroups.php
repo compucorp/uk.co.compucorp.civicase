@@ -1,5 +1,7 @@
 <?php
 
+use Civi\Api4\OptionValue;
+
 /**
  * Enables repeatable (multi-record) custom field sets for Cases.
  *
@@ -22,7 +24,7 @@ class CRM_Civicase_Setup_EnableMultiRecordSupportForCaseCustomGroups {
    *   TRUE on success.
    */
   public function apply(): bool {
-    \Civi\Api4\OptionValue::update(FALSE)
+    OptionValue::update(FALSE)
       ->addWhere('option_group_id:name', '=', 'cg_extend_objects')
       ->addWhere('name', 'IN', ['civicrm_case', 'civicrm_case_type'])
       ->addValue('filter', 1)
