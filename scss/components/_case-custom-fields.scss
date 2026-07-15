@@ -52,6 +52,24 @@
     }
   }
 
+  .custom_field-help-pre-row {
+    display: block;
+    margin-bottom: -16px;
+
+    &:not(:first-child) {
+      margin-top: 16px;
+    }
+
+    td:not(.description) {
+      display: none;
+    }
+
+    .description {
+      display: block;
+      margin-left: 7px;
+    }
+  }
+
   .custom_field-row {
     label {
       color: $crm-gray-matte;
