@@ -1,0 +1,28 @@
+<!--
+  Wrapped in a <form> so SearchKit's display refreshes after add/edit/delete:
+  searchDisplayBaseTrait binds `crmPopupFormSuccess`/`crmFormSuccess` on the
+  display's closest <form>, and the afform popups + inline edits bubble that
+  event up to here. The controller binds a submit handler that preventDefaults,
+  so the form never actually submits the page.
+-->
+<form class="civicase__case-custom-data-tab">
+  <div ng-if="loading" class="crm-loading-element">{{ ts('Loading...') }}</div>
+  <div class="civicase__case-custom-data-tab__header" ng-if="!loading && settings">
+    <h3 class="civicase__case-custom-data-tab__title">{{ headerLabel }}</h3>
+    <button
+      type="button"
+      class="btn btn-primary civicase__case-custom-data-tab__add"
+      ng-if="canAdd"
+      ng-click="openAdd()">
+      <i class="crm-i fa-plus" aria-hidden="true"></i> {{ addLabel }}
+    </button>
+  </div>
+  <crm-search-display-table
+    ng-if="!loading && settings"
+    api-entity="{{ apiEntity }}"
+    search="searchName"
+    display="displayName"
+    settings="settings"
+    filters="filters">
+  </crm-search-display-table>
+</form>
