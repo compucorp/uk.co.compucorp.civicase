@@ -93,6 +93,43 @@ function civicase_civicrm_config(&$config) {
       'evaluateCaseCustomFieldsTokens',
     ]
   );
+
+  // Dynamically contribute the add/edit afforms for repeatable Case custom
+  // groups (TCOSB-51). Generated on the fly, never saved. See the service.
+  Civi::dispatcher()->addListener(
+    'civi.afform.get',
+    [
+      'CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms',
+      'getCaseCustomGroupAfforms',
+    ]
+  );
+
+  // Add Add/Edit links to the Case custom entities so SearchKit renders the
+  // "Add" toolbar and row "Edit" (opening the afforms above). See the service.
+  Civi::dispatcher()->addListener(
+    'civi.api4.getLinks',
+    [
+      'CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms',
+      'alterCustomEntityLinks',
+    ]
+  );
+}
+
+/**
+ * Implements hook_civicrm_managed().
+ *
+ * Dynamically declares the SavedSearch + SearchDisplay (Tab-with-table list)
+ * for each repeatable Case custom group (TCOSB-51).
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_managed/
+ */
+function civicase_civicrm_managed(&$entities, $modules = NULL) {
+  if ($modules && !in_array('uk.co.compucorp.civicase', $modules, TRUE)) {
+    return;
+  }
+  foreach (CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms::getManagedEntities() as $entity) {
+    $entities[] = $entity;
+  }
 }
 
 /**
@@ -276,6 +313,7 @@ function civicase_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     new CRM_Civicase_Hook_Post_UpdateCaseTypeListForCaseCategoryCustomGroup(),
     new CRM_Civicase_Hook_Post_LinkCase(),
     new CRM_Civicase_Hook_Post_CaseTypeCache(),
+    new CRM_Civicase_Hook_Post_ReconcileRepeatableCaseCustomArtifacts(),
   ];
 
   foreach ($hooks as $hook) {
