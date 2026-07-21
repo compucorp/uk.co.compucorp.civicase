@@ -30,6 +30,14 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   const CIVICASE_MODULE = 'uk.co.compucorp.civicase';
 
   /**
+   * Base cache key for the repeatable Case custom group list.
+   *
+   * Domain id is appended (see repeatableGroupsCacheKey) for multidomain
+   * safety.
+   */
+  const REPEATABLE_GROUPS_CACHE_KEY = 'civicase_repeatable_case_custom_groups';
+
+  /**
    * Listener for `civi.afform.get`: contributes the Case create/update afforms.
    *
    * @param \Civi\Core\Event\GenericHookEvent $event
@@ -314,16 +322,30 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   /**
    * Returns repeatable, Tab-with-table Case custom groups.
    *
+   * Cached in the persistent metadata cache. This list is read on every
+   * civicase Angular page load (via the getFeaturesSettings settingsFactory,
+   * see CRM_Civicase_Settings::setRepeatableCaseCustomGroups) as well as from
+   * the afform/managed hooks, so caching avoids repeating the query on hot
+   * paths.
+   *
+   * The cache is invalidated whenever a CustomGroup changes — see
+   * CRM_Civicase_Hook_Post_ReconcileRepeatableCaseCustomArtifacts::run(), which
+   * clears it at the TOP of the hook, before it reads this list to decide
+   * whether to reconcile. So a group created/edited/deleted earlier in the same
+   * request is always reflected (the reconcile within that request sees fresh
+   * structure). It also clears on a system flush (metadata cache).
+   *
    * @return array
    *   List of CustomGroup records.
    */
   public function getRepeatableCaseGroups(): array {
-    // Intentionally NOT statically cached: reconcileManaged() runs from
-    // hook_civicrm_post right after a CustomGroup/CustomField is saved and must
-    // see the just-changed structure within the same request. A per-request
-    // cache would hide a group created earlier in that request. The query is a
-    // single cheap APIv4 read.
-    return (array) CustomGroup::get(FALSE)
+    $cache = \Civi::cache('metadata');
+    $key = self::repeatableGroupsCacheKey();
+    $cached = $cache->get($key);
+    if (is_array($cached)) {
+      return $cached;
+    }
+    $groups = (array) CustomGroup::get(FALSE)
       ->addSelect('id', 'name', 'title', 'extends', 'icon', 'max_multiple')
       ->addWhere('extends', 'IN', $this->getCaseExtends())
       ->addWhere('is_multiple', '=', TRUE)
@@ -331,6 +353,32 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
       ->addWhere('is_active', '=', TRUE)
       ->execute()
       ->getArrayCopy();
+    $cache->set($key, $groups);
+
+    return $groups;
+  }
+
+  /**
+   * Clears the cached repeatable Case custom group list.
+   *
+   * Called from hook_civicrm_post when a CustomGroup changes so the next read
+   * — including the reconcile within that same request — rebuilds from the
+   * just-changed structure. See
+   * CRM_Civicase_Hook_Post_ReconcileRepeatableCaseCustomArtifacts.
+   */
+  public static function clearRepeatableCaseGroupsCache(): void {
+    \Civi::cache('metadata')->delete(self::repeatableGroupsCacheKey());
+  }
+
+  /**
+   * Domain-scoped cache key for the repeatable Case custom group list.
+   *
+   * @return string
+   *   The cache key, suffixed with the current domain id.
+   */
+  private static function repeatableGroupsCacheKey(): string {
+    $domainId = \CRM_Core_Config::domainID();
+    return self::REPEATABLE_GROUPS_CACHE_KEY . '_' . $domainId;
   }
 
   /**

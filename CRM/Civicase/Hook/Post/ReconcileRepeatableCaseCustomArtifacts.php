@@ -27,6 +27,16 @@ class CRM_Civicase_Hook_Post_ReconcileRepeatableCaseCustomArtifacts {
    *   Object reference.
    */
   public function run($op, $objectName, $objectId, &$objectRef) {
+    // A CustomGroup write can change the repeatable-group list, so drop its
+    // cache FIRST — before shouldRun() reads that list to decide whether to
+    // reconcile. Clearing at the end would leave shouldRun() (and the reconcile
+    // it gates) working off the pre-change list, so a newly created group would
+    // never get its artifacts provisioned.
+    if ($objectName === 'CustomGroup'
+      && in_array($op, ['create', 'edit', 'delete'], TRUE)) {
+      CaseCustomAfforms::clearRepeatableCaseGroupsCache();
+    }
+
     if (!$this->shouldRun($op, $objectName, $objectRef)) {
       return;
     }
