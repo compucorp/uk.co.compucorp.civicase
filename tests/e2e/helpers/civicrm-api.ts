@@ -56,7 +56,7 @@ export class CiviCrmApi {
     params: Record<string, unknown> = {},
   ): Promise<Record<string, unknown>> {
     const url = `${this.config.baseUrl}/civicrm/ajax/rest`;
-    const isWrite = ['create', 'update', 'delete', 'setvalue', 'Run', 'run'].includes(action);
+    const isWrite = ['create', 'update', 'delete', 'setvalue', 'flush', 'Run', 'run'].includes(action);
     const apiParams = {
       entity,
       action,

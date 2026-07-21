@@ -30,6 +30,7 @@ function getFeaturesJsFiles() {
 
 $requires = [
   'api4',
+  'crmSearchDisplayTable',
   'crmUi',
   'crmUtil',
   'civicase',

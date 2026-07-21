@@ -1,0 +1,49 @@
+// Repeatable Case custom-data tab (TCOSB-51): a "<Group> Details" heading on
+// the left with the "Add new <group>" button aligned to the right, matching the
+// standard multiple-record "Tab with Table" layout.
+.civicase__case-custom-data-tab {
+  &__header {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1em;
+  }
+
+  &__title {
+    margin: 0;
+  }
+
+  &__add {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  // Numbered rows, matching the "Tab with Table" wireframe. SearchKit has no
+  // row-number column and we must not override its core templates, so we render
+  // a sequential per-page index via a CSS counter on the first data cell of each
+  // row (the cell right after SearchKit's leftmost control/checkbox column).
+  tbody {
+    counter-reset: civicase-custom-data-row;
+  }
+
+  tbody tr {
+    counter-increment: civicase-custom-data-row;
+  }
+
+  // The cell value is block-level, so place the number in reserved left padding
+  // (absolute) to keep "<n>  value" on one line rather than stacking.
+  .crm-search-ctrl-column + td {
+    padding-left: 2.5em;
+    position: relative;
+  }
+
+  .crm-search-ctrl-column + td::before {
+    color: #5a6169;
+    content: counter(civicase-custom-data-row);
+    font-weight: bold;
+    left: 0.5em;
+    position: absolute;
+    text-align: right;
+    width: 1.5em;
+  }
+}

@@ -81,6 +81,7 @@ class CRM_Civicase_Settings {
     self::setCurrencyCodes($options);
     self::setCaseTypesWithFeaturesEnabled($options);
     self::setCaseSalesOrderStatus($options);
+    self::setRepeatableCaseCustomGroups($options);
 
     return $options;
   }
@@ -452,6 +453,27 @@ class CRM_Civicase_Settings {
    */
   public static function setCurrencyCodes(array &$options): void {
     $options['currencyCodes'] = CurrencyUtils::getCurrencies();
+  }
+
+  /**
+   * Exposes repeatable (multi-record) Case custom groups to Angular.
+   *
+   * Used by the case-custom-data feature to render one Tab-with-table tab per
+   * repeatable Case custom group. See TCOSB-51.
+   *
+   * @param array $options
+   *   List of options to pass to the front-end.
+   */
+  public static function setRepeatableCaseCustomGroups(array &$options): void {
+    $groups = (new \CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms())
+      ->getRepeatableCaseGroups();
+    $options['repeatableCaseCustomGroups'] = array_map(function ($group) {
+      return [
+        'name' => $group['name'],
+        'title' => $group['title'],
+        'max_multiple' => $group['max_multiple'] ?? NULL,
+      ];
+    }, $groups);
   }
 
   /**
