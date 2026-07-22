@@ -25,10 +25,13 @@ import { CiviCrmApi } from '../helpers/civicrm-api';
 const GROUP_TITLE = 'ZZ E2E Repeat Case Data';
 const FIELD_LABEL = 'E2E Entry Name';
 const MAX_RECORDS = 2;
-// Case category the civicase case app is opened under (Housing Support et al.).
-const CASE_TYPE_CATEGORY = 1;
-const CASE_TYPE_ID = 2;
-const CLIENT_CONTACT_ID = 3;
+
+// Resolved dynamically in beforeAll (no hardcoded, environment-specific IDs):
+// an active Case Type, the category it belongs to (the civicase app opens under
+// that category), and a throwaway client contact.
+let caseTypeId = 0;
+let caseCategory = 0;
+let contactId = 0;
 
 let groupName = '';
 let fieldName = '';
@@ -116,12 +119,23 @@ test.beforeAll(async () => {
   // hook_civicrm_post reconcile), so the tab works without an admin clearing
   // the cache. Flushing here would mask a regression of that behaviour.
 
+  // An active Case Type + its category (the civicase app opens under it) and a
+  // throwaway contact — resolved dynamically so this runs on any site.
+  const caseType = civi.values(await civi.api3('CaseType', 'get', {
+    is_active: 1, options: { limit: 1, sort: 'id ASC' },
+  }))[0];
+  caseTypeId = Number(caseType.id);
+  caseCategory = Number(caseType.case_type_category);
+  contactId = Number(civi.values(await civi.api3('Contact', 'create', {
+    contact_type: 'Individual', first_name: 'E2E', last_name: 'Manage Client',
+  }))[0].id);
+
   // A case to attach the records to.
   const kase = civi.values(
     await civi.api3('Case', 'create', {
-      case_type_id: CASE_TYPE_ID,
-      contact_id: CLIENT_CONTACT_ID,
-      creator_id: CLIENT_CONTACT_ID,
+      case_type_id: caseTypeId,
+      contact_id: contactId,
+      creator_id: contactId,
       subject: 'E2E Repeatable Custom Data',
       status_id: 'Open',
     }),
@@ -135,11 +149,12 @@ test.afterAll(async () => {
     await civi.api3('Case', 'delete', { id: caseId }).catch(() => {});
   }
   await civi.deleteCustomGroupByTitle(GROUP_TITLE).catch(() => {});
+  if (contactId) await civi.api3('Contact', 'delete', { id: contactId, skip_undelete: 1 }).catch(() => {});
 });
 
 test('add, edit, delete and max-limit on a repeatable Case custom-data tab', async ({ page }) => {
   await civiLogin(page);
-  await page.goto(`/civicrm/case/a/?case_type_category=${CASE_TYPE_CATEGORY}#/case/list?caseId=${caseId}`);
+  await page.goto(`/civicrm/case/a/?case_type_category=${caseCategory}#/case/list?caseId=${caseId}`);
 
   await openGroupTab(page);
 
