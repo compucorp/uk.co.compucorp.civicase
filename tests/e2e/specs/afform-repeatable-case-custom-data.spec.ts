@@ -28,15 +28,17 @@ const GROUP_TITLE = 'ZZ E2E Afform Repeat Case';
 const FIELD_LABEL = 'E2E Afform Name';
 const MAX_RECORDS = 2;
 const AFFORM_NAME = 'afformE2eRepeatCaseTest';
-const CASE_TYPE_ID = 2;
-const CLIENT_CONTACT_ID = 3;
 
 let groupName = '';
 let fieldName = '';
 let caseId = 0;
+let caseTypeId = 0;
+let contactId = 0;
 
 /** Call APIv4 inside the authenticated browser session (as the public form does). */
 async function api4(page: Page, entity: string, action: string, params: Record<string, unknown>): Promise<any> {
+  // Wait for CiviCRM's global CRM object to finish initialising to avoid a race.
+  await page.waitForFunction(() => typeof (window as unknown as { CRM?: { api4?: unknown } }).CRM?.api4 === 'function');
   return page.evaluate(
     ([e, a, p]) => (window as unknown as { CRM: { api4: (e: string, a: string, p: unknown) => Promise<any> } })
       .CRM.api4(e, a, p),
@@ -68,8 +70,17 @@ test.beforeAll(async () => {
   }))[0];
   fieldName = String(field.name);
 
+  // Resolve an active Case Type and a throwaway contact dynamically, so the spec
+  // does not depend on environment-specific seeded IDs.
+  caseTypeId = Number(civi.values(await civi.api3('CaseType', 'get', {
+    is_active: 1, options: { limit: 1, sort: 'id ASC' },
+  }))[0].id);
+  contactId = Number(civi.values(await civi.api3('Contact', 'create', {
+    contact_type: 'Individual', first_name: 'E2E', last_name: 'Afform Client',
+  }))[0].id);
+
   caseId = Number(civi.values(await civi.api3('Case', 'create', {
-    case_type_id: CASE_TYPE_ID, contact_id: CLIENT_CONTACT_ID, creator_id: CLIENT_CONTACT_ID,
+    case_type_id: caseTypeId, contact_id: contactId, creator_id: contactId,
     subject: 'E2E Afform Repeatable', status_id: 'Open',
   }))[0].id);
 });
@@ -78,6 +89,7 @@ test.afterAll(async () => {
   const civi = CiviCrmApi.fromEnv();
   if (caseId) await civi.api3('Case', 'delete', { id: caseId }).catch(() => {});
   await civi.deleteCustomGroupByTitle(GROUP_TITLE).catch(() => {});
+  if (contactId) await civi.api3('Contact', 'delete', { id: contactId, skip_undelete: 1 }).catch(() => {});
 });
 
 test('Afform af-repeat creates multiple Case custom records and enforces the max', async ({ page }) => {
