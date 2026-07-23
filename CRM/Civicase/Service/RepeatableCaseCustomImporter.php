@@ -92,6 +92,20 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporter {
     if (!$caseId) {
       throw new CRM_Core_Exception(ts('case_id is required'));
     }
+
+    // `id`, when supplied, is a MATCH KEY only: it identifies the existing
+    // repeatable record to update; it is never written as a field value.
+    // Blank/absent => create a new record; a non-positive-integer id is a data
+    // error and is rejected outright.
+    $rawId = trim((string) ($params['id'] ?? ''));
+    $recordId = NULL;
+    if ($rawId !== '') {
+      if (!ctype_digit($rawId) || $rawId === '0') {
+        throw new CRM_Core_Exception(ts('Invalid record id "%1"', [1 => $rawId]));
+      }
+      $recordId = (int) $rawId;
+    }
+
     $caseExists = civicrm_api4('Case', 'get', [
       'select' => ['id'],
       'where' => [['id', '=', $caseId]],
@@ -100,11 +114,6 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporter {
     if (!$caseExists) {
       throw new CRM_Core_Exception(ts('Case %1 not found', [1 => $caseId]));
     }
-
-    // `id`, when supplied, is a MATCH KEY only: it identifies the existing
-    // repeatable record to update. It is never written as a field value.
-    // Blank/absent => create a new record.
-    $recordId = !empty($params['id']) ? (int) $params['id'] : NULL;
 
     $service = new CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms();
     $byGroup = self::fieldsByGroup();
@@ -125,22 +134,15 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporter {
 
       $entity = 'Custom_' . $group['name'];
       if ($recordId !== NULL) {
-        // Update: the matched record must already exist on this Case (and in
-        // this group). id is match-only, so it is not part of $values.
-        $matched = civicrm_api4($entity, 'get', [
-          'select' => ['id'],
+        // Update in a single query, scoped to the Case so a record can't be
+        // moved between cases. id is match-only (not in $values). A zero count
+        // means the id/Case/group did not match — the row is rejected below.
+        // (Ids are per-group tables, so only the group holding it updates.)
+        $written += civicrm_api4($entity, 'update', [
+          'values' => $values,
           'where' => [['id', '=', $recordId], ['entity_id', '=', $caseId]],
           'checkPermissions' => FALSE,
         ])->count();
-        if (!$matched) {
-          continue;
-        }
-        civicrm_api4($entity, 'update', [
-          'values' => $values,
-          'where' => [['id', '=', $recordId]],
-          'checkPermissions' => FALSE,
-        ]);
-        $written++;
       }
       else {
         // Create: a new record against the Case.

@@ -64,6 +64,15 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporterTest extends BaseHeadless
   }
 
   /**
+   * A row with a non-numeric id is rejected as invalid.
+   */
+  public function testImportRowRejectsNonNumericId() {
+    $this->expectException(CRM_Core_Exception::class);
+    $this->expectExceptionMessage('Invalid record id');
+    Importer::importRow(['case_id' => 1, 'id' => 'abc', 'custom_1' => 'x']);
+  }
+
+  /**
    * A row whose id matches no record on the Case is rejected.
    */
   public function testImportRowRejectsUnmatchedId() {

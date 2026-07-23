@@ -13,7 +13,7 @@
 class CaseCustomImporterApiTest extends BaseHeadlessTest {
 
   /**
-   * getfields exposes case_id and the id match-key as mappable columns.
+   * The getfields action exposes case_id and the id match-key as columns.
    */
   public function testGetfieldsExposesCaseIdAndMatchKey() {
     $result = civicrm_api3('CaseCustomImporter', 'getfields', [

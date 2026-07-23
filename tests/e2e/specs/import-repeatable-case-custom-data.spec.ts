@@ -32,6 +32,8 @@ const FIELD_LABEL = 'E2E Import Name';
 let groupName = '';
 let fieldId = 0;
 let fieldName = '';
+let dateFieldId = 0;
+let dateFieldName = '';
 let caseId = 0;
 let caseTypeId = 0;
 let contactId = 0;
@@ -75,6 +77,11 @@ test.beforeAll(async () => {
   }))[0];
   fieldId = Number(field.id);
   fieldName = String(field.name);
+  const dateField = civi.values(await civi.api3('CustomField', 'create', {
+    custom_group_id: group.id, label: 'E2E Import Date', data_type: 'Date', html_type: 'Select Date', is_active: 1, is_searchable: 1,
+  }))[0];
+  dateFieldId = Number(dateField.id);
+  dateFieldName = String(dateField.name);
 
   caseTypeId = Number(civi.values(await civi.api3('CaseType', 'get', { is_active: 1, options: { limit: 1, sort: 'id ASC' } }))[0].id);
   contactId = Number(civi.values(await civi.api3('Contact', 'create', {
@@ -115,19 +122,33 @@ test('CaseCustomImporter.create imports rows (create), updates by id, and reject
   });
   expect(rows.length).toBe(2);
 
-  // Update: id matches an existing record -> updates in place, no new row.
-  // id is a match key only (not written as a value).
+  // Update: id matches an existing record -> updates it in place across
+  // MULTIPLE fields, no new row. id is a match key only (not written as a value).
+  const dateCol = `custom_${dateFieldId}`;
   const targetId = rows[0].id;
-  const upd = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, id: targetId, [col]: 'Updated A' });
+  const upd = await api3(page, 'CaseCustomImporter', 'create', {
+    case_id: caseId, id: targetId, [col]: 'Updated A', [dateCol]: '2026-09-15',
+  });
   expect(upd.is_error).toBeFalsy();
-  rows = await api4(page, `Custom_${groupName}`, 'get', { where: [['entity_id', '=', caseId]], select: ['id', fieldName] });
+  rows = await api4(page, `Custom_${groupName}`, 'get', {
+    where: [['entity_id', '=', caseId]], select: ['id', fieldName, dateFieldName],
+  });
   expect(rows.length).toBe(2);
-  expect(rows.find((r: any) => r.id === targetId)[fieldName]).toBe('Updated A');
+  const updatedRow = rows.find((r: any) => r.id === targetId);
+  expect(updatedRow[fieldName]).toBe('Updated A');
+  expect(String(updatedRow[dateFieldName])).toContain('2026-09-15');
 
   // Matching failure: an id with no record on this Case is rejected (no new row).
   const badId = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, id: 999999, [col]: 'Nope' });
   expect(badId.is_error).toBeTruthy();
   expect(String(badId.error_message)).toContain('No repeatable record');
+
+  // A non-numeric id is rejected (api3 type validation catches it before the
+  // service; the service's own "Invalid record id" guard is covered by PHPUnit).
+  const badIdFmt = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, id: 'abc', [col]: 'Nope' });
+  expect(badIdFmt.is_error).toBeTruthy();
+
+  // No stray rows created by any of the rejected imports.
   rows = await api4(page, `Custom_${groupName}`, 'get', { where: [['entity_id', '=', caseId]], select: ['id'] });
   expect(rows.length).toBe(2);
 
