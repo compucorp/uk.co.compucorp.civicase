@@ -31,6 +31,7 @@ const FIELD_LABEL = 'E2E Import Name';
 
 let groupName = '';
 let fieldId = 0;
+let fieldName = '';
 let caseId = 0;
 let caseTypeId = 0;
 let contactId = 0;
@@ -73,6 +74,7 @@ test.beforeAll(async () => {
     custom_group_id: group.id, label: FIELD_LABEL, data_type: 'String', html_type: 'Text', is_active: 1, is_searchable: 1,
   }))[0];
   fieldId = Number(field.id);
+  fieldName = String(field.name);
 
   caseTypeId = Number(civi.values(await civi.api3('CaseType', 'get', { is_active: 1, options: { limit: 1, sort: 'id ASC' } }))[0].id);
   contactId = Number(civi.values(await civi.api3('Contact', 'create', {
@@ -91,26 +93,45 @@ test.afterAll(async () => {
   if (contactId) await civi.api3('Contact', 'delete', { id: contactId, skip_undelete: 1 }).catch(() => {});
 });
 
-test('CaseCustomImporter.create imports rows as separate records against the Case, matched by Case ID', async ({ page }) => {
+test('CaseCustomImporter.create imports rows (create), updates by id, and rejects bad matches', async ({ page }) => {
   await civiLogin(page);
   await page.goto('/civicrm/admin/search', { waitUntil: 'domcontentloaded' });
   const col = `custom_${fieldId}`;
 
-  // AC1: the group's field is offered as an importable column.
+  // AC1: the group's field, case_id and the id match-key are importable columns.
   const fields = await api3(page, 'CaseCustomImporter', 'getfields', { action: 'create' });
   expect(Object.keys(fields.values || {})).toContain(col);
   expect(Object.keys(fields.values || {})).toContain('case_id');
+  expect(Object.keys(fields.values || {})).toContain('id');
 
-  // AC2/AC3: two rows -> two separate records against the same Case.
+  // AC2/AC3: two rows (no id) -> two separate records against the same Case.
   const r1 = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, [col]: 'Imported A' });
   expect(r1.is_error).toBeFalsy();
   const r2 = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, [col]: 'Imported B' });
   expect(r2.is_error).toBeFalsy();
 
-  const rows = await api4(page, `Custom_${groupName}`, 'get', { where: [['entity_id', '=', caseId]], select: ['id'] });
-  expect(Array.isArray(rows) ? rows.length : 0).toBe(2);
+  let rows = await api4(page, `Custom_${groupName}`, 'get', {
+    where: [['entity_id', '=', caseId]], select: ['id', fieldName], orderBy: { id: 'ASC' },
+  });
+  expect(rows.length).toBe(2);
 
-  // AC5: an invalid row (unknown Case) is rejected.
+  // Update: id matches an existing record -> updates in place, no new row.
+  // id is a match key only (not written as a value).
+  const targetId = rows[0].id;
+  const upd = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, id: targetId, [col]: 'Updated A' });
+  expect(upd.is_error).toBeFalsy();
+  rows = await api4(page, `Custom_${groupName}`, 'get', { where: [['entity_id', '=', caseId]], select: ['id', fieldName] });
+  expect(rows.length).toBe(2);
+  expect(rows.find((r: any) => r.id === targetId)[fieldName]).toBe('Updated A');
+
+  // Matching failure: an id with no record on this Case is rejected (no new row).
+  const badId = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, id: 999999, [col]: 'Nope' });
+  expect(badId.is_error).toBeTruthy();
+  expect(String(badId.error_message)).toContain('No repeatable record');
+  rows = await api4(page, `Custom_${groupName}`, 'get', { where: [['entity_id', '=', caseId]], select: ['id'] });
+  expect(rows.length).toBe(2);
+
+  // AC5: an unknown Case is rejected.
   const bad = await api3(page, 'CaseCustomImporter', 'create', { case_id: 999999, [col]: 'x' });
   expect(bad.is_error).toBeTruthy();
   expect(String(bad.error_message)).toContain('not found');

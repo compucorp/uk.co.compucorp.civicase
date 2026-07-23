@@ -64,6 +64,23 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporterTest extends BaseHeadless
   }
 
   /**
+   * A row whose id matches no record on the Case is rejected.
+   */
+  public function testImportRowRejectsUnmatchedId() {
+    $caseType = CaseTypeFabricator::fabricate();
+    $client = ContactFabricator::fabricate();
+    $case = CaseFabricator::fabricate([
+      'case_type_id' => $caseType['id'],
+      'contact_id' => $client['id'],
+      'creator_id' => $client['id'],
+    ]);
+
+    $this->expectException(CRM_Core_Exception::class);
+    $this->expectExceptionMessage('No repeatable record');
+    Importer::importRow(['case_id' => $case['id'], 'id' => 999999, 'custom_1' => 'x']);
+  }
+
+  /**
    * The mappableFields() helper returns an array (empty with no groups).
    */
   public function testMappableFieldsReturnsArray() {

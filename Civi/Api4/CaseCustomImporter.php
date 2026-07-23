@@ -46,6 +46,7 @@ class CaseCustomImporter extends AbstractEntity {
   public static function fieldList(): array {
     $fields = [
       ['name' => 'case_id', 'title' => ts('Case ID'), 'data_type' => 'Integer'],
+      ['name' => 'id', 'title' => ts('Record ID'), 'data_type' => 'Integer'],
     ];
     foreach (Importer::mappableFields() as $key => $label) {
       $fields[] = ['name' => $key, 'title' => $label, 'data_type' => 'String'];
