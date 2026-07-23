@@ -127,15 +127,15 @@ test('SearchKit export emits one row per repeatable Case record (all field types
     display: null,
     return: 'page:1',
   });
-  const data = (Array.isArray(rows) ? rows : []).map((r: any) => r.data || r);
+  const data = (Array.isArray(rows) ? rows : []).map((r: any) => r?.data ?? r);
 
   // AC2: two records -> two rows. AC3: each row carries the parent Case id.
   expect(data).toHaveLength(2);
-  for (const d of data) expect(Number(d.id)).toBe(caseId);
+  for (const d of data) expect(Number(d?.id)).toBe(caseId);
   // AC4: text / date / number values all exported.
-  expect(data.map((d: any) => d[`m.${fName}`])).toEqual(['Export A', 'Export B']);
-  expect(data.map((d: any) => Number(d[`m.${fNum}`]))).toEqual([11, 22]);
-  for (const d of data) expect(String(d[`m.${fDate}`])).toContain('2026-08-0');
+  expect(data.map((d: any) => d?.[`m.${fName}`])).toEqual(['Export A', 'Export B']);
+  expect(data.map((d: any) => Number(d?.[`m.${fNum}`]))).toEqual([11, 22]);
+  for (const d of data) expect(String(d?.[`m.${fDate}`])).toContain('2026-08-0');
 
   // AC5: a non-repeatable Case custom field still exports normally.
   const std = await api4(page, 'SearchDisplay', 'run', {
@@ -146,7 +146,7 @@ test('SearchKit export emits one row per repeatable Case record (all field types
     display: null,
     return: 'page:1',
   });
-  const stdData = (Array.isArray(std) ? std : []).map((r: any) => r.data || r);
+  const stdData = (Array.isArray(std) ? std : []).map((r: any) => r?.data ?? r);
   expect(stdData).toHaveLength(1);
-  expect(stdData[0][`${stdGroupName}.${stdFieldName}`]).toBe('StdValue');
+  expect(stdData[0]?.[`${stdGroupName}.${stdFieldName}`]).toBe('StdValue');
 });
