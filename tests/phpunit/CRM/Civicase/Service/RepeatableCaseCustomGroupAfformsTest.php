@@ -96,4 +96,25 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
     $this->assertEquals('view', $links[0]['ui_action']);
   }
 
+  /**
+   * Option, pseudoconstant and reference fields resolve to readable keys.
+   *
+   * Option groups and the Country/State/Boolean pseudoconstants use the
+   * ":label" suffix; a ContactReference joins to the target's label field
+   * (display_name); plain fields are unchanged. This is what makes the case
+   * tab render labels instead of coded values / contact ids.
+   */
+  public function testFieldDisplayKeyResolvesLabelsAndReferences() {
+    $service = new Service();
+    $method = new ReflectionMethod(Service::class, 'fieldDisplayKey');
+    $method->setAccessible(TRUE);
+    $key = fn (array $field) => $method->invoke($service, $field);
+
+    $this->assertEquals('plain_text', $key(['name' => 'plain_text', 'data_type' => 'String', 'html_type' => 'Text']));
+    $this->assertEquals('a_select:label', $key(['name' => 'a_select', 'data_type' => 'String', 'option_group_id' => 7]));
+    $this->assertEquals('a_country:label', $key(['name' => 'a_country', 'data_type' => 'Country']));
+    $this->assertEquals('a_bool:label', $key(['name' => 'a_bool', 'data_type' => 'Boolean']));
+    $this->assertEquals('a_contact.display_name', $key(['name' => 'a_contact', 'data_type' => 'ContactReference']));
+  }
+
 }
