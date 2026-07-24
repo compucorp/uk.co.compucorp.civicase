@@ -301,7 +301,11 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   }
 
   /**
-   * Whether a field is an entity reference (e.g. a ContactReference).
+   * Whether a field is a reference to another entity.
+   *
+   * Covers both ContactReference (targets a contact) and the generic
+   * EntityReference (targets any entity, named in fk_entity) — core treats the
+   * two together, so both must render as a label join, not a raw id.
    *
    * @param array $field
    *   Custom field record.
@@ -310,14 +314,15 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
    *   TRUE if the field stores a reference to another entity.
    */
   protected function fieldIsReference(array $field): bool {
-    return ($field['data_type'] ?? '') === 'ContactReference';
+    return in_array($field['data_type'] ?? '', ['ContactReference', 'EntityReference'], TRUE);
   }
 
   /**
    * The label field on the entity a reference field points at.
    *
-   * Custom reference fields target Contact, whose label field is display_name;
-   * resolved generically so it stays correct if that ever changes.
+   * A ContactReference targets a contact (fk_entity may be empty, so default to
+   * Contact); an EntityReference names its target in fk_entity. Either way the
+   * target's label field (e.g. Contact -> display_name) is resolved generically.
    *
    * @param array $field
    *   Custom field record.

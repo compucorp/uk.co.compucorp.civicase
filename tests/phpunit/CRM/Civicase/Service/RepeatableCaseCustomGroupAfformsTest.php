@@ -115,6 +115,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
     $this->assertEquals('a_country:label', $key(['name' => 'a_country', 'data_type' => 'Country']));
     $this->assertEquals('a_bool:label', $key(['name' => 'a_bool', 'data_type' => 'Boolean']));
     $this->assertEquals('a_contact.display_name', $key(['name' => 'a_contact', 'data_type' => 'ContactReference']));
+    $this->assertEquals('an_entity.display_name', $key(['name' => 'an_entity', 'data_type' => 'EntityReference', 'fk_entity' => 'Contact']));
   }
 
 }
