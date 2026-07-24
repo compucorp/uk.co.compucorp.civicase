@@ -2,6 +2,7 @@
 
 use Civi\Api4\CustomGroup;
 use Civi\Api4\Managed;
+use Civi\Api4\Utils\CoreUtil;
 
 /**
  * Provides Afform + SearchKit artifacts for repeatable Case custom groups.
@@ -251,9 +252,9 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
       'key' => $this->fieldDisplayKey($field),
       'label' => $field['label'],
       'sortable' => TRUE,
-      // A reference value is rendered via a read-only join (the contact's name),
-      // so it cannot be inline-edited in the table — it is changed through the
-      // row Edit form. Option and plain fields stay inline-editable.
+      // A reference renders as a read-only join (e.g. the contact's name),
+      // so it cannot be inline-edited here; it is changed via the row Edit
+      // form. Option and plain fields stay inline-editable.
       'editable' => !$this->fieldIsReference($field),
     ];
   }
@@ -264,8 +265,8 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
    * SearchKit shows the raw stored value unless told otherwise, so:
    *  - option-list / pseudoconstant fields (Select, Radio, Country, State,
    *    Boolean, …) use the "<name>:label" suffix;
-   *  - entity-reference fields (e.g. ContactReference) use a join to the target
-   *    entity's label field, "<name>.<labelField>" (e.g. "<name>.display_name");
+   *  - entity-reference fields (e.g. ContactReference) join to the target
+   *    entity's label field: "<name>.<labelField>" (e.g. ".display_name");
    *  - plain fields (text, number, date, …) use the field name as-is.
    *
    * @param array $field
@@ -291,7 +292,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
    *   Custom field record.
    *
    * @return bool
-   *   TRUE for option groups and the built-in Country/State/Boolean pseudoconstants.
+   *   TRUE for option groups and Country/State/Boolean pseudoconstants.
    */
   protected function fieldHasOptions(array $field): bool {
     if (!empty($field['option_group_id'])) {
@@ -320,9 +321,9 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   /**
    * The label field on the entity a reference field points at.
    *
-   * A ContactReference targets a contact (fk_entity may be empty, so default to
-   * Contact); an EntityReference names its target in fk_entity. Either way the
-   * target's label field (e.g. Contact -> display_name) is resolved generically.
+   * A ContactReference targets a contact (fk_entity may be empty, so default
+   * to Contact); an EntityReference names its target in fk_entity. Either way
+   * the target's label field (Contact -> display_name) resolves generically.
    *
    * @param array $field
    *   Custom field record.
@@ -332,7 +333,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
    */
   protected function referenceLabelField(array $field): string {
     $fkEntity = !empty($field['fk_entity']) ? $field['fk_entity'] : 'Contact';
-    return \Civi\Api4\Utils\CoreUtil::getInfoItem($fkEntity, 'label_field') ?: 'display_name';
+    return CoreUtil::getInfoItem($fkEntity, 'label_field') ?: 'display_name';
   }
 
   /**
