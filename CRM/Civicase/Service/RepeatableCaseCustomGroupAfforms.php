@@ -2,6 +2,7 @@
 
 use Civi\Api4\CustomGroup;
 use Civi\Api4\Managed;
+use Civi\Api4\Utils\CoreUtil;
 
 /**
  * Provides Afform + SearchKit artifacts for repeatable Case custom groups.
@@ -175,7 +176,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
     $fields = $groupDetails['fields'] ?? [];
     $displayFields = array_filter($fields, fn ($f) => !empty($f['is_active']));
 
-    $select = array_column($fields, 'name');
+    $select = array_map([$this, 'fieldDisplayKey'], array_values($displayFields));
     $select[] = 'id';
     $select[] = 'entity_id';
 
@@ -248,11 +249,91 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   protected function searchColumnForField(array $field): array {
     return [
       'type' => 'field',
-      'key' => $field['name'],
+      'key' => $this->fieldDisplayKey($field),
       'label' => $field['label'],
       'sortable' => TRUE,
-      'editable' => TRUE,
+      // A reference renders as a read-only join (e.g. the contact's name),
+      // so it cannot be inline-edited here; it is changed via the row Edit
+      // form. Option and plain fields stay inline-editable.
+      'editable' => !$this->fieldIsReference($field),
     ];
+  }
+
+  /**
+   * The APIv4 select/column key that renders a field's human-readable value.
+   *
+   * SearchKit shows the raw stored value unless told otherwise, so:
+   *  - option-list / pseudoconstant fields (Select, Radio, Country, State,
+   *    Boolean, …) use the "<name>:label" suffix;
+   *  - entity-reference fields (e.g. ContactReference) join to the target
+   *    entity's label field: "<name>.<labelField>" (e.g. ".display_name");
+   *  - plain fields (text, number, date, …) use the field name as-is.
+   *
+   * @param array $field
+   *   Custom field record.
+   *
+   * @return string
+   *   The select expression / column key.
+   */
+  protected function fieldDisplayKey(array $field): string {
+    if ($this->fieldIsReference($field)) {
+      return $field['name'] . '.' . $this->referenceLabelField($field);
+    }
+    if ($this->fieldHasOptions($field)) {
+      return $field['name'] . ':label';
+    }
+    return $field['name'];
+  }
+
+  /**
+   * Whether a field's value is a coded option that has a separate label.
+   *
+   * @param array $field
+   *   Custom field record.
+   *
+   * @return bool
+   *   TRUE for option groups and Country/State/Boolean pseudoconstants.
+   */
+  protected function fieldHasOptions(array $field): bool {
+    if (!empty($field['option_group_id'])) {
+      return TRUE;
+    }
+    return in_array($field['data_type'] ?? '', ['Boolean', 'Country', 'StateProvince'], TRUE);
+  }
+
+  /**
+   * Whether a field is a reference to another entity.
+   *
+   * Covers both ContactReference (targets a contact) and the generic
+   * EntityReference (targets any entity, named in fk_entity) — core treats the
+   * two together, so both must render as a label join, not a raw id.
+   *
+   * @param array $field
+   *   Custom field record.
+   *
+   * @return bool
+   *   TRUE if the field stores a reference to another entity.
+   */
+  protected function fieldIsReference(array $field): bool {
+    return in_array($field['data_type'] ?? '', ['ContactReference', 'EntityReference'], TRUE);
+  }
+
+  /**
+   * The label field on the entity a reference field points at.
+   *
+   * A ContactReference targets a contact (fk_entity may be empty, so default
+   * to Contact); an EntityReference names its target in fk_entity. Either way
+   * the target's label field (Contact -> display_name) resolves generically.
+   *
+   * @param array $field
+   *   Custom field record.
+   *
+   * @return string
+   *   The target entity's label field name.
+   */
+  protected function referenceLabelField(array $field): string {
+    $fkEntity = !empty($field['fk_entity']) ? $field['fk_entity'] : 'Contact';
+    return CoreUtil::getInfoItem($fkEntity, 'label_field') ?: 'display_name';
   }
 
   /**
