@@ -117,7 +117,10 @@ $tags-max-width: 195px; // Displays the tag's ellipsis element next to the last 
 }
 
 .civicase__case-card__additional-information {
+  align-items: center;
+  display: flex;
   line-height: normal;
+  max-width: calc(100% - 175px);
   position: absolute;
   right: 20px;
   top: 15px;
@@ -125,6 +128,18 @@ $tags-max-width: 195px; // Displays the tag's ellipsis element next to the last 
 
 .civicase__case-card__case-id {
   color: $crm-gray-matte;
+  display: flex;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.civicase__case-card__case-id__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.civicase__case-card__case-id__value {
+  margin-left: 3px;
 }
 
 .civicase__case-card__lock {

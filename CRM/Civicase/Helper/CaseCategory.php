@@ -147,16 +147,23 @@ class CRM_Civicase_Helper_CaseCategory {
       }
 
       $category = CRM_Civicase_Helper_Category::get($caseTypeCategoryName);
+      if (empty($category) || empty($category['label'])) {
+        return [];
+      }
+
+      $singularLabel = !empty($category['singular_label'])
+        ? $category['singular_label']
+        : $category['label'];
 
       return [
         'Cases' => '_PLURAL_WILDCARD_',
         'Case' => '_SINGULAR_WILDCARD_',
         '_PLURAL_WILDCARD_' => ucfirst($category['label']),
-        '_SINGULAR_WILDCARD_' => ucfirst($category['singular_label']),
+        '_SINGULAR_WILDCARD_' => ucfirst($singularLabel),
         'cases' => '_plural_wildcard_',
         'case' => '_singular_wildcard_',
         '_plural_wildcard_' => strtolower($category['label']),
-        '_singular_wildcard_' => strtolower($category['singular_label']),
+        '_singular_wildcard_' => strtolower($singularLabel),
       ];
     }
 
@@ -166,12 +173,62 @@ class CRM_Civicase_Helper_CaseCategory {
 
     $replacementClass = $result['value'];
     if (class_exists($replacementClass) && isset(class_implements($replacementClass)[CRM_Civicase_WordReplacement_BaseInterface::class])) {
-      $replacements = new $replacementClass();
+      $replacements = (new $replacementClass())->get();
 
-      return $replacements->get();
+      return self::applyCategoryLabelToWordReplacements($replacements, $caseTypeCategoryName);
     }
 
     return [];
+  }
+
+  /**
+   * Overrides the generic case words with the actual category labels.
+   *
+   * @param array $replacements
+   *   Word replacements returned by the instance type's replacement class.
+   * @param string $caseTypeCategoryName
+   *   Case Category Name.
+   *
+   * @return array
+   *   The word to be replaced and replacement array.
+   */
+  private static function applyCategoryLabelToWordReplacements(array $replacements, $caseTypeCategoryName) {
+    if (!$caseTypeCategoryName) {
+      return $replacements;
+    }
+
+    $category = CRM_Civicase_Helper_Category::get((string) $caseTypeCategoryName);
+    $isUserCreatedCategory = !empty($category) && empty($category['is_reserved']);
+    if (!$isUserCreatedCategory || empty($category['label'])) {
+      return $replacements;
+    }
+
+    $label = trim($category['label']);
+    $singularLabel = trim($category['singular_label'] ?? '');
+    $singularLabel = $singularLabel !== '' ? $singularLabel : $label;
+    if ($label === '') {
+      return $replacements;
+    }
+
+    $genericCaseWords = ['a Case', 'a case', 'Cases', 'Case', 'cases', 'case'];
+    $replacements = array_diff_key($replacements, array_flip($genericCaseWords));
+
+    $article = preg_match('/^[aeiou]/i', $singularLabel) ? 'an' : 'a';
+
+    return array_merge($replacements, [
+      'a Case' => '_A_SINGULAR_WILDCARD_',
+      'a case' => '_a_singular_wildcard_',
+      'Cases' => '_PLURAL_WILDCARD_',
+      'Case' => '_SINGULAR_WILDCARD_',
+      'cases' => '_plural_wildcard_',
+      'case' => '_singular_wildcard_',
+      '_A_SINGULAR_WILDCARD_' => $article . ' ' . ucfirst($singularLabel),
+      '_a_singular_wildcard_' => $article . ' ' . strtolower($singularLabel),
+      '_PLURAL_WILDCARD_' => ucfirst($label),
+      '_SINGULAR_WILDCARD_' => ucfirst($singularLabel),
+      '_plural_wildcard_' => strtolower($label),
+      '_singular_wildcard_' => strtolower($singularLabel),
+    ]);
   }
 
   /**
