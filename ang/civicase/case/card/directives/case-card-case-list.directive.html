@@ -23,8 +23,11 @@
       contacts="data.client"
     ></div>
     <div class="civicase__case-card__additional-information">
-      <span class="civicase__case-card__case-id">
-        {{ ts("Case ID:") }} {{ data.id }}
+      <span
+        class="civicase__case-card__case-id"
+        title="{{ ts('Case ID:') }} {{ data.id }}">
+        <span class="civicase__case-card__case-id__label">{{ ts("Case ID:") }}</span>
+        <span class="civicase__case-card__case-id__value">{{ data.id }}</span>
       </span>
       <i class="material-icons civicase__case-card__lock" ng-if="data.lock">lock</i>
     </div>
