@@ -168,9 +168,9 @@
      * @returns {object[]} A list of case status objects.
      */
     function getStatusesByName (caseStatusNames) {
-      return _.map(caseStatusNames, function (caseStatusName) {
+      return _.compact(_.map(caseStatusNames, function (caseStatusName) {
         return caseStatusesIndexedByName[caseStatusName];
-      });
+      }));
     }
 
     /**

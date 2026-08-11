@@ -158,6 +158,39 @@
           expect(element.isolateScope().caseStatuses).toEqual(expectedCaseStatuses);
         });
       });
+
+      describe('when a case type references a status that does not exist', () => {
+        beforeEach(() => {
+          const caseType = _.sample(CaseType.getAll());
+          const validStatusNames = _.map(CaseStatus.getAll(), 'name');
+
+          caseType.definition.statuses = validStatusNames
+            .concat(['a_status_that_does_not_exist']);
+
+          expectedCaseStatuses = _.chain(CaseStatus.getAll())
+            .sortBy(function (status) {
+              return parseInt(status.weight, 10);
+            })
+            .value();
+
+          CaseManagementWorkflow.getWorkflowsListForCaseOverview.and.returnValue($q.resolve({
+            values: [caseType],
+            count: 1
+          }));
+
+          compileDirective({ caseTypeCategory: '1' });
+
+          $rootScope.$digest();
+        });
+
+        it('skips the missing status and displays the known statuses', () => {
+          expect(element.isolateScope().caseStatuses).toEqual(expectedCaseStatuses);
+        });
+
+        it('does not include an undefined entry in the status list', () => {
+          expect(_.some(element.isolateScope().caseStatuses, _.isUndefined)).toBe(false);
+        });
+      });
     });
 
     describe('Case Status visibility', () => {
