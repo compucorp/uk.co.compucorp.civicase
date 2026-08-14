@@ -547,7 +547,8 @@
           activity_id: '$value.id',
           activity_type_id: '$value.activity_type_id',
           source_record_id: '$value.source_record_id',
-          case_id: '$value.case_id'
+          case_id: '$value.case_id',
+          contact_id: params.contact_id ?? null
         }
       };
 
