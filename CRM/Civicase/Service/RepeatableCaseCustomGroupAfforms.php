@@ -68,7 +68,20 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
           && !in_array($formName, $requestedNames, TRUE)) {
           continue;
         }
-        $form = $service->buildForm($group, $action, (bool) $event->getLayout);
+        // A form that cannot build (e.g. a missing core template on an older
+        // CiviCRM) must degrade to "no form contributed" — this event fires
+        // during ordinary page rendering, so throwing here breaks every page.
+        try {
+          $form = $service->buildForm($group, $action, (bool) $event->getLayout);
+        }
+        catch (\Throwable $e) {
+          \Civi::log()->warning('civicase: skipped building {form} for custom group {group}: {message}', [
+            'form' => $formName,
+            'group' => $group['name'],
+            'message' => $e->getMessage(),
+          ]);
+          continue;
+        }
         $form['has_base'] = TRUE;
         $form['base_module'] = self::CIVICASE_MODULE;
         $event->afforms[$form['name']] = $form;
