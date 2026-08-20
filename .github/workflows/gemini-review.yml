@@ -1,0 +1,23 @@
+name: Request Gemini Review
+
+on:
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  request-gemini-review:
+    # Skip automated release PRs (RC branches end with "-rc")
+    if: ${{ !endsWith(github.head_ref, '-rc') }}
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post /gemini review comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" \
+            --repo "${{ github.repository }}" \
+            --body "/gemini review"
