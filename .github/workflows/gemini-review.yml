@@ -16,8 +16,22 @@ jobs:
     steps:
       - name: Post /gemini review comment
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN_BASE64: ${{ secrets.BASE64_PRIVATE_ACCESS_TOKEN }}
         run: |
+          if [ -z "$GH_TOKEN_BASE64" ]; then
+            echo "❌ BASE64_PRIVATE_ACCESS_TOKEN secret is not available to this repo."
+            echo "   Gemini ignores comments from github-actions[bot], so a PAT of a"
+            echo "   real user account is required to trigger the review."
+            exit 1
+          fi
+          # Decode the base64 token for gh CLI
+          DECODED_TOKEN=$(echo "$GH_TOKEN_BASE64" | base64 -d)
+          # If token contains ":" (username:token format), extract just the token part
+          if [[ "$DECODED_TOKEN" == *":"* ]]; then
+            export GH_TOKEN="${DECODED_TOKEN#*:}"
+          else
+            export GH_TOKEN="$DECODED_TOKEN"
+          fi
           gh pr comment "${{ github.event.pull_request.number }}" \
             --repo "${{ github.repository }}" \
             --body "/gemini review"
