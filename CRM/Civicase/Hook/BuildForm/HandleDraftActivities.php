@@ -87,7 +87,10 @@ class CRM_Civicase_Hook_BuildForm_HandleDraftActivities {
         );
         $buttonGroup->setElements($buttons);
         $form->addGroup($buttons, 'buttons');
-        $form->setDefaults(['status_id' => 2]);
+        // Set status to completed only for ADD action
+        if ($form->_action & (CRM_Core_Action::ADD)) {
+          $form->setDefaults(['status_id' => 2]);
+        }
       }
       if ($status == 'Draft' && ($form->_action & CRM_Core_Action::VIEW)) {
         if (in_array($activityType, self::SPECIAL_TYPES)) {
