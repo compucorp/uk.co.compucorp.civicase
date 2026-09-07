@@ -94,6 +94,16 @@ class CRM_Civicase_Service_CaseSalesOrderContributionCalculator extends CRM_Civi
   }
 
   /**
+   * Returns the amount still to be invoiced against the quotation.
+   *
+   * @return float
+   *   The outstanding balance.
+   */
+  public function getRemainingBalance(): float {
+    return round($this->getQuotedAmount() - $this->calculateTotalInvoicedAmount(), 2);
+  }
+
+  /**
    * Calculates invoicing status.
    *
    * @return string
