@@ -2,7 +2,6 @@
 
 use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\CaseSalesOrderLine;
-use Civi\Api4\Contribution;
 use Civi\Api4\OptionValue;
 use CRM_Certificate_ExtensionUtil as E;
 
@@ -146,8 +145,14 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
   public function formRule(array $values) {
     $errors = [];
 
-    if ($values['to_be_invoiced'] == self::INVOICE_PERCENT && empty(floatval($values['percent_value']))) {
-      $errors['percent_value'] = 'Percentage value is required';
+    if ($values['to_be_invoiced'] == self::INVOICE_PERCENT) {
+      $percentValue = floatval($values['percent_value']);
+      if (empty($percentValue)) {
+        $errors['percent_value'] = 'Percentage value is required';
+      }
+      elseif ($percentValue < 1) {
+        $errors['percent_value'] = 'Percentage value must be at least 1';
+      }
     }
 
     return $errors ?: TRUE;
@@ -176,12 +181,31 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
    */
   public function validateAmount(array $values) {
     $errors = [];
+    $remainingBalance = $this->getRemainingBalance();
 
     if ($values['to_be_invoiced'] == self::INVOICE_PERCENT) {
-      return TRUE;
+      if ($remainingBalance <= 0) {
+        $errors['percent_value'] = 'This quotation has already been invoiced in full.';
+
+        return $errors;
+      }
+
+      $invoiceTotal = $this->getGeneratedInvoiceTotal($values);
+      if ($invoiceTotal <= 0) {
+        $errors['percent_value'] = 'This percentage is too small to invoice anything against this quotation. Please enter a larger percentage.';
+      }
+      elseif ($invoiceTotal > $remainingBalance) {
+        $errors['percent_value'] = sprintf(
+          'Invoicing this percentage would come to %s, which is more than the %s left on this quotation. Enter a smaller percentage, or use Remaining Balance to invoice the rest.',
+          CRM_Utils_Money::format($invoiceTotal),
+          CRM_Utils_Money::format($remainingBalance)
+        );
+      }
+
+      return $errors ?: TRUE;
     }
 
-    if (!$this->hasRemainingBalance()) {
+    if ($remainingBalance <= 0) {
       $errors['to_be_invoiced'] = 'Unable to create a contribution due to insufficient balance.';
     }
 
@@ -189,11 +213,47 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
   }
 
   /**
+   * Returns what the submitted percentage would actually invoice.
+   *
+   * @param array $values
+   *   Array of submitted values.
+   *
+   * @return float
+   *   The total, tax included.
+   */
+  private function getGeneratedInvoiceTotal(array $values) {
+    $products = array_filter(explode(',', $values['products'] ?? ''));
+    $generator = new CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator(
+      $this->id,
+      self::INVOICE_PERCENT,
+      $values['percent_value'],
+      $products
+    );
+
+    $total = 0;
+    foreach ($generator->generateLineItems() as $lineItem) {
+      $total += (float) $lineItem['line_total'] + (float) ($lineItem['tax_amount'] ?? 0);
+    }
+
+    return round($total, 2);
+  }
+
+  /**
    * Checks if the sales order has left over balance to be invoiced.
    */
   public function hasRemainingBalance() {
+    return $this->getRemainingBalance() > 0;
+  }
+
+  /**
+   * Returns the amount still to be invoiced against this quotation.
+   *
+   * @return float
+   *   The outstanding balance.
+   */
+  public function getRemainingBalance() {
     $caseSalesOrder = CaseSalesOrder::get(FALSE)
-      ->addSelect('total_after_tax')
+      ->addSelect('id')
       ->addWhere('id', '=', $this->id)
       ->setLimit(1)
       ->execute()
@@ -202,22 +262,9 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
       throw new CRM_Core_Exception("The specified case sales order doesn't exist");
     }
 
-    // Get all the previous contributions.
-    $contributions = Contribution::get(FALSE)
-      ->addSelect('total_amount')
-      ->addWhere('Opportunity_Details.Quotation', '=', $this->id)
-      ->execute()
-      ->jsonSerialize();
+    $calculator = new CRM_Civicase_Service_CaseSalesOrderContributionCalculator($this->id);
 
-    $paidTotal = array_sum(array_column($contributions, 'total_amount'));
-    $remainBalance = $caseSalesOrder['total_after_tax'] - $paidTotal;
-    $remainBalance = round($remainBalance, 2);
-
-    if ($remainBalance <= 0) {
-      return FALSE;
-    }
-
-    return TRUE;
+    return $calculator->getRemainingBalance();
   }
 
   /**
@@ -246,7 +293,7 @@ class CRM_Civicase_Form_CaseSalesOrderContributionCreate extends CRM_Core_Form {
       'sales_order_status_id' => $values['status'],
       'to_be_invoiced' => $values['to_be_invoiced'],
       'percent_value' => $values['to_be_invoiced'] ==
-      self::INVOICE_PERCENT ? floatval($values['percent_value']) : 0,
+        self::INVOICE_PERCENT ? floatval($values['percent_value']) : 0,
       'products' => $values['products'],
     ];
 

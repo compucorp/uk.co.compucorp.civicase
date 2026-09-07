@@ -86,8 +86,14 @@ class ContributionCreateAction extends AbstractAction {
   private function createContribution() {
     $priceField = $this->getDefaultPriceSetFields();
     $createdContributionsCount = 0;
+    $skippedSalesOrderIds = [];
 
     foreach ($this->salesOrderIds as $id) {
+      if ($this->exceedsRemainingBalance($id)) {
+        $skippedSalesOrderIds[] = $id;
+        continue;
+      }
+
       $transaction = CRM_Core_Transaction::create();
       try {
         $contribution = $this->createContributionWithLineItems($id, $priceField);
@@ -102,7 +108,41 @@ class ContributionCreateAction extends AbstractAction {
       $transaction->commit();
     }
 
-    return ['created_contributions_count' => $createdContributionsCount];
+    return [
+      'created_contributions_count' => $createdContributionsCount,
+      'skipped_sales_order_ids' => $skippedSalesOrderIds,
+    ];
+  }
+
+  /**
+   * Checks whether invoicing the requested percentage would over-invoice.
+   *
+   * @param int $salesOrderId
+   *   The quotation.
+   *
+   * @return bool
+   *   TRUE when the percentage would bill more than is outstanding.
+   */
+  private function exceedsRemainingBalance($salesOrderId) {
+    if ($this->toBeInvoiced !== salesOrderlineItemGenerator::INVOICE_PERCENT) {
+      return FALSE;
+    }
+
+    $generator = new salesOrderlineItemGenerator(
+      $salesOrderId,
+      $this->toBeInvoiced,
+      $this->percentValue ?? 0,
+      $this->products ?? []
+    );
+
+    $invoiceTotal = 0;
+    foreach ($generator->generateLineItems() as $lineItem) {
+      $invoiceTotal += (float) $lineItem['line_total'] + (float) ($lineItem['tax_amount'] ?? 0);
+    }
+
+    $calculator = new CaseSalesOrderContributionCalculator($salesOrderId);
+
+    return round($invoiceTotal, 2) > $calculator->getRemainingBalance();
   }
 
   /**
