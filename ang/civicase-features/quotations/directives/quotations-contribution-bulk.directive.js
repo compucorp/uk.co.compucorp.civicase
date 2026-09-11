@@ -51,17 +51,17 @@
         ctrl.run = true;
         ctrl.progress = 0;
         let contributionCreated = 0;
+        let skippedCount = 0;
         let index = 0;
         const chunkedIds = _.chunk(ctrl.ids, BATCH_SIZE);
         for (const salesOrderIds of chunkedIds) {
           try {
-            if (ctrl.data.products.length > 0) {
-              ctrl.data.products = ctrl.data.products.split(',');
-            } else {
-              ctrl.data.products = [];
-            }
-            const result = await crmApi4('CaseSalesOrder', 'contributionCreateAction', { ...ctrl.data, salesOrderIds });
+            const products = typeof ctrl.data.products === 'string'
+              ? ctrl.data.products.split(',').filter((product) => product !== '')
+              : ctrl.data.products ?? [];
+            const result = await crmApi4('CaseSalesOrder', 'contributionCreateAction', { ...ctrl.data, products, salesOrderIds });
             contributionCreated += result.created_contributions_count ?? 0;
+            skippedCount += (result.skipped_sales_order_ids ?? []).length;
           } catch (error) {
             console.log(error);
           } finally {
@@ -72,10 +72,19 @@
 
         ctrl.run = false;
         ctrl.close();
-        const contributionNotCreated = ctrl.ids.length - contributionCreated;
-        let message = `${contributionCreated} contributions have been generated`;
-        message += contributionNotCreated > 0 ? ` and no contributions were created for ${contributionNotCreated} quotes as there was no remaining amount to be invoiced` : '';
-        CRM.alert(message, ts('Success'), 'success');
+        const failedCount = Math.max(ctrl.ids.length - contributionCreated - skippedCount, 0);
+        const messages = [`${contributionCreated} contributions have been generated.`];
+
+        if (skippedCount > 0) {
+          messages.push(`${skippedCount} quotations were skipped because the percentage entered is more than the amount still outstanding on them. Use Remaining Balance to invoice what is left on those.`);
+        }
+
+        if (failedCount > 0) {
+          messages.push(`${failedCount} quotations could not be processed.`);
+        }
+
+        const hasIssues = skippedCount > 0 || failedCount > 0;
+        CRM.alert(messages.join(' '), hasIssues ? ts('Complete') : ts('Success'), hasIssues ? 'info' : 'success');
       });
     };
 
