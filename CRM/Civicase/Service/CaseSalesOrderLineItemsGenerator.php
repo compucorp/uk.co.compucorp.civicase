@@ -14,6 +14,11 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
   const INVOICE_REMAIN = 'remain';
 
   /**
+   * Decimal places stored by civicrm_line_item for qty and unit_price.
+   */
+  const LINE_ITEM_PRECISION = 2;
+
+  /**
    * The current sales order entity.
    *
    * @var array
@@ -84,15 +89,21 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
         continue;
       }
 
-      $item['total'] = $item['quantity'] * floatval($item['unit_price']);
+      $item['quantity'] = $this->roundToLineItemPrecision($item['quantity']);
+      // roundToLineItemPrecision unit_price field is
+      // more more of a defensive call.
+      $item['unit_price'] = $this->roundToLineItemPrecision($item['unit_price']);
+      $item['total'] = $item['quantity'] * $item['unit_price'];
       $item['tax'] = empty($item['tax_rate']) ? 0 : $this->percent($item['tax_rate'], $item['total']);
 
       $items[] = $this->lineItemToContributionLineItem($item);
 
       if ($item['discounted_percentage'] > 0) {
         $item['item_description'] = "{$item['item_description']} Discount {$item['discounted_percentage']}%";
-        $item['unit_price'] = $this->percent($item['discounted_percentage'], -$item['unit_price']);
-        $item['total'] = $item['quantity'] * floatval($item['unit_price']);
+        $item['unit_price'] = $this->roundToLineItemPrecision(
+          $this->percent($item['discounted_percentage'], -$item['unit_price'])
+        );
+        $item['total'] = $item['quantity'] * $item['unit_price'];
         $item['tax'] = empty($item['tax_rate']) ? 0 : $this->percent($item['tax_rate'], $item['total']);
         $items[] = $this->lineItemToContributionLineItem($item);
       }
@@ -130,10 +141,14 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
 
       foreach ($items as $item) {
         unset($item['id']);
-        $item['qty'] = $item['qty'];
+        // Reverse what was actually invoiced rather than recalculating it. A
+        // line item saved before quantities and unit prices were rounded here
+        // can hold a line total that no longer matches its own quantity times
+        // its unit price, and recalculating the reversal from those two would
+        // credit back an amount that was never billed.
         $item['unit_price'] = -1 * $item['unit_price'];
         $item['tax_amount'] = -1 * $item['tax_amount'];
-        $item['line_total'] = $item['qty'] * floatval($item['unit_price']);
+        $item['line_total'] = -1 * $item['line_total'];
         $previousItems[] = $item;
       }
     }
@@ -177,6 +192,19 @@ class CRM_Civicase_Service_CaseSalesOrderLineItemsGenerator {
    */
   public function percent(float $percentage, float $value) {
     return (floatval($percentage) / 100) * floatval($value);
+  }
+
+  /**
+   * Rounds a value to the precision a line item can store.
+   *
+   * @param float|int|string|null $value
+   *   The value to round.
+   *
+   * @return float
+   *   The rounded value.
+   */
+  private function roundToLineItemPrecision($value): float {
+    return round(floatval($value), self::LINE_ITEM_PRECISION);
   }
 
 }

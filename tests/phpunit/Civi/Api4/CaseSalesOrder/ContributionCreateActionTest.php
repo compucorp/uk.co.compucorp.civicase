@@ -367,7 +367,7 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
         'contributionCreateData' => [
           'statusId' => 1,
           'toBeInvoiced' => CaseSalesOrderContribution::INVOICE_PERCENT,
-          'percentValue' => 100,
+          'percentValue' => 30,
           'date' => date("Y-m-d"),
           'financialTypeId' => '1',
         ],
@@ -377,8 +377,8 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
           ],
         ],
       ],
-      '2 percentvalue contributions are created for 2 quotations' => [
-        'expectedCount' => 2,
+      'No percentvalue contribution is created for 2 quotations when neither has room' => [
+        'expectedCount' => 0,
         'contributionCreateData' => [
           'statusId' => 1,
           'toBeInvoiced' => CaseSalesOrderContribution::INVOICE_PERCENT,
@@ -395,8 +395,8 @@ class Civi_Api4_CaseSalesOrder_ContributionCreateActionTest extends BaseHeadless
           ],
         ],
       ],
-      '2 percentvalues contribution are created for 2 quotations with 100% already invoiced' => [
-        'expectedCount' => 2,
+      'No percentvalue contribution is created for 2 quotations with 100% already invoiced' => [
+        'expectedCount' => 0,
         'contributionCreateData' => [
           'statusId' => 1,
           'toBeInvoiced' => CaseSalesOrderContribution::INVOICE_PERCENT,
