@@ -5,6 +5,10 @@
 The new CiviCase is a major redesign of the Case Management interface for CiviCRM, with a cleaner look, improved functionality
 and more streamlined work environment based on the Shoreditch design approach.
 
+> **Note:** this extension is *not* the CiviCase component that ships with CiviCRM core, and it is not a
+> newer version of it. It is a separate extension that replaces the core CiviCase **user interface** with the
+> redesigned one described below. It works alongside the core CiviCase component, which stays enabled.
+
 Shortlist of the major changes to CiviCase:
 
 * New Cases Dashboard
@@ -132,16 +136,49 @@ In the extension info.xml file, see the “comments” field where we specify th
 
 
 # Other Technical Requirements
-* [Shoreditch](https://github.com/civicrm/org.civicrm.shoreditch): version >= v0.1-alpha32, preferably the latest version.
-* [Usermenu](https://github.com/compucorp/uk.co.compucorp.usermenu).
-* (Recommended) Migrate from embedded activity revisions to full system logging ([CRM-21051](https://issues.civicrm.org/jira/browse/CRM-21051))
 
-# Installation (git/cli)
-To install the extension on an existing CiviCRM site:
+You need to download these:
 
-mkdir sites/all/modules/civicrm/ext
-cd sites/all/modules/civicrm/ext
-git clone https://github.com/civicrm/org.civicrm.shoreditch shoreditch
-git clone https://github.com/compucorp/uk.co.compucorp.usermenu usermenu
-git clone https://github.com/compucorp/uk.co.compucorp.civicase civicase
-cv en shoreditch usermenu civicase
+* [Shoreditch](https://github.com/civicrm/org.civicrm.shoreditch/releases): version >= v0.1-alpha32, preferably the latest version.
+* [Usermenu](https://github.com/compucorp/uk.co.compucorp.usermenu/releases): latest version.
+
+These ship with CiviCRM and only need enabling — you will usually find them already installed under
+**Administer → System Settings → Extensions**:
+
+* `org.civicrm.afform` (Form Core)
+* `authx` (required in turn by Form Core)
+
+Also recommended:
+
+* Migrate from embedded activity revisions to full system logging ([CRM-21051](https://issues.civicrm.org/jira/browse/CRM-21051))
+
+# Installation
+
+Install the dependencies first and CiviCase last. If this is your first time installing a CiviCRM extension,
+see the [CiviCRM System Administrator Guide](https://docs.civicrm.org/sysadmin/en/latest/customize/extensions/).
+
+## Installation (CLI, Zip)
+
+Using the command-line tool [cv](https://github.com/civicrm/cv), substituting the latest tag for each extension:
+
+```bash
+cv dl org.civicrm.shoreditch@https://github.com/civicrm/org.civicrm.shoreditch/archive/refs/tags/1.0.0-beta.16.zip
+cv dl uk.co.compucorp.usermenu@https://github.com/compucorp/uk.co.compucorp.usermenu/archive/refs/tags/7.1.0.zip
+cv dl uk.co.compucorp.civicase@https://github.com/compucorp/uk.co.compucorp.civicase/archive/refs/tags/7.1.3.zip
+
+cv en afform shoreditch usermenu civicase
+```
+
+## Installation (CLI, Git)
+
+```bash
+cd <extension-dir>
+git clone https://github.com/civicrm/org.civicrm.shoreditch.git shoreditch
+git clone https://github.com/compucorp/uk.co.compucorp.usermenu.git usermenu
+git clone https://github.com/compucorp/uk.co.compucorp.civicase.git civicase
+
+cv en afform shoreditch usermenu civicase
+```
+
+`<extension-dir>` is whatever your site has configured as its extensions directory — it varies by CMS, so
+check **Administer → System Settings → Directories** rather than assuming a path.
