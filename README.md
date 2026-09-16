@@ -8,6 +8,10 @@ and more streamlined work environment based on the Shoreditch design approach.
 > **Note:** this extension is *not* the CiviCase component that ships with CiviCRM core, and it is not a
 > newer version of it. It is a separate extension that replaces the core CiviCase **user interface** with the
 > redesigned one described below. It works alongside the core CiviCase component, which stays enabled.
+>
+> It is also not the *CiviCase v5* listing on civicrm.org, which points at
+> [a different, unmaintained extension](https://github.com/civicrm/org.civicrm.civicase) last updated in
+> 2021. This extension is not in the CiviCRM extension directory — install it from this repository.
 
 Shortlist of the major changes to CiviCase:
 
