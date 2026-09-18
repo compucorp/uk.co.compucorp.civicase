@@ -478,11 +478,28 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
       ->addModule(self::CIVICASE_MODULE)
       ->execute();
 
+    // Our afforms are contributed via civi.afform.get, but the afform scanner
+    // and the Angular module registry both cache the resulting list. Drop them
+    // first so the menu rebuild below — and the page render itself — see the
+    // new/changed forms; otherwise the popup dies with "Unrecognized Angular
+    // module afformCreateCustom<Name>".
+    if (function_exists('_afform_clear')) {
+      _afform_clear();
+    }
+
     // The add/edit afforms expose server routes (civicrm/af/custom/<name>/*)
     // contributed via civi.afform.get. Those routes are only wired into the
     // router when the menu is (re)built, so rebuild it — otherwise the Add/Edit
     // popups 404 until a manual cache clear.
     CRM_Core_Menu::store();
+
+    // Writing civicrm_menu is not enough on CMSs that keep their own router
+    // (Drupal 8+ builds its route collection from CRM_Core_Menu::items() via
+    // Drupal\civicrm\Routing\Routes, and only on a router rebuild). Without
+    // this the new routes exist Civi-side but the CMS still 404s the Add/Edit
+    // popups until someone runs a CMS cache clear. No-op on CMSs that do not
+    // cache routes.
+    CRM_Core_Config::singleton()->userSystem->invalidateRouteCache();
   }
 
   /**
