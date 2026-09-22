@@ -13,26 +13,24 @@ class ComputeTotalAmountPaidAction extends AbstractAction {
   use DAOActionTrait;
 
   /**
-   * Sales order ID.
+   * ID of the sales order (quotation) to compute the paid amount for.
+   *
+   * NOTE: APIv4 derives the public parameter name from this property name,
+   * so it must stay camelCase (`salesOrderId`) to match the callers.
+   *
+   * @var int
    */
-  protected string $salesOrderID;
+  protected $salesOrderId = NULL;
 
   /**
    * {@inheritDoc}
    */
   public function _run(Result $result) { // phpcs:ignore
-    if (!$this->salesOrderID) {
+    if (empty($this->salesOrderId)) {
       return;
     }
-    $service = new \CRM_Civicase_Service_CaseSalesOrderContributionCalculator($this->salesOrderID);
+    $service = new \CRM_Civicase_Service_CaseSalesOrderContributionCalculator($this->salesOrderId);
     $result['amount'] = $service->calculateTotalPaidAmount();
-  }
-
-  /**
-   * Sets Sales Order ID.
-   */
-  public function setSalesOrderId(string $salesOrderId) {
-    $this->salesOrderID = $salesOrderId;
   }
 
 }
