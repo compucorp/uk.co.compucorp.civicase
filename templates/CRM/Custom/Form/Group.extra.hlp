@@ -1,0 +1,9 @@
+{if $id == 'id-display_style'}
+  {assign var='override_help_text' value=1 scope='global'}
+{/if}
+
+{htxt id="id-display_style"}
+  {ts}Select 'Inline' to include this set of fields in the main Add/Edit form and Summary screens for the selected entity. Select 'Tab' or 'Tab with Table' to create a separate navigation tab for viewing and editing these values (generally for less frequently accessed and/or larger sets of fields). 'Tab with Table' is recommended for custom field sets that allow multiple records, including Contact and Case custom field sets.{/ts}
+
+  <p class="font-italic">{ts}NOTE: This setting applies only to custom field sets used for Contacts (Individuals, Households, Organizations, or All Contact Types) and Cases.{/ts}</p>
+{/htxt}
