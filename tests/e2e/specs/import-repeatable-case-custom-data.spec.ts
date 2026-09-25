@@ -34,6 +34,7 @@ let fieldId = 0;
 let fieldName = '';
 let dateFieldId = 0;
 let dateFieldName = '';
+let levelFieldId = 0;
 let caseId = 0;
 let caseTypeId = 0;
 let contactId = 0;
@@ -82,6 +83,11 @@ test.beforeAll(async () => {
   }))[0];
   dateFieldId = Number(dateField.id);
   dateFieldName = String(dateField.name);
+  const levelField = civi.values(await civi.api3('CustomField', 'create', {
+    custom_group_id: group.id, label: 'E2E Import Level', data_type: 'String', html_type: 'Select', is_active: 1,
+    option_label: ['Bachelor', 'Master'], option_value: ['bachelor', 'master'], option_status: [1, 1],
+  }))[0];
+  levelFieldId = Number(levelField.id);
 
   caseTypeId = Number(civi.values(await civi.api3('CaseType', 'get', { is_active: 1, options: { limit: 1, sort: 'id ASC' } }))[0].id);
   contactId = Number(civi.values(await civi.api3('Contact', 'create', {
@@ -156,4 +162,20 @@ test('CaseCustomImporter.create imports rows (create), updates by id, and reject
   const bad = await api3(page, 'CaseCustomImporter', 'create', { case_id: 999999, [col]: 'x' });
   expect(bad.is_error).toBeTruthy();
   expect(String(bad.error_message)).toContain('not found');
+});
+
+test('CaseCustomImporter identifies option fields so csvimport stores option values, not labels', async ({ page }) => {
+  await civiLogin(page);
+  await page.goto('/civicrm/admin/search', { waitUntil: 'domcontentloaded' });
+  const fields = (await api3(page, 'CaseCustomImporter', 'getfields', { action: 'create' })).values || {};
+
+  // CRM_Import_Parser::getFieldMetadata() loads a multi-record custom field's
+  // options — and so converts a CSV label such as "Bachelor" to "bachelor" —
+  // only for a column carrying these keys; otherwise the label is stored as-is.
+  expect(fields[`custom_${levelFieldId}`]).toMatchObject({
+    custom_field_id: levelFieldId,
+    is_multiple: 1,
+    'custom_group_id.name': groupName,
+  });
+  expect(fields[`custom_${fieldId}`].custom_field_id).toBeUndefined();
 });
