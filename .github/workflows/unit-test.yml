@@ -28,14 +28,14 @@ jobs:
         run : amp config:set --mysql_dsn=mysql://root:root@mysql:3306
 
       - name: Build Drupal site
-        run: civibuild create drupal-clean --civi-ver 5.51.3 --cms-ver 7.79 --web-root $GITHUB_WORKSPACE/site
+        run: civibuild create drupal-clean --civi-ver 5.75.0 --cms-ver 7.79 --web-root $GITHUB_WORKSPACE/site
 
       - uses: compucorp/apply-patch@1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           repo: compucorp/civicrm-core
-          version: 5.51.3
+          version: 5.75.0
           path: site/web/sites/all/modules/civicrm
 
       - uses: actions/checkout@v2
@@ -49,6 +49,24 @@ jobs:
           git clone --depth 1 https://github.com/compucorp/uk.co.compucorp.usermenu.git
           cv en shoreditch usermenu civicase
 
+      - name: Setup Test DB
+        run: echo "CREATE DATABASE civicrm_test;" | mysql -u root --password=root --host=mysql
+
+      - name: Update civicrm.settings.php
+        run: |
+          FILE_PATH="$GITHUB_WORKSPACE/site/web/sites/default/civicrm.settings.php"
+          INSERT_LINE="\$GLOBALS['_CV']['TEST_DB_DSN'] = 'mysql://root:root@mysql:3306/civicrm_test?new_link=true';"
+          TMP_FILE=$(mktemp)
+          while IFS= read -r line
+          do
+              printf '%s\n' "$line" >> "$TMP_FILE"
+              if [ "$line" = "<?php" ]; then
+                  printf '%s\n' "$INSERT_LINE" >> "$TMP_FILE"
+              fi
+          done < "$FILE_PATH"
+          mv "$TMP_FILE" "$FILE_PATH"
+          echo "File modified successfully."
+
       - name: Run JS unit tests
         working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}/uk.co.compucorp.civicase
         run: |
@@ -61,4 +79,4 @@ jobs:
       - name: Run phpunit tests
         if: ${{ always() }}
         working-directory: ${{ env.CIVICRM_EXTENSIONS_DIR }}/uk.co.compucorp.civicase
-        run: phpunit5
+        run: phpunit9

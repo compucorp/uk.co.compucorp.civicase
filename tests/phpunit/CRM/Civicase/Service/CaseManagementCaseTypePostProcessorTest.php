@@ -54,7 +54,8 @@ class CRM_Civicase_Service_CaseManagementCaseTypePostProcessorTest extends BaseH
     $entityColumnValues,
     $mismatchEntityColumnValues,
     $expectedEntityColumnValues,
-    $correctedMismatchValues) {
+    $correctedMismatchValues,
+  ) {
     $customGroup = $this->createCustomGroup($entityColumnValues);
     $mismatchCustomGroup = $this->createCustomGroup($mismatchEntityColumnValues);
     $customGroupId = $customGroup[0]['id'];
@@ -128,7 +129,7 @@ class CRM_Civicase_Service_CaseManagementCaseTypePostProcessorTest extends BaseH
    *   What to return for the
    *   getCaseTypeCustomGroupsWithCategoryMismatch method.
    *
-   * @return \PHPUnit_Framework_MockObject_MockObject
+   * @return \PHPUnit\Framework\MockObject\MockObject
    *   CaseManagementHelper mock object.
    */
   private function getCaseManagementHelperMock($customGroupReturn, $customGroupMismatchReturn) {

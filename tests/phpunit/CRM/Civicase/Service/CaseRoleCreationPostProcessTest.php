@@ -20,7 +20,7 @@ class CRM_Civicase_Service_CaseRoleCreationPostProcessTest extends BaseHeadlessT
   /**
    * Setup data before tests run.
    */
-  public function setUp() {
+  public function setUp(): void {
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
   }
@@ -245,10 +245,8 @@ class CRM_Civicase_Service_CaseRoleCreationPostProcessTest extends BaseHeadlessT
 
     $latestRelationship = RelationshipFabricator::fabricate($latestRelParams);
     $caseRolePostProcess = new CaseRoleCreationPostProcess();
-    $this->setExpectedException(
-      'Exception',
-      'The relationship type Id of the role to reassign must match the new relationship type Id'
-    );
+    $this->expectException(Exception::class);
+    $this->expectExceptionMessage('The relationship type Id of the role to reassign must match the new relationship type Id');
     $caseRolePostProcess->onCreate(['params' => $latestRelParams], ['id' => $latestRelationship['id']]);
   }
 

@@ -33,7 +33,7 @@ class CRM_Civicase_Service_CaseManagementCustomGroupDisplayFormatterTest extends
    * @param mixed $cgExtendReturn
    *   What to return for the `getCgExtendValues` method.
    *
-   * @return \PHPUnit_Framework_MockObject_MockObject
+   * @return \PHPUnit\Framework\MockObject\MockObject
    *   CaseManagementHelper mock object.
    */
   private function getCaseManagementHelperMock($caseCategoryReturn, $cgExtendReturn) {

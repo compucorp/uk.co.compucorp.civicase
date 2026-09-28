@@ -37,7 +37,7 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
   /**
    * Setup case types and cases before running of tests.
    */
-  public static function setupBeforeClass() {
+  public static function setUpBeforeClass(): void {
     CRM_Core_BAO_OptionValue::ensureOptionValueExists([
       'option_group_id' => 'case_type_categories',
       'name' => 'award',
@@ -74,7 +74,7 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
   /**
    * Clean the cases and types created.
    */
-  public static function tearDownAfterClass() {
+  public static function tearDownAfterClass(): void {
     foreach (static::$cases as $case) {
       civicrm_api3('Case', 'delete', [
         'id' => $case['id'],

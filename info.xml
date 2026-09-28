@@ -18,11 +18,11 @@
   <version>7.1.0</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.51</ver>
+    <ver>5.75</ver>
   </compatibility>
   <comments>
     Supported CiviCRM versions:
-     CiviCRM 5.51.1
+     CiviCRM 5.75.0
   </comments>
   <classloader>
     <psr4 prefix="Civi\" path="Civi"/>
