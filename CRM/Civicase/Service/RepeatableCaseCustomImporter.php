@@ -13,28 +13,22 @@ use Civi\Api4\CustomField;
 class CRM_Civicase_Service_RepeatableCaseCustomImporter {
 
   /**
-   * Per-request cache of active fields grouped by custom group id.
-   *
-   * @var array|null
-   */
-  private static $fieldsByGroup = NULL;
-
-  /**
    * Active fields of all repeatable Case custom groups, keyed by group id.
    *
-   * Fetched in a single query and cached per request, so importing many rows
-   * does not re-query per row or per group.
+   * Fetched in a single query and cached for the request in Civi::$statics
+   * (reset along with the container), so importing many rows does not
+   * re-query per row or per group.
    *
    * @return array
    *   [ groupId => [ ['id' => .., 'name' => .., 'label' => ..], ... ], ... ]
    */
   private static function fieldsByGroup(): array {
-    if (self::$fieldsByGroup !== NULL) {
-      return self::$fieldsByGroup;
+    if (isset(\Civi::$statics[__CLASS__]['fieldsByGroup'])) {
+      return \Civi::$statics[__CLASS__]['fieldsByGroup'];
     }
     $service = new CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms();
     $groupIds = array_column($service->getRepeatableCaseGroups(), 'id');
-    self::$fieldsByGroup = [];
+    $byGroup = [];
     if ($groupIds) {
       $fields = CustomField::get(FALSE)
         ->addSelect('id', 'name', 'label', 'custom_group_id', 'option_group_id', 'data_type')
@@ -42,10 +36,11 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporter {
         ->addWhere('is_active', '=', TRUE)
         ->execute();
       foreach ($fields as $field) {
-        self::$fieldsByGroup[$field['custom_group_id']][] = $field;
+        $byGroup[$field['custom_group_id']][] = $field;
       }
     }
-    return self::$fieldsByGroup;
+    \Civi::$statics[__CLASS__]['fieldsByGroup'] = $byGroup;
+    return $byGroup;
   }
 
   /**
