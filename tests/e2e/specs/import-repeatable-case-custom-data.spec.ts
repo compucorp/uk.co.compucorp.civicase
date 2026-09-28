@@ -35,6 +35,7 @@ let fieldName = '';
 let dateFieldId = 0;
 let dateFieldName = '';
 let levelFieldId = 0;
+let countryFieldId = 0;
 let caseId = 0;
 let caseTypeId = 0;
 let contactId = 0;
@@ -88,6 +89,10 @@ test.beforeAll(async () => {
     option_label: ['Bachelor', 'Master'], option_value: ['bachelor', 'master'], option_status: [1, 1],
   }))[0];
   levelFieldId = Number(levelField.id);
+  const countryField = civi.values(await civi.api3('CustomField', 'create', {
+    custom_group_id: group.id, label: 'E2E Import Country', data_type: 'Country', html_type: 'Select', is_active: 1,
+  }))[0];
+  countryFieldId = Number(countryField.id);
 
   caseTypeId = Number(civi.values(await civi.api3('CaseType', 'get', { is_active: 1, options: { limit: 1, sort: 'id ASC' } }))[0].id);
   contactId = Number(civi.values(await civi.api3('Contact', 'create', {
@@ -170,12 +175,17 @@ test('CaseCustomImporter identifies option fields so csvimport stores option val
   const fields = (await api3(page, 'CaseCustomImporter', 'getfields', { action: 'create' })).values || {};
 
   // CRM_Import_Parser::getFieldMetadata() loads a multi-record custom field's
-  // options — and so converts a CSV label such as "Bachelor" to "bachelor" —
-  // only for a column carrying these keys; otherwise the label is stored as-is.
-  expect(fields[`custom_${levelFieldId}`]).toMatchObject({
-    custom_field_id: levelFieldId,
-    is_multiple: 1,
-    'custom_group_id.name': groupName,
-  });
+  // options — and so converts a CSV label such as "Bachelor" to "bachelor", or
+  // a country name to its ID — only for a column carrying these keys;
+  // otherwise the label is stored as-is (or, for a Country field, rejected).
+  for (const id of [levelFieldId, countryFieldId]) {
+    expect(fields).toHaveProperty(`custom_${id}`);
+    expect(fields[`custom_${id}`]).toMatchObject({
+      custom_field_id: id,
+      is_multiple: 1,
+      'custom_group_id.name': groupName,
+    });
+  }
+  expect(fields).toHaveProperty(`custom_${fieldId}`);
   expect(fields[`custom_${fieldId}`].custom_field_id).toBeUndefined();
 });

@@ -37,7 +37,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporter {
     self::$fieldsByGroup = [];
     if ($groupIds) {
       $fields = CustomField::get(FALSE)
-        ->addSelect('id', 'name', 'label', 'custom_group_id', 'option_group_id')
+        ->addSelect('id', 'name', 'label', 'custom_group_id', 'option_group_id', 'data_type')
         ->addWhere('custom_group_id', 'IN', $groupIds)
         ->addWhere('is_active', '=', TRUE)
         ->execute();
@@ -76,7 +76,9 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporter {
    * CiviCRM's import parser converts an option label (or name) in the CSV to
    * the stored option value only when a column's metadata identifies the
    * multi-record custom field it belongs to; without it the label text is
-   * stored verbatim, which no option matches.
+   * stored verbatim, which no option matches. Country and StateProvince fields
+   * have no option group but store an ID, so a name in the CSV is rejected
+   * unless it is converted the same way.
    *
    * @return array
    *   [ 'custom_<id>' => ['custom_field_id' => .., 'is_multiple' => 1,
@@ -88,7 +90,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporter {
     $out = [];
     foreach ($service->getRepeatableCaseGroups() as $group) {
       foreach ($byGroup[$group['id']] ?? [] as $field) {
-        if (!empty($field['option_group_id'])) {
+        if (!empty($field['option_group_id']) || in_array($field['data_type'], ['Country', 'StateProvince'], TRUE)) {
           $out['custom_' . $field['id']] = [
             'custom_field_id' => $field['id'],
             'is_multiple' => 1,
