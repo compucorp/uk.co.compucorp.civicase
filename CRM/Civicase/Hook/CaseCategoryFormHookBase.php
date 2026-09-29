@@ -31,10 +31,9 @@ class CRM_Civicase_Hook_CaseCategoryFormHookBase {
    *   True if the form is right.
    */
   protected function isCaseTypeCategoriesForm(CRM_Core_Form $form, $formName) {
-    $optionGroupName = $form->getVar('_gName');
-
+    // Form name first: only the Options form has _gName.
     return $formName == CRM_Admin_Form_Options::class
-      && $optionGroupName == 'case_type_categories';
+      && $form->getVar('_gName') == 'case_type_categories';
   }
 
   /**

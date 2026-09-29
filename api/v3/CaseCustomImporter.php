@@ -48,10 +48,11 @@ function _civicrm_api3_case_custom_importer_create_spec(&$spec) {
     'title' => ts('Record ID (match key for update; blank to create)'),
     'type' => CRM_Utils_Type::T_INT,
   ];
+  $optionFields = Importer::optionFieldMetadata();
   foreach (Importer::mappableFields() as $key => $label) {
     $spec[$key] = [
       'title' => $label,
       'type' => CRM_Utils_Type::T_STRING,
-    ];
+    ] + ($optionFields[$key] ?? []);
   }
 }

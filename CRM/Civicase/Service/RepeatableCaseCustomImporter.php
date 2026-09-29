@@ -13,39 +13,34 @@ use Civi\Api4\CustomField;
 class CRM_Civicase_Service_RepeatableCaseCustomImporter {
 
   /**
-   * Per-request cache of active fields grouped by custom group id.
-   *
-   * @var array|null
-   */
-  private static $fieldsByGroup = NULL;
-
-  /**
    * Active fields of all repeatable Case custom groups, keyed by group id.
    *
-   * Fetched in a single query and cached per request, so importing many rows
-   * does not re-query per row or per group.
+   * Fetched in a single query and cached for the request in Civi::$statics
+   * (reset along with the container), so importing many rows does not
+   * re-query per row or per group.
    *
    * @return array
    *   [ groupId => [ ['id' => .., 'name' => .., 'label' => ..], ... ], ... ]
    */
   private static function fieldsByGroup(): array {
-    if (self::$fieldsByGroup !== NULL) {
-      return self::$fieldsByGroup;
+    if (isset(\Civi::$statics[__CLASS__]['fieldsByGroup'])) {
+      return \Civi::$statics[__CLASS__]['fieldsByGroup'];
     }
     $service = new CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms();
     $groupIds = array_column($service->getRepeatableCaseGroups(), 'id');
-    self::$fieldsByGroup = [];
+    $byGroup = [];
     if ($groupIds) {
       $fields = CustomField::get(FALSE)
-        ->addSelect('id', 'name', 'label', 'custom_group_id')
+        ->addSelect('id', 'name', 'label', 'custom_group_id', 'option_group_id', 'data_type')
         ->addWhere('custom_group_id', 'IN', $groupIds)
         ->addWhere('is_active', '=', TRUE)
         ->execute();
       foreach ($fields as $field) {
-        self::$fieldsByGroup[$field['custom_group_id']][] = $field;
+        $byGroup[$field['custom_group_id']][] = $field;
       }
     }
-    return self::$fieldsByGroup;
+    \Civi::$statics[__CLASS__]['fieldsByGroup'] = $byGroup;
+    return $byGroup;
   }
 
   /**
@@ -65,6 +60,38 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporter {
       foreach ($byGroup[$group['id']] ?? [] as $field) {
         $label = $group['title'] . ': ' . $field['label'];
         $out['custom_' . $field['id']] = $label;
+      }
+    }
+    return $out;
+  }
+
+  /**
+   * Import metadata for the option-list fields among the mappable columns.
+   *
+   * CiviCRM's import parser converts an option label (or name) in the CSV to
+   * the stored option value only when a column's metadata identifies the
+   * multi-record custom field it belongs to; without it the label text is
+   * stored verbatim, which no option matches. Country and StateProvince fields
+   * have no option group but store an ID, so a name in the CSV is rejected
+   * unless it is converted the same way.
+   *
+   * @return array
+   *   [ 'custom_<id>' => ['custom_field_id' => .., 'is_multiple' => 1,
+   *     'custom_group_id.name' => ..], ... ]
+   */
+  public static function optionFieldMetadata(): array {
+    $service = new CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms();
+    $byGroup = self::fieldsByGroup();
+    $out = [];
+    foreach ($service->getRepeatableCaseGroups() as $group) {
+      foreach ($byGroup[$group['id']] ?? [] as $field) {
+        if (!empty($field['option_group_id']) || in_array($field['data_type'], ['Country', 'StateProvince'], TRUE)) {
+          $out['custom_' . $field['id']] = [
+            'custom_field_id' => $field['id'],
+            'is_multiple' => 1,
+            'custom_group_id.name' => $group['name'],
+          ];
+        }
       }
     }
     return $out;

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class CRM_Civicase_Hook_BuildForm_EnableCaseCategoryIconField.
+ * Adds the icon field to the case type category option form.
  */
 class CRM_Civicase_Hook_BuildForm_EnableCaseCategoryIconField {
 
@@ -41,8 +41,9 @@ class CRM_Civicase_Hook_BuildForm_EnableCaseCategoryIconField {
    *   returns TRUE or FALSE.
    */
   private function shouldRun(CRM_Core_Form $form, $formName) {
-    $optionGroupName = $form->getVar('_gName');
-    return $formName == 'CRM_Admin_Form_Options' && $optionGroupName == 'case_type_categories';
+    // Form name first: only the Options form has _gName.
+    return $formName == 'CRM_Admin_Form_Options'
+      && $form->getVar('_gName') == 'case_type_categories';
   }
 
 }

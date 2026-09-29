@@ -16,7 +16,7 @@ class Civi_Api4_CaseSalesOrder_ComputeTotalActionTest extends BaseHeadlessTest {
   /**
    * Setup data before tests run.
    */
-  public function setUp() {
+  public function setUp(): void {
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
   }

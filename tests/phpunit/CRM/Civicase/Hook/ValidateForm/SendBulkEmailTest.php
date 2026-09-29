@@ -38,7 +38,7 @@ class CRM_Civicase_Hook_SendBulkEmailTest extends BaseHeadlessTest {
   /**
    * {@inheritDoc}
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
 
     $this->loggedInUser = CRM_Civicase_Test_Fabricator_Contact::fabricateWithEmail();
