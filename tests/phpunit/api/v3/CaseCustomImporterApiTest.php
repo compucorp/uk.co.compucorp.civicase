@@ -164,6 +164,27 @@ class CaseCustomImporterApiTest extends TestCase implements HeadlessInterface {
   }
 
   /**
+   * The entity has a DAO with no unique indices, and no extra columns.
+   *
+   * With "Allow Updating An Entity Using Unique Fields" ticked, the CSV
+   * Import to API extension reads the import entity's DAO indices, and failed
+   * when there was no DAO. With no unique indices it finds nothing to match
+   * on, so the row imports as if the option were unticked. The DAO has no
+   * fields, so the column list still comes from the API spec alone.
+   */
+  public function testDaoHasNoUniqueIndicesOrExtraColumns() {
+    $dao = _civicrm_api3_get_DAO('CaseCustomImporter');
+
+    $this->assertEquals(CRM_Civicase_Service_RepeatableCaseCustomImporterDAO::class, $dao);
+    $this->assertSame([], $dao::indices());
+    $unexpected = array_filter(
+      array_keys($this->getCreateFields()),
+      fn ($key) => !in_array($key, ['case_id', 'id'], TRUE) && strpos($key, 'custom_') !== 0
+    );
+    $this->assertEmpty($unexpected);
+  }
+
+  /**
    * Create imports a row and returns the number of records it wrote.
    */
   public function testCreateWritesOneRecordPerGroupOnTheRow() {

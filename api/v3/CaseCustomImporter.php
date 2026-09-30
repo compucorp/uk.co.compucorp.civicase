@@ -56,3 +56,17 @@ function _civicrm_api3_case_custom_importer_create_spec(&$spec) {
     ] + ($optionFields[$key] ?? []);
   }
 }
+
+/**
+ * DAO for the CaseCustomImporter entity, which has no table of its own.
+ *
+ * Lets the CSV Import to API extension's "Allow Updating An Entity Using
+ * Unique Fields" option run instead of failing; see the class for why it
+ * then has no effect.
+ *
+ * @return string
+ *   The stand-in DAO class name.
+ */
+function _civicrm_api3_case_custom_importer_DAO() {
+  return CRM_Civicase_Service_RepeatableCaseCustomImporterDAO::class;
+}
