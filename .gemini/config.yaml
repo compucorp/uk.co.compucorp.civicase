@@ -32,10 +32,10 @@ code_review:
     help: false
 
     # Post a PR summary (overview of changes)
-    summary: false
+    summary: true
 
     # Post code review comments
-    code_review: false
+    code_review: true
 
     # Also review draft PRs
     include_drafts: false
