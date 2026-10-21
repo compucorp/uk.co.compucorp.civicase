@@ -37,7 +37,7 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
   /**
    * Setup case types and cases before running of tests.
    */
-  public static function setupBeforeClass() {
+  public static function setUpBeforeClass(): void {
     CRM_Core_BAO_OptionValue::ensureOptionValueExists([
       'option_group_id' => 'case_type_categories',
       'name' => 'award',
@@ -74,7 +74,7 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
   /**
    * Clean the cases and types created.
    */
-  public static function tearDownAfterClass() {
+  public static function tearDownAfterClass(): void {
     foreach (static::$cases as $case) {
       civicrm_api3('Case', 'delete', [
         'id' => $case['id'],
@@ -89,12 +89,16 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
   }
 
   /**
-   * Test that all records are returned if user has no permissions.
+   * Test that all records are returned if user has no basic permissions.
    */
-  public function testAllCasesAreReturnedForNoPermissions() {
+  public function testAllCasesAreReturnedForNoBasicPermissions() {
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
-    $this->setPermissions(['access my cases and activities']);
+    $this->setPermissions([
+      'view all contacts',
+      'access all cases and activities',
+      'access all award and activities',
+    ]);
 
     $result = civicrm_api3('Case', 'get', [
       'contact_id' => static::$client['id'],
@@ -110,7 +114,11 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
   public function testAllCasesAreReturnedForAllPermissions() {
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
-    $this->setPermissions(['basic case information', 'basic award information']);
+    $this->setPermissions([
+      'view all contacts',
+      'basic case information',
+      'basic award information',
+    ]);
 
     $result = civicrm_api3('Case', 'get', [
       'contact_id' => static::$client['id'],
@@ -126,7 +134,7 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
   public function testOnlyAccessibleCasesAreReturnedForLimitedPermissions() {
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
-    $this->setPermissions(['basic case information']);
+    $this->setPermissions(['view all contacts', 'basic case information']);
 
     $result = civicrm_api3('Case', 'get', [
       'contact_id' => static::$client['id'],
@@ -169,9 +177,10 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
     $this->setPermissions([
+      'view all contacts',
       'basic award information',
       'access CiviCRM',
-      'access my award and activities',
+      'access all award and activities',
     ]);
 
     $result = civicrm_api3('Case', 'getcaselist', [

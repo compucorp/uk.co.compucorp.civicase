@@ -514,17 +514,14 @@ function civicase_civicrm_navigationMenu(&$menu) {
 /**
  * Implements hook_civicrm_selectWhereClause().
  */
-function civicase_civicrm_selectWhereClause($entity, &$clauses) {
-  if ($entity === 'Case') {
-    unset($clauses['id']);
-  }
-
+function civicase_civicrm_selectWhereClause($entity, &$clauses, $userId = NULL) {
   $hooks = [
+    new CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermissions(),
     new CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategories(),
   ];
 
   foreach ($hooks as $hook) {
-    $hook->run($entity, $clauses);
+    $hook->run($entity, $clauses, $userId);
   }
 }
 
