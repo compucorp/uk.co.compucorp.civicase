@@ -89,6 +89,13 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
   }
 
   /**
+   * Logs out, as each test logs in a contact that is rolled back.
+   */
+  public function tearDown(): void {
+    $this->unregisterCurrentLoggedInContactFromSession();
+  }
+
+  /**
    * Test that all records are returned if user has no basic permissions.
    */
   public function testAllCasesAreReturnedForNoBasicPermissions() {

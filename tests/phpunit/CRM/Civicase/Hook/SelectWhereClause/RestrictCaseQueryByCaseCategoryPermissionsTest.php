@@ -69,6 +69,10 @@ class CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermiss
    * other manager on the other case of each category.
    */
   public static function setUpBeforeClass(): void {
+    // An earlier test class can leave a rolled back contact as the session
+    // user, which breaks the change log of the contacts created here.
+    CRM_Core_Session::singleton()->set('userID', NULL);
+
     CRM_Core_BAO_OptionValue::ensureOptionValueExists([
       'option_group_id' => 'case_type_categories',
       'name' => 'award',
@@ -141,6 +145,13 @@ class CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermiss
    */
   public function setUp(): void {
     $this->registerCurrentLoggedInContactInSession(static::$caseManager['id']);
+  }
+
+  /**
+   * Logs out, as some tests log in a contact that is rolled back.
+   */
+  public function tearDown(): void {
+    $this->unregisterCurrentLoggedInContactFromSession();
   }
 
   /**
