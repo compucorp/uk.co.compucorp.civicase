@@ -148,10 +148,13 @@ class CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermiss
   }
 
   /**
-   * Logs out, as some tests log in a contact that is rolled back.
+   * Logs out and resets the permissions, so later tests are not affected.
+   *
+   * Some tests log in a contact that is rolled back.
    */
   public function tearDown(): void {
     $this->unregisterCurrentLoggedInContactFromSession();
+    $this->resetPermissions();
   }
 
   /**

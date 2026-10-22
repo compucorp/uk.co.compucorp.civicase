@@ -3,6 +3,8 @@
 use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
 use CRM_Civicase_Test_Fabricator_CaseType as CaseTypeFabricator;
 use CRM_Civicase_Test_Fabricator_Case as CaseFabricator;
+use CRM_Civicase_Test_Fabricator_Relationship as RelationshipFabricator;
+use CRM_Civicase_Test_Fabricator_RelationshipType as RelationshipTypeFabricator;
 
 /**
  * Tests for limiting case query to accessible case categories.
@@ -89,10 +91,13 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
   }
 
   /**
-   * Logs out, as each test logs in a contact that is rolled back.
+   * Logs out and resets the permissions, so later tests are not affected.
+   *
+   * Each test logs in a contact that is rolled back.
    */
   public function tearDown(): void {
     $this->unregisterCurrentLoggedInContactFromSession();
+    $this->resetPermissions();
   }
 
   /**
@@ -154,12 +159,26 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
   }
 
   /**
-   * Test that only accessible records are returned for limited permissions.
+   * Test that cases of a category without basic information are not returned.
+   *
+   * The contact can view the client and holds a case role on the award case,
+   * so only the missing "basic award information" permission hides it.
    */
   public function testNoCasesAreReturnedWhenUserTriesToFetchCasesForCategoryItDoesNotHaveAccessTo() {
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
+    $relationshipType = RelationshipTypeFabricator::fabricate([
+      'name_a_b' => 'Limit case query manager is',
+      'name_b_a' => 'Limit case query manager of',
+    ]);
+    RelationshipFabricator::fabricate([
+      'contact_id_a' => static::$client['id'],
+      'contact_id_b' => $contact['id'],
+      'relationship_type_id' => $relationshipType['id'],
+      'case_id' => static::$cases[1]['id'],
+    ]);
     $this->setPermissions([
+      'view all contacts',
       'basic case information',
       'access CiviCRM',
       'access my award and activities',

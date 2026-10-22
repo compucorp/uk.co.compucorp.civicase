@@ -34,4 +34,11 @@ trait CRM_Civicase_Helpers_SessionTrait {
     CRM_Core_Config::singleton()->userPermissionClass->permissions = $permissions;
   }
 
+  /**
+   * Resets the permissions, so every permission is granted again.
+   */
+  private function resetPermissions() {
+    CRM_Core_Config::singleton()->userPermissionClass->permissions = NULL;
+  }
+
 }

@@ -12,6 +12,13 @@ class CRM_Civicase_MenuTest extends BaseHeadlessTest {
   use CRM_Civicase_Helpers_SessionTrait;
 
   /**
+   * Resets the permissions, so later tests are not restricted.
+   */
+  public function tearDown(): void {
+    $this->resetPermissions();
+  }
+
+  /**
    * The case dashboard needs "access all" OR "access my" cases permission.
    */
   public function testCaseDashboardNeedsAllOrMyCasesPermission() {
