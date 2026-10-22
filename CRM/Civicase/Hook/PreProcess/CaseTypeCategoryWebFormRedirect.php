@@ -1,5 +1,6 @@
 <?php
 
+use CRM_Civicase_Helper_CaseForm as CaseFormHelper;
 use CRM_Civicase_Service_CaseCategorySetting as CaseCategorySetting;
 use CRM_Civicase_Hook_Helper_CaseTypeCategory as CaseTypeCategoryHelper;
 use CRM_Civicase_Helper_NewCaseWebform as NewCaseWebformHelper;
@@ -33,24 +34,29 @@ class CRM_Civicase_Hook_PreProcess_CaseTypeCategoryWebFormRedirect {
    *   Form object.
    */
   public function run($formName, CRM_Core_Form &$form) {
-    if (!$this->shouldRun($formName)) {
+    if (!$this->shouldRun($formName, $form)) {
       return;
     }
     $this->redirectToWebForm($form);
   }
 
   /**
-   * Checks the form name and snippet parameter.
+   * Checks the form name, action and snippet parameter.
+   *
+   * The redirect only applies to the New Case form, not when the case form
+   * is used to delete or restore a case.
    *
    * @param string $formName
    *   Form name.
+   * @param CRM_Core_Form $form
+   *   Form object.
    *
    * @return bool
    *   Whether this hook should run or not.
    */
-  private function shouldRun($formName) {
+  private function shouldRun($formName, CRM_Core_Form $form) {
     return (
-      $formName === CRM_Case_Form_Case::class &&
+      CaseFormHelper::isNewCaseForm($formName, $form) &&
       CRM_Utils_Array::value('snippet', $_GET, '') !== 'json'
     );
   }
