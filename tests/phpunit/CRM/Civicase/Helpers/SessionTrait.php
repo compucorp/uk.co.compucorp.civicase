@@ -32,6 +32,22 @@ trait CRM_Civicase_Helpers_SessionTrait {
    */
   private function setPermissions(array $permissions = []) {
     CRM_Core_Config::singleton()->userPermissionClass->permissions = $permissions;
+    $this->clearCachedCaseCategoryAccess();
+  }
+
+  /**
+   * Resets the permissions, so every permission is granted again.
+   */
+  private function resetPermissions() {
+    CRM_Core_Config::singleton()->userPermissionClass->permissions = NULL;
+    $this->clearCachedCaseCategoryAccess();
+  }
+
+  /**
+   * Clears the case category access cached for each contact.
+   */
+  private function clearCachedCaseCategoryAccess() {
+    unset(Civi::$statics[CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermissions::class]);
   }
 
 }
