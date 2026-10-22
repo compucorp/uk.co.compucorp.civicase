@@ -22,31 +22,21 @@ class CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermiss
    * @param int|null $contactId
    *   Contact to build the clause for. Defaults to the logged in contact.
    */
-  public function run($entity, array &$clauses, $contactId = NULL) {
+  public function run(string $entity, array &$clauses, ?int $contactId = NULL): void {
     if ($entity !== 'Case') {
       return;
     }
 
     $contactId = $contactId ?: CRM_Core_Session::getLoggedInContactID();
-    $caseTypeCategories = CaseType::buildOptions('case_type_category', 'validate');
-    $fullAccessCategoryIds = [];
-    $myAccessCategoryIds = [];
-
-    foreach ($caseTypeCategories as $categoryId => $categoryName) {
-      if ($this->hasPermission('access all cases and activities', $categoryName, $contactId)) {
-        $fullAccessCategoryIds[] = (int) $categoryId;
-      }
-      elseif ($this->hasPermission('access my cases and activities', $categoryName, $contactId)) {
-        $myAccessCategoryIds[] = (int) $categoryId;
-      }
-      elseif ($this->hasPermission('basic case information', $categoryName, $contactId)) {
-        $fullAccessCategoryIds[] = (int) $categoryId;
-      }
+    $access = $this->getCategoryAccess($contactId);
+    // Keep core's clause when the case categories can't be loaded.
+    if ($access === NULL) {
+      return;
     }
 
     $clauses['id'] = [];
 
-    if (empty($fullAccessCategoryIds) && empty($myAccessCategoryIds)) {
+    if (empty($access['full']) && empty($access['my'])) {
       $clauses['id'][] = 'IS NULL';
 
       return;
@@ -59,19 +49,63 @@ class CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermiss
       $clauses['id'][] = "IN (SELECT case_id FROM civicrm_case_contact WHERE contact_id $contactClause)";
     }
 
-    if (count($fullAccessCategoryIds) === count($caseTypeCategories)) {
+    if ($access['full_in_every_category']) {
       return;
     }
 
     $conditions = [];
-    if ($fullAccessCategoryIds) {
-      $conditions[] = 'ct.case_type_category IN (' . implode(',', $fullAccessCategoryIds) . ')';
+    if ($access['full']) {
+      $conditions[] = 'ct.case_type_category IN (' . implode(',', $access['full']) . ')';
     }
-    if ($myAccessCategoryIds) {
-      $conditions[] = '(ct.case_type_category IN (' . implode(',', $myAccessCategoryIds) . ') AND c.id ' . $this->getMyCasesClause((int) $contactId) . ')';
+    if ($access['my']) {
+      $conditions[] = '(ct.case_type_category IN (' . implode(',', $access['my']) . ') AND c.id ' . $this->getMyCasesClause((int) $contactId) . ')';
     }
 
     $clauses['id'][] = 'IN (SELECT c.id FROM civicrm_case c INNER JOIN civicrm_case_type ct ON ct.id = c.case_type_id WHERE ' . implode(' OR ', $conditions) . ')';
+  }
+
+  /**
+   * Returns the case categories the contact has full or "my" access to.
+   *
+   * Cached per contact, as the hook runs for every Case, CaseContact and
+   * Activity query.
+   *
+   * @param int|null $contactId
+   *   Contact id.
+   *
+   * @return array|null
+   *   The 'full' and 'my' category ids, and 'full_in_every_category'.
+   *   NULL when the case categories can't be loaded.
+   */
+  private function getCategoryAccess(?int $contactId): ?array {
+    if ($contactId && isset(Civi::$statics[__CLASS__][$contactId])) {
+      return Civi::$statics[__CLASS__][$contactId];
+    }
+
+    $caseTypeCategories = CaseType::buildOptions('case_type_category', 'validate');
+    if (!is_array($caseTypeCategories) || empty($caseTypeCategories)) {
+      return NULL;
+    }
+
+    $access = ['full' => [], 'my' => []];
+    foreach ($caseTypeCategories as $categoryId => $categoryName) {
+      if ($this->hasPermission('access all cases and activities', $categoryName, $contactId)) {
+        $access['full'][] = (int) $categoryId;
+      }
+      elseif ($this->hasPermission('access my cases and activities', $categoryName, $contactId)) {
+        $access['my'][] = (int) $categoryId;
+      }
+      elseif ($this->hasPermission('basic case information', $categoryName, $contactId)) {
+        $access['full'][] = (int) $categoryId;
+      }
+    }
+    $access['full_in_every_category'] = count($access['full']) === count($caseTypeCategories);
+
+    if ($contactId) {
+      Civi::$statics[__CLASS__][$contactId] = $access;
+    }
+
+    return $access;
   }
 
   /**
@@ -90,7 +124,7 @@ class CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermiss
    * @return bool
    *   Whether the contact has the permission for the category.
    */
-  private function hasPermission($permission, $categoryName, $contactId) {
+  private function hasPermission(string $permission, string $categoryName, ?int $contactId): bool {
     $categoryPermission = (new CaseCategoryPermission())->replaceWords($permission, $categoryName);
 
     return CRM_Core_Permission::check($categoryPermission, $contactId);
@@ -107,7 +141,7 @@ class CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermiss
    * @return string
    *   Clause for the case id.
    */
-  private function getMyCasesClause($contactId) {
+  private function getMyCasesClause(int $contactId): string {
     return "IN (
       SELECT r.case_id FROM civicrm_relationship r, civicrm_case_contact cc WHERE r.is_active = 1 AND cc.case_id = r.case_id AND (
         (r.contact_id_a = cc.contact_id AND r.contact_id_b = $contactId) OR (r.contact_id_b = cc.contact_id AND r.contact_id_a = $contactId)

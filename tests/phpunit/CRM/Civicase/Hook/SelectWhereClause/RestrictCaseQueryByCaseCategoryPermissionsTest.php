@@ -378,13 +378,7 @@ class CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermiss
       'basic award information',
       'access my award and activities',
     ]);
-    $casePermissions = [];
-    $caseCategoryPermission = new CaseCategoryPermission();
-    foreach (CaseType::buildOptions('case_type_category', 'validate') as $categoryName) {
-      foreach (['access all cases and activities', 'access my cases and activities', 'basic case information'] as $permission) {
-        $casePermissions[] = $caseCategoryPermission->replaceWords($permission, $categoryName);
-      }
-    }
+    $casePermissions = $this->getCaseCategoryPermissions();
     $checkedContactIds = [];
     $recordCheck = function ($event) use ($casePermissions, &$checkedContactIds) {
       if (in_array($event->permission, $casePermissions)) {
@@ -407,6 +401,70 @@ class CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermiss
       $this->getCaseIds(['other_award']),
       $this->getCaseIdsMatchingClauses($clauses, ['my_case', 'other_case', 'my_award', 'other_award'])
     );
+  }
+
+  /**
+   * The case category permissions are checked on the first run only.
+   */
+  public function testCaseCategoryPermissionsAreCheckedOncePerContact() {
+    $this->setPermissions([
+      'access CiviCRM',
+      'view all contacts',
+      'basic award information',
+      'access my award and activities',
+    ]);
+    $casePermissions = $this->getCaseCategoryPermissions();
+    $checkCount = 0;
+    $countCheck = function ($event) use ($casePermissions, &$checkCount) {
+      if (in_array($event->permission, $casePermissions)) {
+        $checkCount++;
+      }
+    };
+    $firstClauses = $secondClauses = ['id' => []];
+
+    Civi::dispatcher()->addListener('hook_civicrm_permission_check', $countCheck);
+    try {
+      (new RestrictCaseQuery())->run('Case', $firstClauses, static::$caseManager['id']);
+      $firstRunCheckCount = $checkCount;
+      (new RestrictCaseQuery())->run('Case', $secondClauses, static::$caseManager['id']);
+    }
+    finally {
+      Civi::dispatcher()->removeListener('hook_civicrm_permission_check', $countCheck);
+    }
+
+    $this->assertGreaterThan(0, $firstRunCheckCount);
+    $this->assertEquals(0, $checkCount - $firstRunCheckCount);
+    $this->assertEquals($firstClauses, $secondClauses);
+    $this->assertEquals(
+      $this->getCaseIds(['my_award']),
+      $this->getCaseIdsMatchingClauses($secondClauses, ['my_case', 'other_case', 'my_award', 'other_award'])
+    );
+  }
+
+  /**
+   * Core's clause is kept when the case categories can't be loaded.
+   */
+  public function testCoreClauseIsKeptWhenCaseCategoriesCannotBeLoaded() {
+    $this->setPermissions(['access CiviCRM', 'view all contacts']);
+    $failCategories = function ($event) {
+      if ($event->field === 'case_type_category') {
+        $event->options = FALSE;
+      }
+    };
+    $clauses = ['id' => ['IN (1)']];
+
+    // Runs after the extension hooks, so the options stay FALSE.
+    Civi::dispatcher()->addListener('hook_civicrm_fieldOptions', $failCategories, -200);
+    try {
+      $caseTypeCategories = CaseType::buildOptions('case_type_category', 'validate');
+      (new RestrictCaseQuery())->run('Case', $clauses);
+    }
+    finally {
+      Civi::dispatcher()->removeListener('hook_civicrm_fieldOptions', $failCategories);
+    }
+
+    $this->assertFalse($caseTypeCategories);
+    $this->assertEquals(['id' => ['IN (1)']], $clauses);
   }
 
   /**
@@ -457,6 +515,24 @@ class CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermiss
       ->column('id');
 
     $this->assertEquals([$activityIds['my_case']], array_map('intval', $visibleIds));
+  }
+
+  /**
+   * Returns the generic case permissions, for every case category.
+   *
+   * @return string[]
+   *   Case category permissions.
+   */
+  private function getCaseCategoryPermissions() {
+    $casePermissions = [];
+    $caseCategoryPermission = new CaseCategoryPermission();
+    foreach (CaseType::buildOptions('case_type_category', 'validate') as $categoryName) {
+      foreach (['access all cases and activities', 'access my cases and activities', 'basic case information'] as $permission) {
+        $casePermissions[] = $caseCategoryPermission->replaceWords($permission, $categoryName);
+      }
+    }
+
+    return $casePermissions;
   }
 
   /**
