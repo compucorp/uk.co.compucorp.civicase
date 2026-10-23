@@ -76,6 +76,13 @@ function civicase_civicrm_config(&$config) {
     10
   );
 
+  // After core's API4 permission check (-100), so it only sees refusals.
+  Civi::dispatcher()->addListener(
+    'civi.api.authorize',
+    ['CRM_Civicase_Event_Listener_CaseCategoryApiAuthorization', 'onAuthorize'],
+    -150
+  );
+
   Civi::dispatcher()->addListener(
     'civi.token.list',
     ['CRM_Civicase_Hook_Tokens_SalesOrderTokens', 'listSalesOrderTokens']
