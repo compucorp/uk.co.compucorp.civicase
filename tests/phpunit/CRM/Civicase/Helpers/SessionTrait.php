@@ -48,6 +48,7 @@ trait CRM_Civicase_Helpers_SessionTrait {
    */
   private function clearCachedCaseCategoryAccess() {
     unset(Civi::$statics[CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermissions::class]);
+    unset(Civi::$statics[CRM_Civicase_Event_Listener_CaseCategoryApiAuthorization::class]);
   }
 
 }
