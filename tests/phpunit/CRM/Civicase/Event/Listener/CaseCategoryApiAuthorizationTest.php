@@ -71,6 +71,13 @@ class CRM_Civicase_Event_Listener_CaseCategoryApiAuthorizationTest extends BaseH
   private static $cases = [];
 
   /**
+   * Whether this class created the "award" case category.
+   *
+   * @var bool
+   */
+  private static $createdAwardCategory = FALSE;
+
+  /**
    * Creates two "Cases" cases and two "award" cases for the same client.
    *
    * The case manager holds a case role on one case of each category.
@@ -78,11 +85,15 @@ class CRM_Civicase_Event_Listener_CaseCategoryApiAuthorizationTest extends BaseH
   public static function setUpBeforeClass(): void {
     CRM_Core_Session::singleton()->set('userID', NULL);
 
-    CRM_Core_BAO_OptionValue::ensureOptionValueExists([
+    $awardCategory = [
       'option_group_id' => 'case_type_categories',
       'name' => 'award',
-      'value' => 2,
-    ]);
+    ];
+    $awardCount = civicrm_api3('OptionValue', 'getcount', $awardCategory);
+    static::$createdAwardCategory = (int) $awardCount === 0;
+    CRM_Core_BAO_OptionValue::ensureOptionValueExists(
+      $awardCategory + ['value' => 2]
+    );
 
     static::$caseTypes['cases'] = CaseTypeFabricator::fabricate([
       'name' => 'Case_category_api4_cases',
@@ -138,6 +149,17 @@ class CRM_Civicase_Event_Listener_CaseCategoryApiAuthorizationTest extends BaseH
     civicrm_api3('RelationshipType', 'delete', [
       'id' => static::$relationshipType['id'],
     ]);
+
+    // Later test classes number their case categories from the free values.
+    if (static::$createdAwardCategory) {
+      $awardCategoryId = civicrm_api3('OptionValue', 'getvalue', [
+        'option_group_id' => 'case_type_categories',
+        'name' => 'award',
+        'return' => 'id',
+      ]);
+      civicrm_api3('OptionValue', 'delete', ['id' => $awardCategoryId]);
+      CRM_Core_PseudoConstant::flush();
+    }
   }
 
   /**
