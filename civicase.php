@@ -113,6 +113,14 @@ function civicase_civicrm_config(&$config) {
       'alterCustomEntityLinks',
     ]
   );
+
+  Civi::dispatcher()->addListener(
+    'civi.api.authorize',
+    [
+      'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAccess',
+      'authorizeApi',
+    ]
+  );
 }
 
 /**
@@ -156,6 +164,11 @@ function civicase_civicrm_enable() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterMenu
  */
 function civicase_civicrm_alterMenu(&$items) {
+  // Core's custom-value delete endpoint fires no pre hook, so route it through
+  // a wrapper that enforces the repeatable Case custom data permission.
+  if (isset($items['civicrm/ajax/customvalue'])) {
+    $items['civicrm/ajax/customvalue']['page_callback'] = 'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAccess::deleteCustomValueAjax';
+  }
   $items['civicrm/case/activity']['ids_arguments']['json'][] = 'civicase_reload';
   $items['civicrm/activity']['ids_arguments']['json'][] = 'civicase_reload';
   $items['civicrm/activity/email/add']['ids_arguments']['json'][] = 'civicase_reload';
@@ -295,6 +308,7 @@ function civicase_civicrm_validateForm($formName, &$fields, &$files, &$form, &$e
     new CRM_Civicase_Hook_ValidateForm_SaveCaseTypeCategory(),
     new CRM_Civicase_Hook_ValidateForm_SendBulkEmail(),
     new CRM_Civicase_Hook_ValidateForm_RemoveEmptyTargetContactFromActivity(),
+    new CRM_Civicase_Hook_ValidateForm_RestrictRepeatableCaseCustomData(),
   ];
 
   foreach ($hooks as $hook) {

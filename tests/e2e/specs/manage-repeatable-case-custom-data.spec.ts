@@ -110,6 +110,7 @@ test.beforeAll(async () => {
       html_type: 'Text',
       is_active: 1,
       is_searchable: 1,
+      in_selector: 1,
     }),
   )[0];
   fieldName = String(field.name);

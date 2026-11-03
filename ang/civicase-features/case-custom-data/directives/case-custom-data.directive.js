@@ -38,6 +38,7 @@
     $scope.settings = null;
     $scope.filters = {};
     $scope.canAdd = false;
+    $scope.canManage = false;
     $scope.addLabel = '';
     $scope.headerLabel = '';
     $scope.openAdd = openAdd;
@@ -62,6 +63,19 @@
     // this element; it must never actually submit the page.
     $element.on('submit', function (event) {
       event.preventDefault();
+    });
+
+    var taskDialogCloseEvent = 'dialogclose.civicaseCaseCustomData' + $scope.$id;
+    var $document = angular.element(document);
+
+    $document.on(taskDialogCloseEvent, function (event) {
+      if (angular.element(event.target).closest('.crm-search-task-dialog').length) {
+        $scope.$evalAsync(refreshAfterBulkTask);
+      }
+    });
+
+    $scope.$on('$destroy', function () {
+      $document.off(taskDialogCloseEvent);
     });
 
     /**
@@ -100,10 +114,33 @@
       }).then(function (result) {
         var res = result || {};
         $scope.apiEntity = res.savedSearch ? res.savedSearch.api_entity : null;
-        $scope.settings = res.display ? res.display.settings : null;
+        $scope.canManage = !!group.can_manage;
+        $scope.settings = res.display ? withManageAccess(res.display.settings, $scope.canManage) : null;
         $scope.canAdd = !!(res.canAdd && res.canAdd.access);
         $scope.loading = false;
       });
+    }
+
+    /**
+     * Adjusts the display settings to the user's edit access to the group.
+     *
+     * Adding/editing/deleting records needs "access all custom data" or an ACL
+     * granting "Edit" on the group. The server enforces it (Edit links, inline
+     * edits and writes are refused via civi.api.authorize; the template hides
+     * the row Delete button, see `canManage`), but SearchKit's bulk-actions
+     * column is rendered client-side, so drop it for users who could not run
+     * any of its tasks.
+     *
+     * @param {object} settings the SearchDisplay settings
+     * @param {boolean} canManage whether the user can edit the group's records
+     * @returns {object} the (possibly copied and adjusted) settings
+     */
+    function withManageAccess (settings, canManage) {
+      if (!settings || canManage) {
+        return settings;
+      }
+
+      return angular.extend({}, settings, { actions: false });
     }
 
     /**
@@ -123,6 +160,23 @@
       }).then(function (result) {
         $scope.canAdd = !!(result && result[0] && result[0].access);
       });
+    }
+
+    /**
+     * Reloads the table after a SearchKit bulk task, the way SearchKit's own
+     * refreshAfterTask() would: clears the row selection, then raises the
+     * refresh event the display (and the add-limit check) listen for.
+     */
+    function refreshAfterBulkTask () {
+      var displayCtrl = angular.element($element.find('crm-search-display-table')[0])
+        .controller('crmSearchDisplayTable');
+
+      if (displayCtrl) {
+        displayCtrl.selectedRows = [];
+        displayCtrl.allRowsSelected = false;
+      }
+
+      $element.find('form').first().trigger('crmPopupFormSuccess');
     }
 
     /**

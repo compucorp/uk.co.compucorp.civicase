@@ -28,4 +28,4 @@
       $window.location.href = url;
     };
   }
-})(angular, CRM._);
+})(angular, CRM.$, CRM._);

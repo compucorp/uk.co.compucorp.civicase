@@ -39,6 +39,11 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   const REPEATABLE_GROUPS_CACHE_KEY = 'civicase_repeatable_case_custom_groups';
 
   /**
+   * Angular module carrying the add/edit forms' styles.
+   */
+  const FORM_STYLES_MODULE = 'civicase-repeatable-custom-data-form';
+
+  /**
    * Listener for `civi.afform.get`: contributes the Case create/update afforms.
    *
    * @param \Civi\Core\Event\GenericHookEvent $event
@@ -62,7 +67,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
           ? 'afformCreateCustom_'
           : 'afformUpdateCustom_';
         $formName = $prefix . $group['name'];
-        // Skip building (which renders Smarty) when a specific afform is
+        // Skip building the layout when a specific afform is
         // requested by name and this is not it.
         if ($requestedNames !== NULL
           && !in_array($formName, $requestedNames, TRUE)) {
@@ -174,9 +179,15 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
 
     $groupDetails = \CRM_Core_BAO_CustomGroup::getGroup(['id' => $group['id']]);
     $fields = $groupDetails['fields'] ?? [];
-    $displayFields = array_filter($fields, fn ($f) => !empty($f['is_active']));
+    $displayFields = array_filter($fields, [$this, 'isDisplayedInTable']);
 
     $select = array_map([$this, 'fieldDisplayKey'], array_values($displayFields));
+    foreach ($displayFields as $field) {
+      if ($this->fieldIsFile($field)) {
+        // The file column links its name to this URL.
+        $select[] = $field['name'] . '.url';
+      }
+    }
     $select[] = 'id';
     $select[] = 'entity_id';
 
@@ -238,6 +249,19 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   }
 
   /**
+   * Whether a field is shown as a column in the records table.
+   *
+   * @param array $field
+   *   Custom field record.
+   *
+   * @return bool
+   *   TRUE if the field should be rendered as a table column.
+   */
+  protected function isDisplayedInTable(array $field): bool {
+    return !empty($field['is_active']) && !empty($field['in_selector']);
+  }
+
+  /**
    * Builds an inline-editable display column for a custom field.
    *
    * @param array $field
@@ -247,16 +271,25 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
    *   SearchDisplay column definition.
    */
   protected function searchColumnForField(array $field): array {
-    return [
+    $column = [
       'type' => 'field',
       'key' => $this->fieldDisplayKey($field),
       'label' => $field['label'],
       'sortable' => TRUE,
-      // A reference renders as a read-only join (e.g. the contact's name),
-      // so it cannot be inline-edited here; it is changed via the row Edit
-      // form. Option and plain fields stay inline-editable.
-      'editable' => !$this->fieldIsReference($field),
+      // References and files render as read-only joins (the contact's name,
+      // the file name), so they cannot be inline-edited here; they are
+      // changed via the row Edit form. Option and plain fields stay
+      // inline-editable.
+      'editable' => !$this->fieldIsReference($field) && !$this->fieldIsFile($field),
     ];
+    if ($this->fieldIsFile($field)) {
+      $column['link'] = [
+        'path' => '[' . $field['name'] . '.url]',
+        'target' => '_blank',
+      ];
+    }
+
+    return $column;
   }
 
   /**
@@ -276,6 +309,9 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
    *   The select expression / column key.
    */
   protected function fieldDisplayKey(array $field): string {
+    if ($this->fieldIsFile($field)) {
+      return $field['name'] . '.file_name';
+    }
     if ($this->fieldIsReference($field)) {
       return $field['name'] . '.' . $this->referenceLabelField($field);
     }
@@ -299,6 +335,22 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
       return TRUE;
     }
     return in_array($field['data_type'] ?? '', ['Boolean', 'Country', 'StateProvince'], TRUE);
+  }
+
+  /**
+   * Whether a field is a file upload.
+   *
+   * Its stored value is a File id; APIv4 exposes it as the file's (long,
+   * tokenised) URL, so the table shows the file name linked to that URL.
+   *
+   * @param array $field
+   *   Custom field record.
+   *
+   * @return bool
+   *   TRUE for File custom fields.
+   */
+  protected function fieldIsFile(array $field): bool {
+    return ($field['data_type'] ?? '') === 'File';
   }
 
   /**
@@ -428,7 +480,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
     }
     $groups = (array) CustomGroup::get(FALSE)
       ->addSelect('id', 'name', 'title', 'extends', 'icon', 'max_multiple')
-      ->addWhere('extends', 'IN', $this->getCaseExtends())
+      ->addWhere('extends', 'IN', self::getCaseExtends())
       ->addWhere('is_multiple', '=', TRUE)
       ->addWhere('style', '=', 'Tab with table')
       ->addWhere('is_active', '=', TRUE)
@@ -508,7 +560,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
    * @return array
    *   Entity values, e.g. ['Case', 'Cases', 'awards', ...].
    */
-  protected function getCaseExtends(): array {
+  public static function getCaseExtends(): array {
     $extends = ['Case'];
     $options = \CRM_Core_BAO_CustomGroup::getCustomGroupExtendsOptions();
     foreach ($options as $option) {
@@ -522,15 +574,16 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   /**
    * Builds an Afform definition for the add or edit form of a group.
    *
-   * Mirrors core's CustomGroup::getAfforms (generate create/update form) so the
-   * artifact is identical to core's.
+   * Same names, routes and entity binding as core's CustomGroup::getAfforms
+   * (so SearchKit links and the case tab find them), but with civicase's own
+   * layout (see buildLayout) so the form matches the case screens.
    *
    * @param array $group
    *   CustomGroup record.
    * @param string $action
    *   Either 'create' or 'update'.
    * @param bool $withLayout
-   *   Whether to render the (expensive) form layout.
+   *   Whether to render the form layout.
    *
    * @return array
    *   Afform definition.
@@ -547,35 +600,111 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
         : ts('Update %1', [1 => $group['title']]),
       'description' => '',
       'is_public' => FALSE,
+      // Edit access is per group ("access all custom data" or an ACL "Edit"
+      // grant), which an afform permission cannot express; saving is refused
+      // by CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAccess.
       'permission' => ['access CiviCRM'],
       'server_route' => 'civicrm/af/custom/' . $name . '/' . $action,
       'icon' => $group['icon'] ?? NULL,
+      // Pulls in the form's styles (standalone page and crm-popup alike).
+      'requires' => [self::FORM_STYLES_MODULE],
     ];
 
     if ($withLayout) {
-      $form['layout'] = \CRM_Core_Smarty::singleton()->fetchWith(
-        'afform/customGroups/afformEdit.tpl',
-        [
-          'formEntity' => $this->layoutEntity($group),
-          'formActions' => [
-            'create' => $isCreate,
-            'update' => !$isCreate,
-          ],
-          'urlAutofill' => !$isCreate,
-          'blockDirective' => _afform_angular_module_name('afblockCustom_' . $name, 'dash'),
-        ]
-      );
+      $details = \CRM_Core_BAO_CustomGroup::getGroup(['id' => $group['id']]) ?? [];
+      $form['layout'] = $this->buildLayout($group + $details, $details['fields'] ?? [], $isCreate);
     }
 
     return $form;
   }
 
   /**
+   * Builds the add/edit form markup.
+   *
+   * Equivalent to core's afformEdit.tpl + afblock.tpl (entity, hidden parent
+   * link, group help, one af-field per active field, Save), with these
+   * changes:
+   *  - each field is labelled with its own label. APIv4 labels Custom_<group>
+   *    fields "<Group>: <Field>", which is redundant on a form for one group
+   *    and differs from the case tab's column headers;
+   *  - fields set as "Required" are marked required. APIv4 reports custom
+   *    fields as not required, so without this afform neither shows the
+   *    asterisk nor validates them (client side or on submit);
+   *  - a styling hook class and a footer around the Save button;
+   *  - Save validates first and says which fields are wrong and why (see
+   *    civicaseRepeatableCustomDataSubmit), instead of afform's generic
+   *    "Please fill all required fields." for any invalid input.
+   *
+   * @param array $group
+   *   CustomGroup record (name, title, extends, help_pre, help_post).
+   * @param array $fields
+   *   The group's custom fields, in display order.
+   * @param bool $isCreate
+   *   TRUE for the add form, FALSE for the edit form.
+   *
+   * @return string
+   *   Afform layout HTML.
+   */
+  public function buildLayout(array $group, array $fields, bool $isCreate): string {
+    $entity = $this->layoutEntity($group);
+    $attr = fn ($value) => htmlspecialchars(
+      is_string($value) ? $value : json_encode($value),
+      ENT_QUOTES
+    );
+
+    $html = '<af-form ctrl="afform" class="civicase__repeatable-custom-data-form">';
+    $html .= sprintf(
+      '<af-entity type="%s" name="%s" label="%s" actions="%s" security="RBAC" url-autofill="%s" />',
+      $attr($entity['type']),
+      $attr($entity['name']),
+      $attr($entity['label']),
+      $attr(['create' => $isCreate, 'update' => !$isCreate]),
+      $isCreate ? '' : '1'
+    );
+    $html .= sprintf('<fieldset af-fieldset="%s" class="af-container">', $attr($entity['name']));
+    $html .= sprintf(
+      '<af-field name="%s" defn="%s" />',
+      $attr($entity['parent_field']),
+      $attr($entity['parent_field_defn'])
+    );
+
+    if (!empty($group['help_pre'])) {
+      $html .= '<div class="af-markup">' . $group['help_pre'] . '</div>';
+    }
+    foreach ($fields as $field) {
+      if (empty($field['is_active'])) {
+        continue;
+      }
+      $defn = ['label' => $field['label']];
+      if (!empty($field['is_required'])) {
+        $defn['required'] = TRUE;
+      }
+      $html .= sprintf(
+        '<af-field name="%s" defn="%s" />',
+        $attr($field['name']),
+        $attr($defn)
+      );
+    }
+    if (!empty($group['help_post'])) {
+      $html .= '<div class="af-markup">' . $group['help_post'] . '</div>';
+    }
+
+    $html .= '</fieldset>';
+    $html .= '<div class="civicase__repeatable-custom-data-form__actions">';
+    $html .= sprintf(
+      '<button type="button" class="af-button btn btn-primary" crm-icon="fa-save" civicase-repeatable-custom-data-submit="afform">%s</button>',
+      htmlspecialchars(ts('Save'), ENT_QUOTES)
+    );
+    $html .= '</div></af-form>';
+
+    return $html;
+  }
+
+  /**
    * The afform layout entity that binds the form to the Case custom record.
    *
-   * This is our contribution to the generated form (core's Smarty template
-   * renders around it): the record entity is `Custom_<name>` and its parent is
-   * the case, linked through the `entity_id` field rendered as a hidden input.
+   * The record entity is `Custom_<name>` and its parent is the case, linked
+   * through the `entity_id` field rendered as a hidden input.
    *
    * @param array $group
    *   CustomGroup record.

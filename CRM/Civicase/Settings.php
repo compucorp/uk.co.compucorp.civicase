@@ -459,7 +459,7 @@ class CRM_Civicase_Settings {
    * Exposes repeatable (multi-record) Case custom groups to Angular.
    *
    * Used by the case-custom-data feature to render one Tab-with-table tab per
-   * repeatable Case custom group. See TCOSB-51.
+   * repeatable Case custom group the current user can see. See TCOSB-51.
    *
    * @param array $options
    *   List of options to pass to the front-end.
@@ -467,11 +467,22 @@ class CRM_Civicase_Settings {
   public static function setRepeatableCaseCustomGroups(array &$options): void {
     $groups = (new \CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms())
       ->getRepeatableCaseGroups();
+    // Only groups the user can see get a tab: "access all custom data" (or
+    // "administer CiviCRM data"), or an ACL granting View/Edit on the group.
+    // Without that the table could only ever be empty. This is display only;
+    // core's ACL on reads and the write checks protect the data itself.
+    $groups = array_values(array_filter($groups, function ($group) {
+      return \CRM_Core_BAO_CustomGroup::checkGroupAccess((int) $group['id'], \CRM_Core_Permission::VIEW);
+    }));
     $options['repeatableCaseCustomGroups'] = array_map(function ($group) {
       return [
         'name' => $group['name'],
         'title' => $group['title'],
         'max_multiple' => $group['max_multiple'] ?? NULL,
+        // Edit access ("access all custom data" or an ACL "Edit" grant on the
+        // group); the tab hides Delete and bulk actions without it. The server
+        // enforces it either way.
+        'can_manage' => CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAccess::canManageGroup($group),
       ];
     }, $groups);
   }
