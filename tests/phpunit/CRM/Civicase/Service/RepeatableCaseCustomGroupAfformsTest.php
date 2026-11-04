@@ -47,6 +47,108 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
   }
 
   /**
+   * Add/edit afforms only require CiviCRM access.
+   *
+   * Edit access is per group ("access all custom data" or an ACL "Edit"
+   * grant), which an afform permission cannot express; the API refuses the
+   * save instead.
+   */
+  public function testBuildFormRequiresOnlyCiviCrmAccess() {
+    foreach (['create', 'update'] as $action) {
+      $form = (new Service())->buildForm($this->group(), $action, FALSE);
+
+      $this->assertEquals(['access CiviCRM'], $form['permission']);
+    }
+  }
+
+  /**
+   * Only active fields with "Display in table?" ticked become table columns.
+   */
+  public function testIsDisplayedInTableRespectsInSelector() {
+    $service = new Service();
+    $method = new ReflectionMethod(Service::class, 'isDisplayedInTable');
+    $method->setAccessible(TRUE);
+    $shown = fn (array $field) => $method->invoke($service, $field);
+
+    $this->assertTrue($shown(['is_active' => 1, 'in_selector' => 1]));
+    $this->assertFalse($shown(['is_active' => 1, 'in_selector' => 0]));
+    $this->assertFalse($shown(['is_active' => 0, 'in_selector' => 1]));
+    $this->assertFalse($shown(['is_active' => 1]));
+  }
+
+  /**
+   * Row Edit/Delete buttons carry no fixed permission condition.
+   *
+   * Access is per group and per user (ACL), so SearchKit's own API access
+   * check decides the Edit link and the tab hides Delete client-side.
+   */
+  public function testButtonColumnLinksHaveNoPermissionCondition() {
+    $method = new ReflectionMethod(Service::class, 'searchButtonColumn');
+    $method->setAccessible(TRUE);
+    $column = $method->invoke(new Service(), 'Custom_Publications');
+
+    $this->assertCount(2, $column['links']);
+    foreach ($column['links'] as $link) {
+      $this->assertArrayNotHasKey('conditions', $link);
+    }
+  }
+
+  /**
+   * The forms pull in the module that carries their styles.
+   */
+  public function testBuildFormRequiresStylesModule() {
+    $form = (new Service())->buildForm($this->group(), 'create', FALSE);
+
+    $this->assertEquals(['civicase-repeatable-custom-data-form'], $form['requires']);
+  }
+
+  /**
+   * The layout labels each active field with its own label (no group prefix).
+   */
+  public function testBuildLayoutUsesFieldLabelsAndSkipsInactiveFields() {
+    $fields = [
+      ['name' => 'title_field', 'label' => "Author's name", 'is_active' => 1],
+      ['name' => 'old_field', 'label' => 'Old', 'is_active' => 0],
+    ];
+    $group = $this->group() + ['help_pre' => '<p>Before</p>', 'help_post' => ''];
+
+    $layout = (new Service())->buildLayout($group, $fields, TRUE);
+
+    $this->assertStringContainsString('class="civicase__repeatable-custom-data-form"', $layout);
+    $this->assertStringContainsString('<af-field name="title_field" defn="{&quot;label&quot;:&quot;Author&#039;s name&quot;}" />', $layout);
+    $this->assertStringNotContainsString('old_field', $layout);
+    $this->assertStringContainsString('<div class="af-markup"><p>Before</p></div>', $layout);
+    $this->assertStringContainsString('url-autofill=""', $layout);
+    $this->assertStringContainsString('civicase__repeatable-custom-data-form__actions', $layout);
+    $this->assertStringContainsString('civicase-repeatable-custom-data-submit="afform"', $layout);
+  }
+
+  /**
+   * Fields set as "Required" are required on the form; others are not.
+   */
+  public function testBuildLayoutMarksRequiredFields() {
+    $fields = [
+      ['name' => 'needed', 'label' => 'Needed', 'is_active' => 1, 'is_required' => 1],
+      ['name' => 'optional', 'label' => 'Optional', 'is_active' => 1, 'is_required' => 0],
+    ];
+
+    $layout = (new Service())->buildLayout($this->group(), $fields, TRUE);
+
+    $this->assertStringContainsString('<af-field name="needed" defn="{&quot;label&quot;:&quot;Needed&quot;,&quot;required&quot;:true}" />', $layout);
+    $this->assertStringContainsString('<af-field name="optional" defn="{&quot;label&quot;:&quot;Optional&quot;}" />', $layout);
+  }
+
+  /**
+   * The edit form autofills the record from the URL; the add form does not.
+   */
+  public function testBuildLayoutUpdateAutofillsFromUrl() {
+    $layout = (new Service())->buildLayout($this->group(), [], FALSE);
+
+    $this->assertStringContainsString('url-autofill="1"', $layout);
+    $this->assertStringContainsString('actions="{&quot;create&quot;:false,&quot;update&quot;:true}"', $layout);
+  }
+
+  /**
    * The update afform definition has the core-compatible name and route.
    */
   public function testBuildFormUpdateDefinition() {
@@ -97,6 +199,19 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
   }
 
   /**
+   * A file column shows the file name, linked to the file, and is read-only.
+   */
+  public function testFileColumnLinksFileName() {
+    $method = new ReflectionMethod(Service::class, 'searchColumnForField');
+    $method->setAccessible(TRUE);
+    $column = $method->invoke(new Service(), ['name' => 'a_file', 'label' => 'Attachment', 'data_type' => 'File']);
+
+    $this->assertEquals('a_file.file_name', $column['key']);
+    $this->assertEquals(['path' => '[a_file.url]', 'target' => '_blank'], $column['link']);
+    $this->assertFalse($column['editable']);
+  }
+
+  /**
    * Option, pseudoconstant and reference fields resolve to readable keys.
    *
    * Option groups and the Country/State/Boolean pseudoconstants use the
@@ -117,6 +232,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
     $this->assertEquals('a_contact.display_name', $key(['name' => 'a_contact', 'data_type' => 'ContactReference']));
     $entityRef = ['name' => 'an_entity', 'data_type' => 'EntityReference', 'fk_entity' => 'Contact'];
     $this->assertEquals('an_entity.display_name', $key($entityRef));
+    $this->assertEquals('a_file.file_name', $key(['name' => 'a_file', 'data_type' => 'File']));
   }
 
 }

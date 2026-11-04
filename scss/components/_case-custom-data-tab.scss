@@ -18,10 +18,28 @@
     margin-left: auto;
   }
 
+  // Without edit access to the group, hide the row Delete button: it is a
+  // SearchKit task link, which SearchKit does not permission-check per row.
+  // (Edit links are already removed server-side, and the delete itself would
+  // be refused.)
+  &--read-only .crm-search-col-type-buttons .btn-danger {
+    display: none;
+  }
+
+  .crm-search-display-table {
+    overflow-x: auto;
+  }
+
+  td {
+    min-width: 6em;
+    overflow-wrap: anywhere;
+  }
+
   // Numbered rows, matching the "Tab with Table" wireframe. SearchKit has no
-  // row-number column and we must not override its core templates, so we render
-  // a sequential per-page index via a CSS counter on the first data cell of each
-  // row (the cell right after SearchKit's leftmost control/checkbox column).
+  // row-number column and we must not override its core templates, so a CSS
+  // counter is rendered as its own leading "#" column: a table-cell pseudo
+  // element on every row (header included). Keeping it in its own column means
+  // the number cannot be mistaken for the first field's value.
   tbody {
     counter-reset: civicase-custom-data-row;
   }
@@ -30,20 +48,80 @@
     counter-increment: civicase-custom-data-row;
   }
 
-  // The cell value is block-level, so place the number in reserved left padding
-  // (absolute) to keep "<n>  value" on one line rather than stacking.
-  .crm-search-ctrl-column + td {
-    padding-left: 2.5em;
-    position: relative;
+  thead tr::before,
+  tbody tr::before {
+    display: table-cell;
+    font-weight: 600;
+    padding: 16px 10px;
+    white-space: nowrap;
+    width: 1%;
   }
 
-  .crm-search-ctrl-column + td::before {
+  thead tr::before {
+    background: #f3f6f7;
+    color: #464354;
+    content: '#';
+    vertical-align: bottom;
+  }
+
+  tbody tr::before {
+    border-top: 1px solid #e8eef0;
     color: #5a6169;
     content: counter(civicase-custom-data-row);
-    font-weight: bold;
-    left: 0.5em;
+    vertical-align: top;
+  }
+
+  // No number on SearchKit's "None found" row or its loading placeholders,
+  // and they do not count towards the numbering.
+  tbody tr:has(> [colspan]),
+  tbody tr:has(.crm-search-loading-placeholder) {
+    counter-increment: none;
+  }
+
+  tbody tr:has(> [colspan])::before,
+  tbody tr:has(.crm-search-loading-placeholder)::before {
+    content: '';
+  }
+
+  // With the bulk-actions (checkbox) column, the number goes right after the
+  // checkbox instead: drawn at the right edge of that column, at the same
+  // spot in the header and in every row, so it reads as its own "#" column.
+  // The leading cell above remains for users without that column.
+  thead tr:has(> .crm-search-result-select)::before,
+  tbody tr:has(> .crm-search-ctrl-column)::before {
+    content: none;
+    display: none;
+  }
+
+  .crm-search-result-select,
+  .crm-search-ctrl-column {
+    // !important: the theme zeroes the header cell's side padding.
+    padding-right: 3.5em !important;
+    position: relative;
+    white-space: nowrap;
+  }
+
+  // Keep the select-all checkbox and its dropdown side by side.
+  .crm-search-result-select .btn-group {
+    display: inline-flex;
+  }
+
+  .crm-search-result-select::after,
+  .crm-search-ctrl-column::after {
+    font-weight: 600;
     position: absolute;
-    text-align: right;
-    width: 1.5em;
+    right: 10px;
+  }
+
+  .crm-search-result-select::after {
+    bottom: 16px;
+    color: #464354;
+    content: '#';
+  }
+
+  .crm-search-ctrl-column::after {
+    color: #5a6169;
+    content: counter(civicase-custom-data-row);
+    top: 16px;
   }
 }

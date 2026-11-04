@@ -1,0 +1,106 @@
+/*
+ * Repeatable Case custom data add/edit afforms (TCOSB-51).
+ *
+ * Afform renders fields as bare inline elements, and Shoreditch makes every
+ * .form-control full width, so without these the form has no spacing, the
+ * date/time pickers wrap onto separate lines and the form sits directly on the
+ * grey page background. Scoped to the generated forms' own class.
+ */
+
+/* Card on the standalone page; flat inside a popup (the dialog is the card). */
+#bootstrap-theme .civicase__repeatable-custom-data-form {
+  background: #fff;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  padding: 20px;
+}
+
+.ui-dialog #bootstrap-theme .civicase__repeatable-custom-data-form {
+  box-shadow: none;
+  padding: 10px 0 0;
+}
+
+/* One field per row, evenly spaced. */
+#bootstrap-theme .civicase__repeatable-custom-data-form af-field {
+  display: block;
+  margin-bottom: 20px;
+}
+
+#bootstrap-theme .civicase__repeatable-custom-data-form af-field.af-field-type-hidden {
+  display: none;
+  margin: 0;
+}
+
+#bootstrap-theme .civicase__repeatable-custom-data-form .crm-af-field-label {
+  color: #464354;
+  display: block;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+#bootstrap-theme .civicase__repeatable-custom-data-form .crm-af-field-help-pre,
+#bootstrap-theme .civicase__repeatable-custom-data-form .crm-af-field-help-post {
+  color: #9494a5;
+  font-size: 12px;
+  margin: 0 0 6px;
+}
+
+#bootstrap-theme .civicase__repeatable-custom-data-form .crm-af-field-help-post {
+  margin: 6px 0 0;
+}
+
+#bootstrap-theme .civicase__repeatable-custom-data-form .af-markup {
+  margin-bottom: 15px;
+}
+
+#bootstrap-theme .civicase__repeatable-custom-data-form textarea {
+  min-height: 80px;
+  width: 100%;
+}
+
+#bootstrap-theme .civicase__repeatable-custom-data-form .radio-inline,
+#bootstrap-theme .civicase__repeatable-custom-data-form .checkbox-inline {
+  margin-right: 16px;
+}
+
+/* Date (+ calendar icon) and time on one line instead of three. */
+#bootstrap-theme .civicase__repeatable-custom-data-form .crm-form-date-wrapper {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#bootstrap-theme .civicase__repeatable-custom-data-form .crm-form-date-wrapper .crm-form-date {
+  flex: 0 1 200px;
+  width: auto;
+}
+
+#bootstrap-theme .civicase__repeatable-custom-data-form .crm-form-date-wrapper .addon {
+  margin-left: -8px;
+}
+
+#bootstrap-theme .civicase__repeatable-custom-data-form .crm-form-date-wrapper .crm-form-time {
+  flex: 0 1 120px;
+  width: auto;
+}
+
+/* Footer with the Save button, separated from the fields. */
+#bootstrap-theme .civicase__repeatable-custom-data-form__actions {
+  border-top: 1px solid #e8eef0;
+  margin-bottom: 15px;
+  padding-top: 15px;
+  text-align: right;
+}
+
+/* Fields flagged by the Save button's validation. */
+#bootstrap-theme .civicase__repeatable-custom-data-form af-field.has-error > .crm-af-field-label {
+  color: #cf3458;
+}
+
+#bootstrap-theme .civicase__repeatable-custom-data-form af-field.has-error input.ng-invalid,
+#bootstrap-theme .civicase__repeatable-custom-data-form af-field.has-error textarea.ng-invalid,
+#bootstrap-theme .civicase__repeatable-custom-data-form af-field.has-error select.ng-invalid,
+#bootstrap-theme .civicase__repeatable-custom-data-form af-field.has-error .select2-container {
+  border-color: #cf3458;
+}

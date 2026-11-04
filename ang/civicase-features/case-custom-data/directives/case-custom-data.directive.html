@@ -5,7 +5,9 @@
   event up to here. The controller binds a submit handler that preventDefaults,
   so the form never actually submits the page.
 -->
-<form class="civicase__case-custom-data-tab">
+<form
+  class="civicase__case-custom-data-tab"
+  ng-class="{'civicase__case-custom-data-tab--read-only': !loading && !canManage}">
   <div ng-if="loading" class="crm-loading-element">{{ ts('Loading...') }}</div>
   <div class="civicase__case-custom-data-tab__header" ng-if="!loading && settings">
     <h3 class="civicase__case-custom-data-tab__title">{{ headerLabel }}</h3>
