@@ -459,7 +459,8 @@ class CRM_Civicase_Settings {
    * Exposes repeatable (multi-record) Case custom groups to Angular.
    *
    * Used by the case-custom-data feature to render one Tab-with-table tab per
-   * repeatable Case custom group the current user can see. See TCOSB-51.
+   * repeatable Case custom group the current user can see, on cases of the
+   * types the group applies to. See TCOSB-51 and TCOSB-104.
    *
    * @param array $options
    *   List of options to pass to the front-end.
@@ -479,6 +480,9 @@ class CRM_Civicase_Settings {
         'name' => $group['name'],
         'title' => $group['title'],
         'max_multiple' => $group['max_multiple'] ?? NULL,
+        // The case types the group is limited to (NULL for all); the case
+        // screen only shows the tab on cases of these types. See TCOSB-104.
+        'case_type_ids' => \CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms::getGroupCaseTypeIds($group),
         // Edit access ("access all custom data" or an ACL "Edit" grant on the
         // group); the tab hides Delete and bulk actions without it. The server
         // enforces it either way.
