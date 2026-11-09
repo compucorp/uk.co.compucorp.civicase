@@ -15,7 +15,10 @@
         name: tabName,
         label: group.title,
         weight: 200 + index,
-        customGroup: group
+        customGroup: group,
+        isVisible: function (caseItem) {
+          return isGroupForCaseType(group, caseItem && caseItem.case_type_id);
+        }
       }]);
 
       // Each tab needs a "<name>CaseTab" service returning the content template.
@@ -29,4 +32,22 @@
       });
     });
   });
+
+  /**
+   * Whether a custom group applies to cases of a case type.
+   *
+   * `case_type_ids` lists the case types the group is limited to, or is null
+   * when it applies to all of them. See TCOSB-104.
+   *
+   * @param {object} group the custom group ({case_type_ids, ...})
+   * @param {string|number} caseTypeId the case's case type ID
+   * @returns {boolean} true if the group's tab should show on the case
+   */
+  function isGroupForCaseType (group, caseTypeId) {
+    if (!Array.isArray(group.case_type_ids)) {
+      return true;
+    }
+
+    return group.case_type_ids.map(String).indexOf(String(caseTypeId)) !== -1;
+  }
 })(angular, CRM);

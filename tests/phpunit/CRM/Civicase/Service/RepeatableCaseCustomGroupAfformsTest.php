@@ -235,4 +235,21 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
     $this->assertEquals('a_file.file_name', $key(['name' => 'a_file', 'data_type' => 'File']));
   }
 
+  /**
+   * A group's case types are read from every shape the value comes in.
+   */
+  public function testGetGroupCaseTypeIds() {
+    $sep = CRM_Core_DAO::VALUE_SEPARATOR;
+    $ids = fn ($value) => Service::getGroupCaseTypeIds(['extends_entity_column_value' => $value]);
+
+    $this->assertEquals([10], $ids(['10']));
+    $this->assertEquals([4, 7], $ids(['4', 7, '4']));
+    $this->assertEquals([4, 7], $ids($sep . '4' . $sep . '7' . $sep));
+    $this->assertNull($ids(NULL));
+    $this->assertNull($ids([]));
+    $this->assertNull($ids(''));
+    $this->assertNull(Service::getGroupCaseTypeIds([]));
+    $this->assertEquals([], $ids('null'));
+  }
+
 }

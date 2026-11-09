@@ -33,10 +33,13 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   /**
    * Base cache key for the repeatable Case custom group list.
    *
+   * Versioned: bump it when the cached group fields change, so a cache built
+   * by an older release (e.g. without the case types) is not read back.
+   *
    * Domain id is appended (see repeatableGroupsCacheKey) for multidomain
    * safety.
    */
-  const REPEATABLE_GROUPS_CACHE_KEY = 'civicase_repeatable_case_custom_groups';
+  const REPEATABLE_GROUPS_CACHE_KEY = 'civicase_repeatable_case_custom_groups_v2';
 
   /**
    * Angular module carrying the add/edit forms' styles.
@@ -479,7 +482,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
       return $cached;
     }
     $groups = (array) CustomGroup::get(FALSE)
-      ->addSelect('id', 'name', 'title', 'extends', 'icon', 'max_multiple')
+      ->addSelect('id', 'name', 'title', 'extends', 'icon', 'max_multiple', 'extends_entity_column_value')
       ->addWhere('extends', 'IN', self::getCaseExtends())
       ->addWhere('is_multiple', '=', TRUE)
       ->addWhere('style', '=', 'Tab with table')
@@ -489,6 +492,37 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
     $cache->set($key, $groups);
 
     return $groups;
+  }
+
+  /**
+   * The case types a Case custom group is limited to.
+   *
+   * Stored in `extends_entity_column_value`. A group set to extend a case
+   * category is saved with every case type of that category there (see
+   * CRM_Civicase_Service_CaseManagementCustomGroupPostProcessor), so this
+   * covers both.
+   *
+   * @param array $group
+   *   CustomGroup record with `extends_entity_column_value`, as returned by
+   *   APIv4 or CRM_Core_BAO_CustomGroup::getGroup() (a list), or as stored
+   *   (a separator-delimited string).
+   *
+   * @return int[]|null
+   *   The case type IDs, or NULL when the group applies to every case type.
+   *   An empty list means it applies to none (a category with no case types).
+   */
+  public static function getGroupCaseTypeIds(array $group): ?array {
+    $value = $group['extends_entity_column_value'] ?? NULL;
+    if (is_string($value)) {
+      $value = explode(\CRM_Core_DAO::VALUE_SEPARATOR, trim($value, \CRM_Core_DAO::VALUE_SEPARATOR));
+    }
+    $values = array_filter((array) $value, fn ($id) => $id !== NULL && $id !== '');
+    if (!$values) {
+      return NULL;
+    }
+    $ids = array_filter($values, fn ($id) => is_numeric($id) && (int) $id > 0);
+
+    return array_values(array_unique(array_map('intval', $ids)));
   }
 
   /**
