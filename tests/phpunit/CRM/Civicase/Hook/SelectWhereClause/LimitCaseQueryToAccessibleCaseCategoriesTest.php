@@ -40,6 +40,7 @@ class CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategori
    * Setup case types and cases before running of tests.
    */
   public static function setUpBeforeClass(): void {
+    parent::setUpBeforeClass();
     CRM_Core_BAO_OptionValue::ensureOptionValueExists([
       'option_group_id' => 'case_type_categories',
       'name' => 'award',

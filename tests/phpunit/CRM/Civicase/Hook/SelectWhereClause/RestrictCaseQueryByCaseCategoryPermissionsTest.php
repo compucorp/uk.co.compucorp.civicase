@@ -69,6 +69,7 @@ class CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermiss
    * other manager on the other case of each category.
    */
   public static function setUpBeforeClass(): void {
+    parent::setUpBeforeClass();
     // An earlier test class can leave a rolled back contact as the session
     // user, which breaks the change log of the contacts created here.
     CRM_Core_Session::singleton()->set('userID', NULL);

@@ -83,6 +83,7 @@ class CRM_Civicase_Event_Listener_CaseCategoryApiAuthorizationTest extends BaseH
    * The case manager holds a case role on one case of each category.
    */
   public static function setUpBeforeClass(): void {
+    parent::setUpBeforeClass();
     CRM_Core_Session::singleton()->set('userID', NULL);
 
     $awardCategory = [

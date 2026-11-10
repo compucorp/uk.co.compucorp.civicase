@@ -376,7 +376,7 @@ class CRM_Civicase_Settings {
       'return' => ['extends_entity_column_value', 'title', 'extends'],
       'extends' => ['IN' => ['Case', 'Activity']],
       'is_active' => 1,
-      'options' => ['sort' => 'weight'],
+      'options' => ['sort' => 'weight', 'limit' => 0],
       'api.CustomField.get' => [
         'is_active' => 1,
         'is_searchable' => 1,
@@ -384,7 +384,7 @@ class CRM_Civicase_Settings {
           'label', 'html_type', 'data_type', 'is_search_range',
           'filter', 'option_group_id',
         ],
-        'options' => ['sort' => 'weight'],
+        'options' => ['sort' => 'weight', 'limit' => 0],
       ],
     ]);
     $options['customSearchFields'] = $options['customActivityFields'] = [];
