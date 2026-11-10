@@ -46,6 +46,23 @@ function civicase_civicrm_config(&$config) {
   }
   Civi::$statics[__FUNCTION__] = 1;
 
+  // Build the Angular strings bundle per case category instead of resetting
+  // the site-wide resource cache code on every category switch.
+  Civi::dispatcher()->addListener(
+    'hook_civicrm_getAssetUrl',
+    ['CRM_Civicase_Event_Listener_CaseCategoryAssets', 'onGetAssetUrl']
+  );
+  Civi::dispatcher()->addListener(
+    'hook_civicrm_buildAsset',
+    ['CRM_Civicase_Event_Listener_CaseCategoryAssets', 'onBuildAssetBefore'],
+    100
+  );
+  Civi::dispatcher()->addListener(
+    'hook_civicrm_buildAsset',
+    ['CRM_Civicase_Event_Listener_CaseCategoryAssets', 'onBuildAssetAfter'],
+    -100
+  );
+
   Civi::dispatcher()->addListener(
     'civi.api.prepare',
     ['CRM_Civicase_Event_Listener_ActivityFilter', 'onPrepare'],
