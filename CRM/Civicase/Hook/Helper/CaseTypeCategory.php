@@ -103,12 +103,19 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
       return;
     }
 
-    $currentCaseCategory = CRM_Core_Session::singleton()->get('current_case_category');
-    if ($currentCaseCategory !== $caseCategoryName) {
-      CRM_Core_Resources::singleton()->flushStrings()->resetCacheCode();
-      CRM_Core_Session::singleton()->set('current_case_category', $caseCategoryName);
-    }
+    // The Angular bundles are built per case category (see
+    // CRM_Civicase_Event_Listener_CaseCategoryAssets), so switching category
+    // no longer resets the site-wide resource cache code.
+    self::applyWordReplacements($caseCategoryName);
+  }
 
+  /**
+   * Applies a case category's word replacements to Civi's locale for this request.
+   *
+   * @param string $caseCategoryName
+   *   Case category name.
+   */
+  public static function applyWordReplacements($caseCategoryName) {
     $cacheKey = 'civicase_word_replacement_for_' . $caseCategoryName;
     $cache = \Civi::cache();
     $wordReplacements = $cache->get($cacheKey);
@@ -125,7 +132,7 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
 
     $locale = CRM_Core_I18n::getLocale();
     Civi::$statics[CRM_Core_I18n::class][$locale] = array_replace_recursive(
-      Civi::$statics[CRM_Core_I18n::class][$locale],
+      Civi::$statics[CRM_Core_I18n::class][$locale] ?? CRM_Core_BAO_WordReplacement::getLocaleCustomStrings($locale),
       [
         'enabled' => [
           'wildcardMatch' => $wordReplacements,
