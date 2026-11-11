@@ -55,9 +55,10 @@ class CRM_Civicase_Event_Listener_CaseCategoryAssets {
     try {
       [, $caseCategoryName] = CaseUrlHelper::getCategoryParamsFromUrl();
     }
-    catch (CRM_Core_Exception $e) {
+    catch (CRM_Core_Exception | CiviCRM_API3_Exception $e) {
       // Unknown case_type_category in the URL: use the default Cases category,
       // so the bundle is still built from the site's own word replacements.
+      // CiviCRM_API3_Exception only extends CRM_Core_Exception from 5.52 on.
       $caseCategoryName = CRM_Civicase_Helper_CaseCategory::CASE_TYPE_CATEGORY_NAME;
     }
     if ($caseCategoryName) {
