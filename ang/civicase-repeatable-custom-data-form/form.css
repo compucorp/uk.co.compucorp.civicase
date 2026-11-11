@@ -17,7 +17,7 @@
 
 .ui-dialog #bootstrap-theme .civicase__repeatable-custom-data-form {
   box-shadow: none;
-  padding: 10px 0 0;
+  padding: 10px 20px 0;
 }
 
 /* One field per row, evenly spaced. */
@@ -103,4 +103,10 @@
 #bootstrap-theme .civicase__repeatable-custom-data-form af-field.has-error select.ng-invalid,
 #bootstrap-theme .civicase__repeatable-custom-data-form af-field.has-error .select2-container {
   border-color: #cf3458;
+}
+
+/* Theme margin:auto on .modal-dialog centres a shrunk form in flex dialogs. */
+.ui-dialog .ui-dialog-content:has(.civicase__repeatable-custom-data-form) {
+  margin-left: 0;
+  margin-right: 0;
 }

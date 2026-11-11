@@ -568,6 +568,7 @@ function civicase_civicrm_entityTypes(&$entityTypes) {
 function civicase_civicrm_queryObjects(&$queryObjects, $type) {
   if ($type == 'Contact') {
     $queryObjects[] = new CRM_Civicase_BAO_Query_ContactLock();
+    $queryObjects[] = new CRM_Civicase_BAO_Query_RepeatableCaseCustomFields();
   }
 }
 
@@ -594,6 +595,7 @@ function civicase_civicrm_preProcess($formName, &$form) {
     new CRM_Civicase_Hook_PreProcess_CaseCategoryWordReplacementsForChangeCase(),
     new CRM_Civicase_Hook_PreProcess_AddCaseAdminSettings(),
     new CRM_Civicase_Hook_PreProcess_CaseTypeCategoryWebFormRedirect(),
+    new CRM_Civicase_Hook_PreProcess_AddRepeatableCaseCustomFieldsToSearchBuilder(),
   ];
 
   foreach ($hooks as $hook) {
