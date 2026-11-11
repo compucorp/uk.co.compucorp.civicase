@@ -103,7 +103,7 @@ class CRM_Civicase_Event_Listener_CaseCategoryAssetsTest extends BaseHeadlessTes
   }
 
   /**
-   * The bundle is built with its category's wording, then the request's is back.
+   * The bundle gets its category's wording, then the request's comes back.
    */
   public function testBuildAssetUsesTheBundleCategoryWordingAndRestoresTheRequestWording() {
     $category = $this->createCaseTypeCategory('Awards', 'Award');
