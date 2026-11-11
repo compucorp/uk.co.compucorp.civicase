@@ -21,8 +21,8 @@ class CRM_Civicase_Event_Listener_CaseCategoryAssets {
   /**
    * Bundles whose content includes translated strings.
    *
-   * angular-modules.js holds code only and is identical for every category,
-   * so it is deliberately not listed.
+   * The angular-modules.js bundle holds code only and is identical for every
+   * category, so it is deliberately not listed.
    */
   const ASSETS = ['angular-modules.json'];
 

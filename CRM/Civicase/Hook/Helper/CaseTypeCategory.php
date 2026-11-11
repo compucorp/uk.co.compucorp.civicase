@@ -110,7 +110,7 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
   }
 
   /**
-   * Applies a case category's word replacements to Civi's locale for this request.
+   * Applies a case category's word replacements for this request.
    *
    * @param string $caseCategoryName
    *   Case category name.
