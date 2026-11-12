@@ -110,3 +110,12 @@
   margin-left: 0;
   margin-right: 0;
 }
+
+/*
+ * Keep the validation toast above the form's dialog. The toasts live in
+ * #crm-container, which themes put at z-index 1, below the dialog and its
+ * overlay. Shoreditch lifts that while a dialog is open; The Island does not.
+ */
+body.ui-dialog-open:has(.civicase__repeatable-custom-data-form) #crm-container {
+  z-index: auto;
+}
