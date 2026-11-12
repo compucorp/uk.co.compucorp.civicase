@@ -1,6 +1,6 @@
 <?php
 
-use CRM_Certificate_ExtensionUtil as E;
+use CRM_Civicase_ExtensionUtil as E;
 use CRM_Civicase_Service_CaseTypeCategoryFeatures as CaseTypeCategoryFeatures;
 
 /**
