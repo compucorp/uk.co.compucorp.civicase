@@ -10,22 +10,28 @@
 
 use CRM_Civicase_Helper_GlobRecursive as GlobRecursive;
 
-/**
- * Get a list of JS files.
- *
- * @return array
- *   list of js files
- */
-function getFeaturesJsFiles() {
-  return array_merge(
-    [
-      'ang/civicase-features.js',
-    ],
-    GlobRecursive::getRelativeToExtension(
-      'uk.co.compucorp.civicase',
-      'ang/civicase-features/*.js'
-    )
-  );
+// Core can build the Angular module list more than once in a process (e.g.
+// after a cache flush), including this file again, so only declare it once.
+if (!function_exists('getFeaturesJsFiles')) {
+
+  /**
+   * Get a list of JS files.
+   *
+   * @return array
+   *   list of js files
+   */
+  function getFeaturesJsFiles() {
+    return array_merge(
+      [
+        'ang/civicase-features.js',
+      ],
+      GlobRecursive::getRelativeToExtension(
+        'uk.co.compucorp.civicase',
+        'ang/civicase-features/*.js'
+      )
+    );
+  }
+
 }
 
 $requires = [

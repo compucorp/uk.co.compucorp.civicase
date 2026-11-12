@@ -87,14 +87,18 @@
   // checkbox instead: drawn at the right edge of that column, at the same
   // spot in the header and in every row, so it reads as its own "#" column.
   // The leading cell above remains for users without that column.
-  thead tr:has(> .crm-search-result-select)::before,
-  tbody tr:has(> .crm-search-ctrl-column)::before {
+  // The header and the rows both key off the header's select-all cell, so they
+  // always agree on whether the leading cell is shown. The row's checkbox cell
+  // is found by its checkbox: SearchKit only gives it the
+  // .crm-search-ctrl-column class from CiviCRM 6, and without it every row kept
+  // the leading cell and its values shifted one column to the right.
+  table:has(.crm-search-result-select) tr::before {
     content: none;
     display: none;
   }
 
   .crm-search-result-select,
-  .crm-search-ctrl-column {
+  tbody td:first-child:has(> [type='checkbox']) {
     // !important: the theme zeroes the header cell's side padding.
     padding-right: 3.5em !important;
     position: relative;
@@ -107,7 +111,7 @@
   }
 
   .crm-search-result-select::after,
-  .crm-search-ctrl-column::after {
+  tbody td:first-child:has(> [type='checkbox'])::after {
     font-weight: 600;
     position: absolute;
     right: 10px;
@@ -119,7 +123,7 @@
     content: '#';
   }
 
-  .crm-search-ctrl-column::after {
+  tbody td:first-child:has(> [type='checkbox'])::after {
     color: #5a6169;
     content: counter(civicase-custom-data-row);
     top: 16px;

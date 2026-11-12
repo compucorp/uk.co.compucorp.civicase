@@ -10,23 +10,29 @@
 
 use CRM_Civicase_Helper_GlobRecursive as GlobRecursive;
 
-/**
- * Get a list of JS files.
- *
- * @return array
- *   list of js files
- */
-function get_base_js_files() {
-  return array_merge(
-    [
-      Civi::service('asset_builder')->getUrl('visual-bundle.js'),
-      'ang/civicase-base.js',
-    ],
-    GlobRecursive::getRelativeToExtension(
-      'uk.co.compucorp.civicase',
-      'ang/civicase-base/*.js'
-    )
-  );
+// Core can build the Angular module list more than once in a process (e.g.
+// after a cache flush), including this file again, so only declare it once.
+if (!function_exists('get_base_js_files')) {
+
+  /**
+   * Get a list of JS files.
+   *
+   * @return array
+   *   list of js files
+   */
+  function get_base_js_files() {
+    return array_merge(
+      [
+        Civi::service('asset_builder')->getUrl('visual-bundle.js'),
+        'ang/civicase-base.js',
+      ],
+      GlobRecursive::getRelativeToExtension(
+        'uk.co.compucorp.civicase',
+        'ang/civicase-base/*.js'
+      )
+    );
+  }
+
 }
 
 return [

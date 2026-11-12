@@ -369,11 +369,24 @@ class CRM_Civicase_Settings {
 
   /**
    * Sets the custom fields information to javascript global variable.
+   *
+   * Only the groups the user may view are offered as filters, as in core's
+   * contact search.
    */
   public static function setCustomFieldsInfoToJsVars(array &$options): void {
+    $options['customSearchFields'] = $options['customActivityFields'] = [];
+    $viewableGroupIds = array_keys(CRM_Core_BAO_CustomGroup::getAll(
+      ['extends' => ['Case', 'Activity'], 'is_active' => TRUE],
+      CRM_Core_Permission::VIEW
+    ));
+    if (!$viewableGroupIds) {
+      return;
+    }
+
     $result = civicrm_api3('CustomGroup', 'get', [
       'sequential' => 1,
       'return' => ['extends_entity_column_value', 'title', 'extends'],
+      'id' => ['IN' => $viewableGroupIds],
       'extends' => ['IN' => ['Case', 'Activity']],
       'is_active' => 1,
       'options' => ['sort' => 'weight', 'limit' => 0],
@@ -387,7 +400,6 @@ class CRM_Civicase_Settings {
         'options' => ['sort' => 'weight', 'limit' => 0],
       ],
     ]);
-    $options['customSearchFields'] = $options['customActivityFields'] = [];
     foreach ($result['values'] as $group) {
       if (!empty($group['api.CustomField.get']['values'])) {
         if ($group['extends'] == 'Case') {

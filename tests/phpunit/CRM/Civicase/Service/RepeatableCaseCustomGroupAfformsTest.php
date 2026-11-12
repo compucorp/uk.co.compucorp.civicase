@@ -200,11 +200,15 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
 
   /**
    * A file column shows the file name, linked to the file, and is read-only.
+   *
+   * Where core joins File fields to their file, the column reads the field's
+   * own join.
    */
   public function testFileColumnLinksFileName() {
     $method = new ReflectionMethod(Service::class, 'searchColumnForField');
     $method->setAccessible(TRUE);
-    $column = $method->invoke(new Service(), ['name' => 'a_file', 'label' => 'Attachment', 'data_type' => 'File']);
+    $field = ['name' => 'a_file', 'label' => 'Attachment', 'data_type' => 'File'];
+    $column = $method->invoke($this->serviceWhereCoreJoinsFiles(TRUE), $field);
 
     $this->assertEquals('a_file.file_name', $column['key']);
     $this->assertEquals(['path' => '[a_file.url]', 'target' => '_blank'], $column['link']);
@@ -212,15 +216,60 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
   }
 
   /**
+   * Where core does not join File fields, the column reads the explicit join.
+   */
+  public function testFileColumnReadsExplicitJoinWhenCoreDoesNotJoinFiles() {
+    $method = new ReflectionMethod(Service::class, 'searchColumnForField');
+    $method->setAccessible(TRUE);
+    $field = ['name' => 'a_file', 'label' => 'Attachment', 'data_type' => 'File'];
+    $column = $method->invoke($this->serviceWhereCoreJoinsFiles(FALSE), $field);
+
+    $this->assertEquals('record_file_a_file.file_name', $column['key']);
+    $this->assertEquals(['path' => '[record_file_a_file.url]', 'target' => '_blank'], $column['link']);
+    $this->assertFalse($column['editable']);
+  }
+
+  /**
+   * Files are joined from the record's Case, once per File field.
+   */
+  public function testFileJoinsGoThroughTheCase() {
+    $method = new ReflectionMethod(Service::class, 'fileJoins');
+    $method->setAccessible(TRUE);
+    $fields = [
+      ['name' => 'a_file', 'data_type' => 'File'],
+      ['name' => 'b_file', 'data_type' => 'File'],
+    ];
+
+    $joins = $method->invoke($this->serviceWhereCoreJoinsFiles(FALSE), $fields, 'civicrm_value_pubs_9');
+
+    $this->assertEquals([
+      ['Case AS record_case', 'LEFT', ['record_case.id', '=', 'entity_id']],
+      [
+        'File AS record_file_a_file',
+        'LEFT',
+        'EntityFile',
+        ['record_case.id', '=', 'record_file_a_file.entity_id'],
+        ['record_file_a_file.entity_table', '=', "'civicrm_value_pubs_9'"],
+        ['record_file_a_file.id', '=', 'a_file'],
+      ],
+      [
+        'File AS record_file_b_file',
+        'LEFT',
+        'EntityFile',
+        ['record_case.id', '=', 'record_file_b_file.entity_id'],
+        ['record_file_b_file.entity_table', '=', "'civicrm_value_pubs_9'"],
+        ['record_file_b_file.id', '=', 'b_file'],
+      ],
+    ], $joins);
+    $this->assertSame([], $method->invoke($this->serviceWhereCoreJoinsFiles(TRUE), $fields, 'civicrm_value_pubs_9'));
+    $this->assertSame([], $method->invoke($this->serviceWhereCoreJoinsFiles(FALSE), [], 'civicrm_value_pubs_9'));
+  }
+
+  /**
    * Option, pseudoconstant and reference fields resolve to readable keys.
-   *
-   * Option groups and the Country/State/Boolean pseudoconstants use the
-   * ":label" suffix; a ContactReference joins to the target's label field
-   * (display_name); plain fields are unchanged. This is what makes the case
-   * tab render labels instead of coded values / contact ids.
    */
   public function testFieldDisplayKeyResolvesLabelsAndReferences() {
-    $service = new Service();
+    $service = $this->serviceWhereCoreJoinsFiles(TRUE);
     $method = new ReflectionMethod(Service::class, 'fieldDisplayKey');
     $method->setAccessible(TRUE);
     $key = fn (array $field) => $method->invoke($service, $field);
@@ -250,6 +299,45 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
     $this->assertNull($ids(''));
     $this->assertNull(Service::getGroupCaseTypeIds([]));
     $this->assertEquals([], $ids('null'));
+  }
+
+  /**
+   * The service, as on a core that does or does not join File fields.
+   *
+   * @param bool $coreJoinsFiles
+   *   Whether core joins File custom fields to their file.
+   *
+   * @return \CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms
+   *   The service.
+   */
+  private function serviceWhereCoreJoinsFiles(bool $coreJoinsFiles): Service {
+    return new class($coreJoinsFiles) extends Service {
+
+      /**
+       * Whether core joins File custom fields to their file.
+       *
+       * @var bool
+       */
+      private $coreJoinsFiles;
+
+      /**
+       * Sets whether core joins File custom fields to their file.
+       *
+       * @param bool $coreJoinsFiles
+       *   Whether core joins File custom fields to their file.
+       */
+      public function __construct(bool $coreJoinsFiles) {
+        $this->coreJoinsFiles = $coreJoinsFiles;
+      }
+
+      /**
+       * {@inheritdoc}
+       */
+      protected function coreJoinsFileFields(): bool {
+        return $this->coreJoinsFiles;
+      }
+
+    };
   }
 
 }

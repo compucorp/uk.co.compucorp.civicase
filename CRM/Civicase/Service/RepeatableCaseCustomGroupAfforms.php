@@ -47,6 +47,16 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   const FORM_STYLES_MODULE = 'civicase-repeatable-custom-data-form';
 
   /**
+   * Alias of the record's Case, joined to reach its files (see fileJoins()).
+   */
+  const FILE_CASE_JOIN = 'record_case';
+
+  /**
+   * Prefix of the alias of a File field's file (see fileJoins()).
+   */
+  const FILE_JOIN_PREFIX = 'record_file_';
+
+  /**
    * Listener for `civi.afform.get`: contributes the Case create/update afforms.
    *
    * @param \Civi\Core\Event\GenericHookEvent $event
@@ -185,14 +195,24 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
     $displayFields = array_filter($fields, [$this, 'isDisplayedInTable']);
 
     $select = array_map([$this, 'fieldDisplayKey'], array_values($displayFields));
-    foreach ($displayFields as $field) {
-      if ($this->fieldIsFile($field)) {
-        // The file column links its name to this URL.
-        $select[] = $field['name'] . '.url';
-      }
+    $fileFields = array_filter($displayFields, [$this, 'fieldIsFile']);
+    foreach ($fileFields as $field) {
+      // The file column links its name to this URL.
+      $select[] = $this->fileFieldPrefix($field) . '.url';
     }
     $select[] = 'id';
     $select[] = 'entity_id';
+
+    $apiParams = [
+      'version' => 4,
+      'select' => array_values(array_unique($select)),
+      'orderBy' => [],
+      'where' => [],
+    ];
+    $joins = $this->fileJoins(array_values($fileFields), $groupDetails['table_name']);
+    if ($joins) {
+      $apiParams['join'] = $joins;
+    }
 
     $columns = array_map([$this, 'searchColumnForField'], array_values($displayFields));
     $columns[] = $this->searchButtonColumn($entityName);
@@ -210,12 +230,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
             'name' => $searchName,
             'label' => ts('%1 Search', [1 => $group['title']]),
             'api_entity' => $entityName,
-            'api_params' => [
-              'version' => 4,
-              'select' => array_values(array_unique($select)),
-              'orderBy' => [],
-              'where' => [],
-            ],
+            'api_params' => $apiParams,
           ],
           'match' => ['name'],
         ],
@@ -287,7 +302,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
     ];
     if ($this->fieldIsFile($field)) {
       $column['link'] = [
-        'path' => '[' . $field['name'] . '.url]',
+        'path' => '[' . $this->fileFieldPrefix($field) . '.url]',
         'target' => '_blank',
       ];
     }
@@ -313,7 +328,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
    */
   protected function fieldDisplayKey(array $field): string {
     if ($this->fieldIsFile($field)) {
-      return $field['name'] . '.file_name';
+      return $this->fileFieldPrefix($field) . '.file_name';
     }
     if ($this->fieldIsReference($field)) {
       return $field['name'] . '.' . $this->referenceLabelField($field);
@@ -354,6 +369,69 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
    */
   protected function fieldIsFile(array $field): bool {
     return ($field['data_type'] ?? '') === 'File';
+  }
+
+  /**
+   * Whether core's APIv4 joins a File custom field to its file.
+   *
+   * Core does so since it added CRM_Core_BAO_CustomField::getFkEntity(). Before
+   * that (e.g. 5.75), `<field>.file_name` and `<field>.url` are undefined, so
+   * the file has to be joined explicitly (see fileJoins()).
+   *
+   * @return bool
+   *   TRUE when `<field>.file_name` and `<field>.url` resolve by themselves.
+   */
+  protected function coreJoinsFileFields(): bool {
+    return method_exists(\CRM_Core_BAO_CustomField::class, 'getFkEntity');
+  }
+
+  /**
+   * The prefix of the keys that read a File field's file.
+   *
+   * @param array $field
+   *   Custom field record.
+   *
+   * @return string
+   *   The field name when core joins the file itself, otherwise the alias of
+   *   the file's join from fileJoins().
+   */
+  protected function fileFieldPrefix(array $field): string {
+    return $this->coreJoinsFileFields()
+      ? $field['name']
+      : self::FILE_JOIN_PREFIX . $field['name'];
+  }
+
+  /**
+   * Explicit joins to the files of File fields, on cores that do not join them.
+   *
+   * @param array $fileFields
+   *   The File custom fields shown in the table.
+   * @param string $tableName
+   *   The group's table, which the EntityFile rows are stored against.
+   *
+   * @return array
+   *   APIv4 joins, or none when core joins the files itself.
+   */
+  protected function fileJoins(array $fileFields, string $tableName): array {
+    if (!$fileFields || $this->coreJoinsFileFields()) {
+      return [];
+    }
+
+    $case = self::FILE_CASE_JOIN;
+    $joins = [["Case AS $case", 'LEFT', ["$case.id", '=', 'entity_id']]];
+    foreach ($fileFields as $field) {
+      $file = $this->fileFieldPrefix($field);
+      $joins[] = [
+        "File AS $file",
+        'LEFT',
+        'EntityFile',
+        ["$case.id", '=', "$file.entity_id"],
+        ["$file.entity_table", '=', "'$tableName'"],
+        ["$file.id", '=', $field['name']],
+      ];
+    }
+
+    return $joins;
   }
 
   /**
