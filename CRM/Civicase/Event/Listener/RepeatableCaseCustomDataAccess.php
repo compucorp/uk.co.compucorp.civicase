@@ -193,7 +193,7 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAccess {
    * @return array|null
    *   The CustomGroup record for a multi-record Case custom group, or NULL.
    */
-  private static function getGatedGroupForEntity(string $entityName): ?array {
+  public static function getGatedGroupForEntity(string $entityName): ?array {
     $groupName = CoreUtil::getCustomGroupName($entityName);
     if (!$groupName) {
       return NULL;
