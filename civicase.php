@@ -136,6 +136,44 @@ function civicase_civicrm_config(&$config) {
       'validateValues',
     ]
   );
+
+  // Form Builder support for repeatable Case custom groups. See
+  // the listener for what each step fixes in afform core.
+  // After core generates the custom group field blocks (priority 0).
+  Civi::dispatcher()->addListener(
+    'civi.afform.get',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'markRequiredFields'],
+    -100
+  );
+  // After afform declares its Angular modules (priority -1000).
+  Civi::dispatcher()->addListener(
+    'hook_civicrm_angularModules',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'addFormMessagesToAfform'],
+    -2000
+  );
+  // Next to core's own checks (required fields at 50, references at 45).
+  Civi::dispatcher()->addListener(
+    'civi.afform.validate',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'validate'],
+    40
+  );
+  // Last, once every check has run.
+  Civi::dispatcher()->addListener(
+    'civi.afform.validate',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'reportErrors'],
+    -1000
+  );
+  // Around core's save of each entity (processGenericEntity, priority 0).
+  Civi::dispatcher()->addListener(
+    'civi.afform.submit',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'detachEntries'],
+    5
+  );
+  Civi::dispatcher()->addListener(
+    'civi.afform.submit',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'saveEntries'],
+    -5
+  );
 }
 
 /**
