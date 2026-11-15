@@ -53,6 +53,9 @@
     function createUploader () {
       return new FileUploader({
         url: civicaseCrmUrl('civicrm/ajax/attachment'),
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
         onAfterAddingFile: function onAfterAddingFile (item) {
           item.crmData = { description: '' };
         },
