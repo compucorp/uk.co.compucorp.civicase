@@ -36,3 +36,8 @@ npm run report           # open last HTML report
 - `repeatable-case-custom-fields.spec.ts` — TCOSB-23: the Custom Group admin
   form exposes "Allow multiple records", "Maximum records" and "Tab with table"
   when the group is used for a Case, and the configuration saves (AC1 / AC2).
+- `export-repeatable-case-custom-data.spec.ts` — TCOSB-62 (1.7): a Case search
+  joined to repeatable groups downloads through SearchKit's Download
+  Spreadsheet with one row per record (AC1–AC7, AC9–AC12). AC8 (permissions)
+  needs a non-admin user, so it is covered by the PHPUnit test
+  `CRM_Civicase_RepeatableCaseCustomDataExportTest` instead.

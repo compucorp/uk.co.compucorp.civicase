@@ -111,6 +111,44 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupFileColumnTest extends TestC
   }
 
   /**
+   * Download Spreadsheet exports the file's link, not just its name.
+   */
+  public function testDownloadExportsTheFileLink() {
+    $group = $this->createRepeatableCaseGroup('Documents', [
+      'attachment' => [
+        'data_type' => 'File',
+        'html_type' => 'File',
+        'in_selector' => 1,
+      ],
+      'title' => ['in_selector' => 1],
+    ]);
+    $caseId = $this->createCase();
+    $fileId = $this->createFile('report');
+    $this->createRecord($group, $caseId, ['attachment' => $fileId, 'title' => 'With file']);
+    $this->createRecord($group, $caseId, ['title' => 'No file']);
+
+    $rows = (array) civicrm_api4('SearchDisplay', 'download', [
+      'savedSearch' => 'Custom_' . $group['name'] . '_Search',
+      'display' => 'Custom_' . $group['name'] . '_Tab',
+      'filters' => ['entity_id' => $caseId],
+      'format' => 'array',
+      'checkPermissions' => FALSE,
+    ]);
+
+    $this->assertEquals(['attachment', 'title'], $rows[0]);
+    $this->assertCount(3, $rows);
+    $this->assertEquals(['With file', 'No file'], [$rows[1][1], $rows[2][1]]);
+    parse_str((string) parse_url($rows[1][0], PHP_URL_QUERY), $query);
+    $this->assertEquals($fileId, $query['id'] ?? NULL);
+    $entityId = $query['eid'] ?? NULL;
+    $this->assertTrue(CRM_Core_BAO_File::validateFileHash($query['fcs'] ?? '', $entityId, $fileId));
+    [$path] = CRM_Core_BAO_File::path($fileId, $entityId);
+    $this->assertNotNull($path, 'The exported link must find the file.');
+    $this->assertEmpty($rows[2][0]);
+    $this->assertEquals('report.txt', $this->runTable($group, $caseId)[0]['columns'][0]['val']);
+  }
+
+  /**
    * Runs the group's records table for a Case.
    *
    * @param array $group

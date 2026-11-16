@@ -172,6 +172,19 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   }
 
   /**
+   * Name of the saved search behind a group's records table.
+   *
+   * @param array $group
+   *   CustomGroup record (needs `name`).
+   *
+   * @return string
+   *   The saved search name, e.g. Custom_publications_Search.
+   */
+  public static function getRecordsSearchName(array $group): string {
+    return 'Custom_' . $group['name'] . '_Search';
+  }
+
+  /**
    * Builds the SavedSearch + SearchDisplay managed declarations for a group.
    *
    * Mirrors core's CustomGroup::getSearchKit so the table matches the standard
@@ -187,7 +200,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
    */
   protected function searchKitManaged(array $group): array {
     $entityName = 'Custom_' . $group['name'];
-    $searchName = $entityName . '_Search';
+    $searchName = self::getRecordsSearchName($group);
     $displayName = $entityName . '_Tab';
 
     $groupDetails = \CRM_Core_BAO_CustomGroup::getGroup(['id' => $group['id']]);
