@@ -194,7 +194,10 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform {
     }
     \Civi::log('afform')->error('Afform Validation errors: ' . print_r($errors, TRUE));
 
-    throw new \CRM_Core_Exception(implode("\n", $errors), 0, ['validation' => $errors]);
+    throw new \CRM_Core_Exception(implode("\n", $errors), 0, [
+      'validation' => $errors,
+      'show_detailed_error' => TRUE,
+    ]);
   }
 
   /**

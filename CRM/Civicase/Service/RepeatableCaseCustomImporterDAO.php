@@ -9,8 +9,8 @@
  * indices when "Allow Updating An Entity Using Unique Fields" is ticked, and
  * fails when the entity has no DAO. With no fields and no indices, that option
  * finds nothing to match on, so the import behaves the same ticked or
- * unticked. Updates are driven by the mapped record ID, as a mapped ID is for
- * any other entity.
+ * unticked. Updates are driven by each group's mapped Custom Value ID, as a
+ * mapped ID is for any other entity.
  */
 class CRM_Civicase_Service_RepeatableCaseCustomImporterDAO extends CRM_Core_DAO {
 

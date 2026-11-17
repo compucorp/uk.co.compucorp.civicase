@@ -223,6 +223,33 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfformTest extends Tes
   }
 
   /**
+   * Users who are not administrators are also told what is wrong.
+   */
+  public function testValidationErrorIsShownToUsersWithoutDebugAccess() {
+    $this->setPermissions(['access CiviCRM', 'add cases', 'access all cases and activities', 'access all custom data']);
+    $this->assertFalse(CRM_Core_Permission::check('view debug output'));
+
+    $entries = [['title' => 'First'], ['title' => 'Second', 'pages' => 'abc']];
+    $page = new CRM_Api4_Page_AJAX();
+    $execute = new ReflectionMethod($page, 'execute');
+    $execute->setAccessible(TRUE);
+    $response = $execute->invoke($page, 'Afform', 'submit', [
+      'name' => self::FORM,
+      'values' => [
+        'Case1' => [
+          [
+            'fields' => ['subject' => 'TCOSB-60 test'],
+            'joins' => ['Custom_' . $this->group['name'] => $entries],
+          ],
+        ],
+      ],
+    ]);
+
+    $this->assertStringContainsString('Pages (entry 2) must be a whole number.', $response['error_message'] ?? '');
+    $this->assertNoCaseCreated();
+  }
+
+  /**
    * Updating a case keeps records not on the form or removed from it.
    *
    * The form loads only 2 of the case's 3 records (its repeat maximum); the

@@ -2,13 +2,14 @@
 
 /**
  * @file
- * CaseCustomImporter.create API (TCOSB-64 / 1.8).
+ * CaseCustomImporter.create API.
  *
  * A thin importer endpoint called once per CSV row by the
- * nz.co.fuzion.csvimport extension ("CSV GUI Import to api"). It creates
- * repeatable Case custom data additively — no core Import framework changes.
- * The parent Case is matched by Case ID; each row creates new record(s)
- * (create-only). See CRM_Civicase_Service_RepeatableCaseCustomImporter.
+ * nz.co.fuzion.csvimport extension ("CSV Import to API"). It creates and
+ * updates repeatable Case custom data additively — no core Import framework
+ * changes. The parent Case is matched by Case ID; per group, a blank Custom
+ * Value ID creates a record and a populated one updates that record. See
+ * CRM_Civicase_Service_RepeatableCaseCustomImporter.
  */
 
 use CRM_Civicase_Service_RepeatableCaseCustomImporter as Importer;
@@ -17,7 +18,8 @@ use CRM_Civicase_Service_RepeatableCaseCustomImporter as Importer;
  * CaseCustomImporter.create.
  *
  * @param array $params
- *   Row values (case_id + custom_<fieldId> columns).
+ *   Row values (case_id, custom_value_id_<groupId> and custom_<fieldId>
+ *   columns).
  *
  * @return array
  *   API3 result.
@@ -44,16 +46,20 @@ function _civicrm_api3_case_custom_importer_create_spec(&$spec) {
     'type' => CRM_Utils_Type::T_INT,
     'api.required' => 1,
   ];
-  $spec['id'] = [
-    'title' => ts('Record ID (match key for update; blank to create)'),
-    'type' => CRM_Utils_Type::T_INT,
-  ];
-  $optionFields = Importer::optionFieldMetadata();
+  // Each group's record ID is taken as text, so the importer can name the
+  // group in its own message when the cell is not a positive whole number.
+  foreach (Importer::recordIdFields() as $key => $label) {
+    $spec[$key] = [
+      'title' => $label,
+      'type' => CRM_Utils_Type::T_STRING,
+    ];
+  }
+  $parserMetadata = Importer::parserFieldMetadata();
   foreach (Importer::mappableFields() as $key => $label) {
     $spec[$key] = [
       'title' => $label,
       'type' => CRM_Utils_Type::T_STRING,
-    ] + ($optionFields[$key] ?? []);
+    ] + ($parserMetadata[$key] ?? []);
   }
 }
 

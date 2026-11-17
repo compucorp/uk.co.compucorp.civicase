@@ -23,7 +23,7 @@ class CaseCustomImporterApiTest extends TestCase implements HeadlessInterface {
   use CRM_Civicase_Helpers_RepeatableCaseCustomDataTrait;
 
   /**
-   * Repeatable group with a text, an option and a Yes/No field.
+   * Repeatable group with a text, an option, a Yes/No and a Money field.
    *
    * @var array
    */
@@ -71,6 +71,10 @@ class CaseCustomImporterApiTest extends TestCase implements HeadlessInterface {
         'data_type' => 'Boolean',
         'html_type' => 'Radio',
       ],
+      'fee' => [
+        'label' => 'Fee',
+        'data_type' => 'Money',
+      ],
     ]);
     $this->employment = $this->createRepeatableCaseGroup('Employment history', [
       'employer' => ['label' => 'Employer'],
@@ -81,6 +85,7 @@ class CaseCustomImporterApiTest extends TestCase implements HeadlessInterface {
    * Removes the groups, Cases and contacts the test created.
    */
   public function tearDown(): void {
+    $this->resetPermissions();
     $this->cleanUpRepeatableCaseCustomData();
   }
 
@@ -98,14 +103,25 @@ class CaseCustomImporterApiTest extends TestCase implements HeadlessInterface {
   }
 
   /**
-   * Case ID is a required column and the record id an optional one.
+   * Case ID is required; each group has its own optional record ID column.
+   *
+   * The record ID columns are labelled as a SearchKit export labels them, so
+   * an exported file maps straight back. There is no single record ID for
+   * the whole row.
    */
-  public function testGetfieldsExposesCaseIdAndMatchKey() {
+  public function testGetfieldsExposesCaseIdAndAnIdColumnPerGroup() {
     $fields = $this->getCreateFields();
 
     $this->assertEquals(1, $fields['case_id']['api.required']);
-    $this->assertArrayHasKey('id', $fields);
-    $this->assertEmpty($fields['id']['api.required'] ?? NULL);
+    $this->assertArrayNotHasKey('id', $fields);
+    $columns = [
+      $this->idKey($this->education) => 'Education history: Custom Value ID',
+      $this->idKey($this->employment) => 'Employment history: Custom Value ID',
+    ];
+    foreach ($columns as $key => $title) {
+      $this->assertEquals($title, $fields[$key]['title'] ?? NULL);
+      $this->assertEmpty($fields[$key]['api.required'] ?? NULL);
+    }
   }
 
   /**
@@ -147,6 +163,22 @@ class CaseCustomImporterApiTest extends TestCase implements HeadlessInterface {
   }
 
   /**
+   * Money columns tell the parser to clean amounts, but are taken as text.
+   *
+   * With the Money data type, CiviCRM's import parser turns "£1,000.50" (as
+   * a SearchKit export writes it) into 1000.50. The API type stays text, so
+   * an amount the parser rejects reaches the importer, which names the field
+   * in its error.
+   */
+  public function testGetfieldsTypesMoneyColumnsForTheImportParser() {
+    $fields = $this->getCreateFields();
+
+    $fee = $fields[$this->fieldKey($this->education, 'fee')];
+    $this->assertEquals('Money', $fee['data_type']);
+    $this->assertEquals(CRM_Utils_Type::T_STRING, $fee['type']);
+  }
+
+  /**
    * The entity resolves over APIv4 too, listing the same columns.
    *
    * The nz.co.fuzion.csvimport extension calls APIv4 getFields on the import
@@ -158,7 +190,10 @@ class CaseCustomImporterApiTest extends TestCase implements HeadlessInterface {
     ])->indexBy('name');
 
     $this->assertArrayHasKey('case_id', $fields);
-    $this->assertArrayHasKey('id', $fields);
+    $this->assertEquals(
+      'Education history: Custom Value ID',
+      $fields[$this->idKey($this->education)]['title'] ?? NULL
+    );
     $titleKey = $this->fieldKey($this->education, 'title');
     $this->assertEquals('Education history: Title', $fields[$titleKey]['title']);
   }
@@ -179,7 +214,7 @@ class CaseCustomImporterApiTest extends TestCase implements HeadlessInterface {
     $this->assertSame([], $dao::indices());
     $unexpected = array_filter(
       array_keys($this->getCreateFields()),
-      fn ($key) => !in_array($key, ['case_id', 'id'], TRUE) && strpos($key, 'custom_') !== 0
+      fn ($key) => $key !== 'case_id' && strpos($key, 'custom_') !== 0
     );
     $this->assertEmpty($unexpected);
   }
@@ -201,22 +236,25 @@ class CaseCustomImporterApiTest extends TestCase implements HeadlessInterface {
   }
 
   /**
-   * Create with a record id updates that record instead of adding one.
+   * A group's record ID updates that record; other groups still get created.
    */
-  public function testCreateUpdatesRecordById() {
+  public function testCreateUpdatesRecordByItsGroupsId() {
     $recordId = $this->createRecord($this->education, $this->caseId, [
       'title' => 'BSc Biology',
     ]);
 
-    civicrm_api3('CaseCustomImporter', 'create', [
+    $result = civicrm_api3('CaseCustomImporter', 'create', [
       'case_id' => $this->caseId,
-      'id' => $recordId,
+      $this->idKey($this->education) => $recordId,
       $this->fieldKey($this->education, 'title') => 'BSc Biology (Hons)',
+      $this->fieldKey($this->employment, 'employer') => 'Acme Ltd',
     ]);
 
+    $this->assertEquals(2, $result['values']);
     $records = $this->getRecords($this->education, $this->caseId);
     $this->assertCount(1, $records);
     $this->assertEquals('BSc Biology (Hons)', $records[0]['title']);
+    $this->assertCount(1, $this->getRecords($this->employment, $this->caseId));
   }
 
   /**
@@ -226,17 +264,65 @@ class CaseCustomImporterApiTest extends TestCase implements HeadlessInterface {
     try {
       civicrm_api3('CaseCustomImporter', 'create', [
         'case_id' => $this->caseId,
-        'id' => 999999,
+        $this->idKey($this->education) => 999999,
         $this->fieldKey($this->education, 'title') => 'BSc Biology',
       ]);
       $this->fail('Expected the row to be rejected');
     }
     catch (CRM_Core_Exception $e) {
       $this->assertEquals(
-        'No repeatable record 999999 found on Case ' . $this->caseId,
+        'No Education history record has Custom Value ID 999999',
         $e->getMessage()
       );
     }
+    $this->assertEmpty($this->getRecords($this->education, $this->caseId));
+  }
+
+  /**
+   * A record ID that is not a number is reported with its group's label.
+   *
+   * The column is taken as text, so the importer's own message names the
+   * group instead of the API's generic integer error.
+   */
+  public function testCreateReportsInvalidIdWithTheGroupLabel() {
+    try {
+      civicrm_api3('CaseCustomImporter', 'create', [
+        'case_id' => $this->caseId,
+        $this->idKey($this->education) => 'abc',
+        $this->fieldKey($this->education, 'title') => 'BSc Biology',
+      ]);
+      $this->fail('Expected the row to be rejected');
+    }
+    catch (CRM_Core_Exception $e) {
+      $this->assertEquals(
+        'Education history: Custom Value ID must be a positive whole number, not "abc"',
+        $e->getMessage()
+      );
+    }
+  }
+
+  /**
+   * With permission checks, a row for a Case the user cannot access fails.
+   *
+   * The user can import (the API needs "administer CiviCRM", which also
+   * gives access to all custom data) but has no Case access.
+   */
+  public function testCreateRejectsCaseTheUserCannotAccess() {
+    $this->setPermissions(['access CiviCRM', 'administer CiviCRM']);
+
+    try {
+      civicrm_api3('CaseCustomImporter', 'create', [
+        'case_id' => $this->caseId,
+        'check_permissions' => 1,
+        $this->fieldKey($this->education, 'title') => 'BSc Biology',
+      ]);
+      $this->fail('Expected the row to be rejected');
+    }
+    catch (CRM_Core_Exception $e) {
+      $this->assertEquals("You do not have permission to update Case {$this->caseId}", $e->getMessage());
+    }
+
+    $this->resetPermissions();
     $this->assertEmpty($this->getRecords($this->education, $this->caseId));
   }
 
