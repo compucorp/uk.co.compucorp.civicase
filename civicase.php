@@ -244,6 +244,7 @@ function civicase_civicrm_buildForm($formName, &$form) {
     new CRM_Civicase_Hook_BuildForm_EnableCaseCategoryIconField(),
     new CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplay(),
     new CRM_Civicase_Hook_BuildForm_HideMaxMultipleForCaseCustomGroups(),
+    new CRM_Civicase_Hook_BuildForm_HideCaseGroupsFromCustomDataImport(),
     new CRM_Civicase_Hook_BuildForm_ModifyCaseTypesForAdvancedSearch(),
     new CRM_Civicase_Hook_BuildForm_AddCaseCategoryInstanceField(),
     new CRM_Civicase_Hook_BuildForm_RemoveExportActionFromReports(),
@@ -362,6 +363,7 @@ function civicase_civicrm_validateForm($formName, &$fields, &$files, &$form, &$e
     new CRM_Civicase_Hook_ValidateForm_SendBulkEmail(),
     new CRM_Civicase_Hook_ValidateForm_RemoveEmptyTargetContactFromActivity(),
     new CRM_Civicase_Hook_ValidateForm_RestrictRepeatableCaseCustomData(),
+    new CRM_Civicase_Hook_ValidateForm_RejectCaseGroupsInCustomDataImport(),
   ];
 
   foreach ($hooks as $hook) {

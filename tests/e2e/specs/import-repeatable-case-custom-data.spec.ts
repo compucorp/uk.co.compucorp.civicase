@@ -5,17 +5,19 @@
  * so 1.8 is delivered additively via nz.co.fuzion.csvimport ("CSV GUI Import to
  * api", installed) calling a thin civicase API endpoint, CaseCustomImporter.create,
  * once per CSV row (same pattern as uk.co.compucorp.membershipextrasimporterapi).
- * The parent Case is matched by Case ID; each row creates NEW record(s)
- * (create-only — AC2/AC3, never overwrites).
+ * The parent Case is matched by Case ID. Each repeatable group has its own
+ * "<Group title>: Custom Value ID" column: blank creates a record in that
+ * group, populated updates that record in place.
  *
  * This spec drives CaseCustomImporter.create directly (the exact call csvimport
  * makes per row) in the authenticated session — a real regression guard without
  * the brittle csvimport QuickForm UI (that round-trip is covered by manual QA),
  * and without the DDL-leak that blocks creating a real custom group in a headless
  * PHPUnit test.
- *  - AC1: the repeatable group's fields are offered as importable columns.
- *  - AC2/AC3: two rows create two separate records against the same Case.
- *  - AC5: an invalid row (unknown Case) is rejected with an error.
+ *  - AC1/AC2: the group's fields and its Custom Value ID are importable columns.
+ *  - AC5/AC6: two rows create two separate records against the same Case.
+ *  - AC7/AC17: the group's ID updates a record in place; a blank cell clears.
+ *  - AC8/AC9: a bad ID or an unknown Case is rejected with an error.
  *
  * Self-contained: creates its own group + field + Case + records (no hardcoded
  * IDs) and tears them all down.
@@ -30,6 +32,7 @@ const GROUP_TITLE = 'ZZ E2E Import Repeat Case';
 const FIELD_LABEL = 'E2E Import Name';
 
 let groupName = '';
+let groupId = 0;
 let fieldId = 0;
 let fieldName = '';
 let dateFieldId = 0;
@@ -74,6 +77,7 @@ test.beforeAll(async () => {
     title: GROUP_TITLE, extends: 'Case', is_multiple: 1, style: 'Tab with table',
   }))[0];
   groupName = String(group.name);
+  groupId = Number(group.id);
   const field = civi.values(await civi.api3('CustomField', 'create', {
     custom_group_id: group.id, label: FIELD_LABEL, data_type: 'String', html_type: 'Text', is_active: 1, is_searchable: 1,
   }))[0];
@@ -111,18 +115,21 @@ test.afterAll(async () => {
   if (contactId) await civi.api3('Contact', 'delete', { id: contactId, skip_undelete: 1 }).catch(() => {});
 });
 
-test('CaseCustomImporter.create imports rows (create), updates by id, and rejects bad matches', async ({ page }) => {
+test('CaseCustomImporter.create imports rows (create), updates by the group ID, and rejects bad matches', async ({ page }) => {
   await civiLogin(page);
   await page.goto('/civicrm/admin/search', { waitUntil: 'domcontentloaded' });
   const col = `custom_${fieldId}`;
+  const idCol = `custom_value_id_${groupId}`;
 
-  // AC1: the group's field, case_id and the id match-key are importable columns.
+  // AC1/AC2: the group's field, case_id and the group's Custom Value ID
+  // (labelled as a SearchKit export labels it) are importable columns.
   const fields = await api3(page, 'CaseCustomImporter', 'getfields', { action: 'create' });
   expect(Object.keys(fields.values || {})).toContain(col);
   expect(Object.keys(fields.values || {})).toContain('case_id');
-  expect(Object.keys(fields.values || {})).toContain('id');
+  expect(fields.values?.[idCol]?.title).toBe(`${GROUP_TITLE}: Custom Value ID`);
+  expect(Object.keys(fields.values || {})).not.toContain('id');
 
-  // AC2/AC3: two rows (no id) -> two separate records against the same Case.
+  // AC5/AC6: two rows (no ID) -> two separate records against the same Case.
   const r1 = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, [col]: 'Imported A' });
   expect(r1.is_error).toBeFalsy();
   const r2 = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, [col]: 'Imported B' });
@@ -133,12 +140,12 @@ test('CaseCustomImporter.create imports rows (create), updates by id, and reject
   });
   expect(rows.length).toBe(2);
 
-  // Update: id matches an existing record -> updates it in place across
-  // MULTIPLE fields, no new row. id is a match key only (not written as a value).
+  // AC7: the group's ID matches an existing record -> updates it in place
+  // across MULTIPLE fields, no new row. The ID is a match key only.
   const dateCol = `custom_${dateFieldId}`;
   const targetId = rows[0].id;
   const upd = await api3(page, 'CaseCustomImporter', 'create', {
-    case_id: caseId, id: targetId, [col]: 'Updated A', [dateCol]: '2026-09-15',
+    case_id: caseId, [idCol]: targetId, [col]: 'Updated A', [dateCol]: '2026-09-15',
   });
   expect(upd.is_error).toBeFalsy();
   rows = await api4(page, `Custom_${groupName}`, 'get', {
@@ -149,21 +156,31 @@ test('CaseCustomImporter.create imports rows (create), updates by id, and reject
   expect(updatedRow[fieldName]).toBe('Updated A');
   expect(String(updatedRow[dateFieldName])).toContain('2026-09-15');
 
-  // Matching failure: an id with no record on this Case is rejected (no new row).
-  const badId = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, id: 999999, [col]: 'Nope' });
-  expect(badId.is_error).toBeTruthy();
-  expect(String(badId.error_message)).toContain('No repeatable record');
+  // AC17: on update a mapped blank cell clears the value; an unmapped column
+  // (the name here) is left unchanged.
+  const clear = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, [idCol]: targetId, [dateCol]: '' });
+  expect(clear.is_error).toBeFalsy();
+  rows = await api4(page, `Custom_${groupName}`, 'get', {
+    where: [['id', '=', targetId]], select: ['id', fieldName, dateFieldName],
+  });
+  expect(rows[0][fieldName]).toBe('Updated A');
+  expect(rows[0][dateFieldName]).toBeNull();
 
-  // A non-numeric id is rejected (api3 type validation catches it before the
-  // service; the service's own "Invalid record id" guard is covered by PHPUnit).
-  const badIdFmt = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, id: 'abc', [col]: 'Nope' });
+  // AC8: an ID with no record in the group is rejected (no new row).
+  const badId = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, [idCol]: 999999, [col]: 'Nope' });
+  expect(badId.is_error).toBeTruthy();
+  expect(String(badId.error_message)).toBe(`No ${GROUP_TITLE} record has Custom Value ID 999999`);
+
+  // AC8: a non-numeric ID is rejected, naming the group's ID column.
+  const badIdFmt = await api3(page, 'CaseCustomImporter', 'create', { case_id: caseId, [idCol]: 'abc', [col]: 'Nope' });
   expect(badIdFmt.is_error).toBeTruthy();
+  expect(String(badIdFmt.error_message)).toContain(`${GROUP_TITLE}: Custom Value ID must be a positive whole number`);
 
   // No stray rows created by any of the rejected imports.
   rows = await api4(page, `Custom_${groupName}`, 'get', { where: [['entity_id', '=', caseId]], select: ['id'] });
   expect(rows.length).toBe(2);
 
-  // AC5: an unknown Case is rejected.
+  // AC9: an unknown Case is rejected.
   const bad = await api3(page, 'CaseCustomImporter', 'create', { case_id: 999999, [col]: 'x' });
   expect(bad.is_error).toBeTruthy();
   expect(String(bad.error_message)).toContain('not found');

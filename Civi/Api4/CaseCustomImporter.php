@@ -26,7 +26,8 @@ class CaseCustomImporter extends AbstractEntity {
    *   Whether to enforce permissions.
    *
    * @return \Civi\Api4\Generic\BasicGetFieldsAction
-   *   Lists case_id plus every repeatable Case custom field.
+   *   Lists case_id, each group's record ID and every importable repeatable
+   *   Case custom field.
    */
   public static function getFields($checkPermissions = TRUE) {
     $action = new BasicGetFieldsAction(
@@ -38,7 +39,10 @@ class CaseCustomImporter extends AbstractEntity {
   }
 
   /**
-   * The importable field definitions (case_id + each repeatable custom field).
+   * The importable field definitions.
+   *
+   * Case ID, each group's record ID and each importable repeatable custom
+   * field, matching the APIv3 CaseCustomImporter.create spec.
    *
    * @return array
    *   APIv4 field spec array.
@@ -46,8 +50,10 @@ class CaseCustomImporter extends AbstractEntity {
   public static function fieldList(): array {
     $fields = [
       ['name' => 'case_id', 'title' => ts('Case ID'), 'data_type' => 'Integer'],
-      ['name' => 'id', 'title' => ts('Record ID'), 'data_type' => 'Integer'],
     ];
+    foreach (Importer::recordIdFields() as $key => $label) {
+      $fields[] = ['name' => $key, 'title' => $label, 'data_type' => 'Integer'];
+    }
     foreach (Importer::mappableFields() as $key => $label) {
       $fields[] = ['name' => $key, 'title' => $label, 'data_type' => 'String'];
     }

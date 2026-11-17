@@ -142,6 +142,19 @@ trait CRM_Civicase_Helpers_RepeatableCaseCustomDataTrait {
   }
 
   /**
+   * A group's record ID column key as the importer uses it.
+   *
+   * @param array $group
+   *   A group returned by createCustomGroup().
+   *
+   * @return string
+   *   The importer column key, e.g. custom_value_id_3.
+   */
+  private function idKey(array $group): string {
+    return CRM_Civicase_Service_RepeatableCaseCustomImporter::recordIdKey((int) $group['id']);
+  }
+
+  /**
    * Creates a record in a repeatable group directly, through APIv4.
    *
    * @param array $group
