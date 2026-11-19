@@ -75,6 +75,7 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfformTest extends Tes
         'html_type' => 'Select',
         'option_values' => ['book' => 'Book', 'paper' => 'Paper'],
       ],
+      'fee' => ['label' => 'Fee', 'data_type' => 'Money'],
     ]);
     Civi::dispatcher()->addListener('civi.afform.get', [$this, 'provideForm']);
   }
@@ -270,6 +271,23 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfformTest extends Tes
       ['First (edited)', 'Second', 'Third', 'Fourth'],
       array_column($this->getRecords($this->group, $caseId), 'title')
     );
+  }
+
+  /**
+   * A cleared amount, or a new entry's blank one, is saved empty, not as 0.
+   */
+  public function testBlankAmountIsSavedEmpty() {
+    $caseId = $this->createCase();
+    $id = $this->createRecord($this->group, $caseId, ['title' => 'First', 'fee' => 10]);
+
+    $this->submit(
+      [['id' => $id, 'title' => 'First', 'fee' => ''], ['title' => 'Second', 'fee' => '']],
+      ['Case1' => $caseId]
+    );
+
+    $records = $this->getRecords($this->group, $caseId);
+    $this->assertSame(['First', 'Second'], array_column($records, 'title'));
+    $this->assertSame([NULL, NULL], array_column($records, 'fee'));
   }
 
   /**

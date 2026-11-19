@@ -138,6 +138,14 @@ function civicase_civicrm_config(&$config) {
   );
 
   Civi::dispatcher()->addListener(
+    'civi.api.prepare',
+    [
+      'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataClearedNumbers',
+      'keepClearedNumbersEmpty',
+    ]
+  );
+
+  Civi::dispatcher()->addListener(
     'civi.api4.validate',
     [
       'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseType',

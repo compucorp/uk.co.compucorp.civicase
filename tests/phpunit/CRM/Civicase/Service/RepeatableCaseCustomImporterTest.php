@@ -88,6 +88,10 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporterTest extends TestCase imp
         'label' => 'Fee',
         'data_type' => 'Money',
       ],
+      'hours' => [
+        'label' => 'Hours',
+        'data_type' => 'Float',
+      ],
       'subjects' => [
         'label' => 'Subjects',
         'html_type' => 'Select',
@@ -418,6 +422,33 @@ class CRM_Civicase_Service_RepeatableCaseCustomImporterTest extends TestCase imp
     $this->assertEquals('BSc Biology (Hons)', $record['title']);
     $this->assertNull($record['year']);
     $this->assertEquals('bachelor', $record['level']);
+  }
+
+  /**
+   * A blank Money or Float cell clears the value on update instead of 0.
+   */
+  public function testBlankMoneyAndFloatCellsClearValueOnUpdate() {
+    $clearedId = $this->createRecord($this->education, $this->caseId, ['title' => 'MSc', 'fee' => 250, 'hours' => 1.5]);
+    $zeroedId = $this->createRecord($this->education, $this->caseId, ['title' => 'BSc', 'fee' => 100, 'hours' => 2]);
+    $otherId = $this->createRecord($this->education, $this->caseId, ['title' => 'PhD', 'fee' => 75, 'hours' => 3]);
+
+    foreach ([$clearedId => '', $zeroedId => '0'] as $recordId => $cell) {
+      Importer::importRow([
+        'case_id' => $this->caseId,
+        $this->idKey($this->education) => (string) $recordId,
+        $this->fieldKey($this->education, 'fee') => $cell,
+        $this->fieldKey($this->education, 'hours') => $cell,
+      ]);
+    }
+
+    $records = array_column($this->getRecords($this->education, $this->caseId), NULL, 'id');
+    $this->assertNull($records[$clearedId]['fee']);
+    $this->assertNull($records[$clearedId]['hours']);
+    $this->assertEquals('MSc', $records[$clearedId]['title']);
+    $this->assertSame([0.0, 0.0], [(float) $records[$zeroedId]['fee'], (float) $records[$zeroedId]['hours']]);
+    $this->assertNotNull($records[$zeroedId]['fee']);
+    $this->assertNotNull($records[$zeroedId]['hours']);
+    $this->assertEquals([75, 3], [$records[$otherId]['fee'], $records[$otherId]['hours']]);
   }
 
   /**
