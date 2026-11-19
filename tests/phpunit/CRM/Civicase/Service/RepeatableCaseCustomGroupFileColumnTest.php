@@ -2,6 +2,9 @@
 
 use Civi\Test;
 use Civi\Test\HeadlessInterface;
+use CRM_Civicase_Api_SearchDisplay_RepeatableCaseCustomDataDownload as FileUrlDownload;
+use CRM_Civicase_Api_SearchDisplay_WrappingPdfWriter as WrappingPdfWriter;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -146,6 +149,54 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupFileColumnTest extends TestC
     $this->assertNotNull($path, 'The exported link must find the file.');
     $this->assertEmpty($rows[2][0]);
     $this->assertEquals('report.txt', $this->runTable($group, $caseId)[0]['columns'][0]['val']);
+  }
+
+  /**
+   * A PDF lets only the file link columns wrap, counted as exported.
+   *
+   * SearchKit leaves columns without a key, such as buttons, out of the file.
+   */
+  public function testPdfWrapsOnlyFileLinkColumns() {
+    $columns = [
+      ['type' => 'buttons', 'links' => []],
+      ['key' => 'title', 'type' => 'field'],
+      [
+        'key' => 'record_file_attachment.file_name',
+        'type' => 'field',
+        'link' => ['path' => '[record_file_attachment.url]'],
+      ],
+      [
+        'key' => 'record_file_other.file_name',
+        'type' => 'field',
+        'link' => ['path' => '[elsewhere]'],
+      ],
+    ];
+
+    $this->assertSame([1], FileUrlDownload::getFileUrlColumnNumbers($columns));
+  }
+
+  /**
+   * The PDF's HTML lets the given columns' cells break their text anywhere.
+   */
+  public function testPdfWriterAddsWrapStyleForGivenColumns() {
+    $spreadsheet = new Spreadsheet();
+    $spreadsheet->getActiveSheet()->fromArray([
+      ['Title', 'Attachment'],
+      ['Report', 'https://example.org/civicrm/file?reset=1&id=1&eid=2&fcs=' . str_repeat('a', 64)],
+    ]);
+
+    try {
+      WrappingPdfWriter::$wrapColumns = [1];
+      $html = (new WrappingPdfWriter($spreadsheet))->generateHTMLAll();
+      WrappingPdfWriter::$wrapColumns = [];
+      $unchanged = (new WrappingPdfWriter($spreadsheet))->generateHTMLAll();
+    }
+    finally {
+      WrappingPdfWriter::$wrapColumns = [];
+    }
+
+    $this->assertStringContainsString('<style>.column1 { overflow-wrap: anywhere; }</style></head>', $html);
+    $this->assertStringNotContainsString('overflow-wrap', $unchanged);
   }
 
   /**
