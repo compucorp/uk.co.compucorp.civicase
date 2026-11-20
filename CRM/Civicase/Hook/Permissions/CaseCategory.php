@@ -1,6 +1,5 @@
 <?php
 
-use CRM_Case_BAO_CaseType as CaseType;
 use CRM_Civicase_ExtensionUtil as E;
 use CRM_Civicase_Helper_CaseCategory as CaseCategoryHelper;
 use CRM_Civicase_Service_CaseCategoryPermission as CaseCategoryPermission;
@@ -70,7 +69,10 @@ class CRM_Civicase_Hook_Permissions_CaseCategory {
    * Adds permissions provided by Case categories excluding Civicase.
    */
   private function addCaseCategoryPermissions() {
-    $caseTypeCategories = CaseType::buildOptions('case_type_category', 'validate');
+    // Not CaseType::buildOptions(): during a CiviCRM upgrade the
+    // case_type_category field can be missing from CaseType's cached fields,
+    // and CiviCRM then removes every category permission from Drupal roles.
+    $caseTypeCategories = CRM_Core_OptionGroup::values('case_type_categories', FALSE, FALSE, FALSE, NULL, 'name', FALSE);
     if (empty($caseTypeCategories)) {
       return;
     }
