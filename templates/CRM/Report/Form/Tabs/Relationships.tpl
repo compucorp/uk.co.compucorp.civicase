@@ -28,7 +28,7 @@
           {if $field.operatorType & 4}
             <tr class="report-contents crm-report crm-report-criteria-filter crm-report-criteria-filter-{$tableName}">
               <td class="label report-contents">{$field.title}</td>
-              {include file="CRM/Core/DateRange.tpl" fieldName=$fieldName from='_from' to='_to'}
+              {include file="CRM/Core/DatePickerRangeWrapper.tpl" fieldName=$fieldName hideRelativeLabel=1 from='_from' to='_to' class='' colspan=''}
             </tr>
             {* custom override for handling of single date concept - ie. a dividing date *}
           {elseif $field.operatorType eq 3}
@@ -36,7 +36,7 @@
               <td class="label report-contents">{$field.title}</td>
               <td class="report-contents">{$form.$fieldOp.html}</td>
               <td>
-                <span id="{$filterVal}_cell">{include file="CRM/common/jcalendar.tpl" elementName=$filterVal}</span>
+                <span id="{$filterVal}_cell">{$form.$filterVal.html}</span>
                       <span id="{$filterMin}_max_cell">{$form.$filterMin.label}&nbsp;{$form.$filterMin.html}
                         &nbsp;&nbsp;{$form.$filterMax.label}&nbsp;{$form.$filterMax.html}</span>
               </td>

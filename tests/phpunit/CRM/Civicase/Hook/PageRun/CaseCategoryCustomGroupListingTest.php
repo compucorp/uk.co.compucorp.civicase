@@ -15,6 +15,10 @@ class CRM_Civicase_Hook_PageRun_CaseCategoryCustomGroupListingTest extends BaseH
    * Test the CaseCategoryCustomGroupListing run method.
    */
   public function testRun() {
+    if (!class_exists('CRM_Custom_Page_Group')) {
+      $this->markTestSkipped('CRM_Custom_Page_Group was removed from CiviCRM core.');
+    }
+
     $rows = [
       [
         'extends_entity_column_id' => 1,

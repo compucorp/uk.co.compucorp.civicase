@@ -72,6 +72,10 @@ class CRM_Civicase_Hook_PageRun_CaseCategoryCustomGroupListing {
    * form use the same page we check that the action URL parameter is not
    * defined so we avoid running the hook for those forms.
    *
+   * CRM_Custom_Page_Group was removed from CiviCRM core (the listing is now
+   * the SearchKit afsearchAdminCustomGroups form), so there is nothing to
+   * format when the class no longer exists.
+   *
    * @param object $page
    *   Page Object.
    *
@@ -79,6 +83,10 @@ class CRM_Civicase_Hook_PageRun_CaseCategoryCustomGroupListing {
    *   returns a boolean to determine if hook will run or not.
    */
   private function shouldRun($page) {
+    if (!class_exists('CRM_Custom_Page_Group')) {
+      return FALSE;
+    }
+
     $action = (CRM_Utils_Request::retrieve('action', 'String'));
 
     return $page instanceof CRM_Custom_Page_Group && (empty($action) || (!empty($action) && $action == CRM_Core_Action::BROWSE));
