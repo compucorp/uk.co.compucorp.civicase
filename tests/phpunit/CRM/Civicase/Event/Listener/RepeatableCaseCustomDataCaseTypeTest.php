@@ -61,6 +61,19 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseTypeTest extends B
   }
 
   /**
+   * The case in `entityID`, which core writes over `entity_id`, is checked.
+   */
+  public function testChecksTheCaseGivenAsEntityId() {
+    $records = [
+      'own' => ['entityID' => $this->allowedCaseId],
+      'other' => ['entityID' => $this->otherCaseId],
+      'both' => ['entity_id' => $this->allowedCaseId, 'entityID' => $this->otherCaseId],
+    ];
+
+    $this->assertEquals(['other', 'both'], CaseTypeCheck::getRecordsOnOtherCaseTypes($this->limitedGroup(), $records));
+  }
+
+  /**
    * A group for every case type accepts records on any case.
    */
   public function testGroupForAllCaseTypesAcceptsAnyCase() {

@@ -49,28 +49,67 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccess {
    * @param array $group
    *   The record's group, with its name.
    * @param array $record
-   *   The record as written: a new record's `entity_id`, or an existing
-   *   record's `id`.
+   *   The record as written: a new record's Case (`entity_id` or `entityID`),
+   *   or an existing record's `id`.
    *
    * @return int|null
-   *   The Case, or NULL for an unknown record or one moved to another Case.
+   *   The Case, or NULL for an unknown record, one moved to another Case, or
+   *   one that names two different Cases.
    */
   private static function getRecordCaseId(array $group, array $record): ?int {
-    $givenCaseId = isset($record['entity_id']) ? (int) $record['entity_id'] : NULL;
+    $givenCaseIds = [];
+    foreach (RecordAccess::getGivenCaseIds($record) as $givenCaseId) {
+      if (!CRM_Utils_Rule::positiveInteger($givenCaseId)) {
+        return NULL;
+      }
+      $givenCaseIds[(int) $givenCaseId] = (int) $givenCaseId;
+    }
+    if (count($givenCaseIds) > 1) {
+      return NULL;
+    }
+    $givenCaseId = $givenCaseIds ? reset($givenCaseIds) : NULL;
     if (empty($record['id'])) {
-      return $givenCaseId ?: NULL;
+      return $givenCaseId;
+    }
+
+    $storedCaseId = self::getStoredCaseId($group, (int) $record['id']);
+    if (!$storedCaseId || ($givenCaseId !== NULL && $givenCaseId !== $storedCaseId)) {
+      return NULL;
+    }
+
+    return $storedCaseId;
+  }
+
+  /**
+   * The Case an existing record is stored on.
+   *
+   * Cached for the request, as a records table checks each row's links.
+   *
+   * @param array $group
+   *   The record's group, with its name.
+   * @param int $recordId
+   *   The record.
+   *
+   * @return int|null
+   *   The Case, or NULL for an unknown record.
+   */
+  private static function getStoredCaseId(array $group, int $recordId): ?int {
+    $cached = Civi::$statics[__CLASS__]['storedCaseIds'][$group['name']][$recordId] ?? NULL;
+    if ($cached !== NULL) {
+      return $cached;
     }
 
     // The stored record is read whatever the user's access, to compare Cases.
     $storedRecord = civicrm_api4('Custom_' . $group['name'], 'get', [
       'checkPermissions' => FALSE,
       'select' => ['entity_id'],
-      'where' => [['id', '=', (int) $record['id']]],
+      'where' => [['id', '=', $recordId]],
     ])->first();
     $storedCaseId = is_array($storedRecord) ? (int) $storedRecord['entity_id'] : 0;
-    if (!$storedCaseId || ($givenCaseId !== NULL && $givenCaseId !== $storedCaseId)) {
+    if (!$storedCaseId) {
       return NULL;
     }
+    Civi::$statics[__CLASS__]['storedCaseIds'][$group['name']][$recordId] = $storedCaseId;
 
     return $storedCaseId;
   }
@@ -94,15 +133,15 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccess {
     if ($userId !== (int) CRM_Core_Session::getLoggedInContactID()) {
       return FALSE;
     }
-    if (isset(Civi::$statics[__CLASS__][$userId][$caseId])) {
-      return Civi::$statics[__CLASS__][$userId][$caseId];
+    if (isset(Civi::$statics[__CLASS__]['canWorkOnCase'][$userId][$caseId])) {
+      return Civi::$statics[__CLASS__]['canWorkOnCase'][$userId][$caseId];
     }
 
     $category = CaseCategoryHelper::getCategoryName($caseId);
     $canWork = $category
       && self::hasCasePermission($category, $userId)
       && self::canSeeCase($caseId);
-    Civi::$statics[__CLASS__][$userId][$caseId] = $canWork;
+    Civi::$statics[__CLASS__]['canWorkOnCase'][$userId][$caseId] = $canWork;
 
     return $canWork;
   }

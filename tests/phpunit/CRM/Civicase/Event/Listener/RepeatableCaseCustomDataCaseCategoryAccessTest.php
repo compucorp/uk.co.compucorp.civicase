@@ -1,7 +1,13 @@
 <?php
 
+use Civi\API\Exception\UnauthorizedException;
+use Civi\Api4\CustomValue;
+use Civi\Api4\Event\AuthorizeRecordEvent;
 use Civi\Test;
 use Civi\Test\HeadlessInterface;
+use CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccess as CaseCategoryAccess;
+use CRM_Civicase_Test_Fabricator_Relationship as RelationshipFabricator;
+use CRM_Civicase_Test_Fabricator_RelationshipType as RelationshipTypeFabricator;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -32,6 +38,13 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccessTest
   private $group;
 
   /**
+   * The relationship type a test created for a case role, if any.
+   *
+   * @var int|null
+   */
+  private $relationshipTypeId;
+
+  /**
    * {@inheritdoc}
    */
   public function setUpHeadless() {
@@ -51,10 +64,17 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccessTest
 
   /**
    * Removes the group, Cases, case types and contacts the test created.
+   *
+   * Deleting the Cases also deletes their case roles, so the relationship
+   * type goes last.
    */
   public function tearDown(): void {
     $this->resetPermissions();
     $this->cleanUpRepeatableCaseCustomData();
+    if ($this->relationshipTypeId) {
+      civicrm_api3('RelationshipType', 'delete', ['id' => $this->relationshipTypeId]);
+      $this->relationshipTypeId = NULL;
+    }
   }
 
   /**
@@ -93,6 +113,30 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccessTest
     $this->assertFalse($this->canWrite('create', ['entity_id' => $caseId]));
     $this->assertFalse($this->canWrite('update', ['id' => $recordId]));
     $this->assertFalse($this->canWrite('delete', ['id' => $recordId]));
+
+    $this->assertCreateRefused(['entity_id' => $caseId, 'title' => 'Second']);
+    $this->assertCount(1, $this->getRecords($this->group, $caseId));
+  }
+
+  /**
+   * A record naming another Case in `entityID`, which core writes, is refused.
+   *
+   * Core's writer takes the Case from `entityID` over `entity_id`, so checking
+   * only `entity_id` would let a record onto a Case the user cannot work on.
+   */
+  public function testRecordNamingAnotherCaseAsEntityIdIsRefused() {
+    $caseId = $this->createCategoryCase('award');
+    $otherCaseId = $this->createCase();
+    $recordId = $this->createRecord($this->group, $caseId, ['title' => 'First']);
+    $this->setPermissions(self::AWARD_PERMISSIONS);
+
+    $this->assertTrue($this->canWrite('create', ['entity_id' => $caseId, 'entityID' => $caseId]));
+    $this->assertFalse($this->canWrite('create', ['entity_id' => $caseId, 'entityID' => $otherCaseId]));
+    $this->assertFalse($this->canWrite('update', ['id' => $recordId, 'entityID' => $otherCaseId]));
+
+    $this->assertCreateRefused(['entity_id' => $caseId, 'entityID' => $otherCaseId, 'title' => 'Second']);
+    $this->assertEquals([], $this->getRecords($this->group, $otherCaseId));
+    $this->assertCount(1, $this->getRecords($this->group, $caseId));
   }
 
   /**
@@ -139,6 +183,25 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccessTest
   }
 
   /**
+   * A "my" permission for the category and a role on the Case allow writes.
+   */
+  public function testMyCategoryPermissionWithCaseRoleCanWrite() {
+    $caseId = $this->createCategoryCase('award');
+    $this->giveLoggedInContactRoleOnCase($caseId);
+    $recordId = $this->createRecord($this->group, $caseId, ['title' => 'First']);
+    $this->setPermissions([
+      'access CiviCRM',
+      'view all contacts',
+      'access all custom data',
+      'access my award and activities',
+    ]);
+
+    $this->assertTrue($this->canWrite('create', ['entity_id' => $caseId]));
+    $this->assertTrue($this->canWrite('update', ['id' => $recordId]));
+    $this->assertTrue($this->canWrite('delete', ['id' => $recordId]));
+  }
+
+  /**
    * Edit access to the group is still needed.
    */
   public function testEditAccessToTheGroupIsStillNeeded() {
@@ -146,6 +209,22 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccessTest
     $this->setPermissions(array_diff(self::AWARD_PERMISSIONS, ['access all custom data']));
 
     $this->assertFalse($this->canWrite('create', ['entity_id' => $caseId]));
+  }
+
+  /**
+   * The listener itself does not grant writes without edit access to the group.
+   *
+   * The API refuses such users before the listener runs, so it is called
+   * directly here, on a write core has refused.
+   */
+  public function testListenerNeedsEditAccessToTheGroup() {
+    $caseId = $this->createCategoryCase('award');
+
+    $this->setPermissions(array_diff(self::AWARD_PERMISSIONS, ['access all custom data']));
+    $this->assertFalse($this->authorizeRefusedCreate(['entity_id' => $caseId]));
+
+    $this->setPermissions(self::AWARD_PERMISSIONS);
+    $this->assertTrue($this->authorizeRefusedCreate(['entity_id' => $caseId]));
   }
 
   /**
@@ -164,6 +243,69 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccessTest
       'action' => $action,
       'values' => $values,
     ])->first()['access'];
+  }
+
+  /**
+   * Asserts the logged-in user cannot create a record of the group.
+   *
+   * @param array $values
+   *   The record, as written.
+   */
+  private function assertCreateRefused(array $values): void {
+    try {
+      civicrm_api4('Custom_' . $this->group['name'], 'create', ['values' => $values]);
+    }
+    catch (UnauthorizedException $e) {
+      return;
+    }
+
+    $this->fail('The record was created.');
+  }
+
+  /**
+   * Whether the listener grants a create that core has refused.
+   *
+   * @param array $record
+   *   The record, as written.
+   *
+   * @return bool
+   *   The authorization after the listener ran.
+   */
+  private function authorizeRefusedCreate(array $record): bool {
+    $event = new AuthorizeRecordEvent(
+      CustomValue::create($this->group['name']),
+      $record,
+      (int) CRM_Core_Session::getLoggedInContactID()
+    );
+    $event->setAuthorized(FALSE);
+    CaseCategoryAccess::authorizeRecord($event);
+
+    return (bool) $event->isAuthorized();
+  }
+
+  /**
+   * Gives the logged-in contact a role on a Case, for "my" permissions.
+   *
+   * @param int $caseId
+   *   The Case.
+   */
+  private function giveLoggedInContactRoleOnCase(int $caseId): void {
+    $clientId = (int) CRM_Core_DAO::singleValueQuery(
+      'SELECT contact_id FROM civicrm_case_contact WHERE case_id = %1',
+      [1 => [$caseId, 'Integer']]
+    );
+    $suffix = substr(md5((string) mt_rand()), 0, 8);
+    $relationshipType = RelationshipTypeFabricator::fabricate([
+      'name_a_b' => 'Records manager is ' . $suffix,
+      'name_b_a' => 'Records manager of ' . $suffix,
+    ]);
+    $this->relationshipTypeId = (int) $relationshipType['id'];
+    RelationshipFabricator::fabricate([
+      'contact_id_a' => $clientId,
+      'contact_id_b' => (int) CRM_Core_Session::getLoggedInContactID(),
+      'relationship_type_id' => $this->relationshipTypeId,
+      'case_id' => $caseId,
+    ]);
   }
 
 }
