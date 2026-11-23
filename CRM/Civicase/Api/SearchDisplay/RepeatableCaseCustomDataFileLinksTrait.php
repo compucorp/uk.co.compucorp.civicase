@@ -1,7 +1,6 @@
 <?php
 
 use Civi\Api4\Action\SearchDisplay\AbstractRunAction;
-use Civi\Api4\Service\Spec\Provider\FileGetSpecProvider;
 use CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms as CaseCustomAfforms;
 
 /**
@@ -74,7 +73,10 @@ trait CRM_Civicase_Api_SearchDisplay_RepeatableCaseCustomDataFileLinksTrait {
   }
 
   /**
-   * The link to a file stored against a Case, as core formats file links.
+   * The link to a file stored against a Case, signed for that Case.
+   *
+   * Built here rather than with core's file URL formatter, which on newer
+   * cores takes a file id instead of this URL.
    *
    * @param int $fileId
    *   The file.
@@ -82,13 +84,12 @@ trait CRM_Civicase_Api_SearchDisplay_RepeatableCaseCustomDataFileLinksTrait {
    *   The Case the file is stored against.
    *
    * @return string
-   *   The file's download URL.
+   *   The file's absolute download URL.
    */
   public static function getFileUrl(int $fileId, int $caseId): string {
-    $url = "civicrm/file?reset=1&id=$fileId&eid=$caseId";
-    FileGetSpecProvider::formatFileUrl($url);
+    $fileHash = CRM_Core_BAO_File::generateFileHash($caseId, $fileId);
 
-    return $url;
+    return (string) Civi::url("frontend://civicrm/file?reset=1&id=$fileId&eid=$caseId&fcs=$fileHash", 'a');
   }
 
 }

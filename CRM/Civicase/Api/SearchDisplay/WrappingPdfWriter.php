@@ -73,7 +73,9 @@ class CRM_Civicase_Api_SearchDisplay_WrappingPdfWriter extends Dompdf {
     foreach (self::$wrapColumns as $number) {
       $column = Coordinate::stringFromColumnIndex((int) $number + 1);
       foreach ($this->spreadsheet->getAllSheets() as $sheet) {
-        for ($row = 1; $row <= $sheet->getHighestDataRow($column); $row++) {
+        // Read once: it scans every cell of the sheet.
+        $highestRow = $sheet->getHighestDataRow($column);
+        for ($row = 1; $row <= $highestRow; $row++) {
           $cell = $sheet->getCell($column . $row);
           $value = $cell->getValue();
           if (is_string($value) && preg_match('~^https?://\S+$~i', $value)) {

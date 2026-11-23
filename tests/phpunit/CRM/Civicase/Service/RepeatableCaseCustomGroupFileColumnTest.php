@@ -19,6 +19,16 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupFileColumnTest extends TestC
   use CRM_Civicase_Helpers_RepeatableCaseCustomDataTrait;
 
   /**
+   * Permissions of a user who works on every award case, and sees its data.
+   */
+  const AWARD_USER_PERMISSIONS = [
+    'access CiviCRM',
+    'view all contacts',
+    'access all custom data',
+    'access all award and activities',
+  ];
+
+  /**
    * Files the test created.
    *
    * @var int[]
@@ -161,23 +171,8 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupFileColumnTest extends TestC
    * APIv4 leaves out the File join, as core's download page would refuse them.
    */
   public function testCaseCategoryUserGetsFileLinks() {
-    $group = $this->createRepeatableCaseGroup('Documents', [
-      'attachment' => [
-        'data_type' => 'File',
-        'html_type' => 'File',
-        'in_selector' => 1,
-      ],
-    ]);
-    $caseId = $this->createCategoryCase('award');
-    $fileId = $this->createFile('report');
-    $this->createRecord($group, $caseId, ['attachment' => $fileId]);
-    $this->setPermissions([
-      'access CiviCRM',
-      'view all contacts',
-      'access all custom data',
-      'access uploaded files',
-      'access all award and activities',
-    ]);
+    [$group, $caseId, $fileId] = $this->createFileRecordOnAwardCase();
+    $this->setPermissions(array_merge(self::AWARD_USER_PERMISSIONS, ['access uploaded files']));
 
     $column = $this->runTable($group, $caseId, TRUE)[0]['columns'][0];
 
@@ -188,6 +183,41 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupFileColumnTest extends TestC
     $this->assertTrue(CRM_Core_BAO_File::validateFileHash($query['fcs'] ?? '', $caseId, $fileId));
     [$path] = CRM_Core_BAO_File::path($fileId, $caseId);
     $this->assertNotNull($path, 'The download link must find the file.');
+  }
+
+  /**
+   * Without "access uploaded files" the table loads, with no file or link.
+   */
+  public function testUserWithoutFileAccessGetsNoFileLinks() {
+    [$group, $caseId] = $this->createFileRecordOnAwardCase();
+    $this->setPermissions(self::AWARD_USER_PERMISSIONS);
+
+    $rows = $this->runTable($group, $caseId, TRUE);
+
+    $this->assertCount(1, $rows);
+    $this->assertNull($rows[0]['columns'][0]['val'] ?? NULL);
+    $this->assertEmpty($rows[0]['columns'][0]['links'] ?? NULL);
+  }
+
+  /**
+   * Creates a group with a File field, and a record with a file on an award.
+   *
+   * @return array
+   *   The group, the award Case id and the file id.
+   */
+  private function createFileRecordOnAwardCase(): array {
+    $group = $this->createRepeatableCaseGroup('Documents', [
+      'attachment' => [
+        'data_type' => 'File',
+        'html_type' => 'File',
+        'in_selector' => 1,
+      ],
+    ]);
+    $caseId = $this->createCategoryCase('award');
+    $fileId = $this->createFile('report');
+    $this->createRecord($group, $caseId, ['attachment' => $fileId]);
+
+    return [$group, $caseId, $fileId];
   }
 
   /**
