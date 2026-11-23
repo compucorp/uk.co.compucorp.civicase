@@ -39,6 +39,20 @@ trait CRM_Civicase_Helpers_RepeatableCaseCustomDataTrait {
   private $createdContactIds = [];
 
   /**
+   * Ids of the case types created by createCategoryCase().
+   *
+   * @var int[]
+   */
+  private $createdCaseTypeIds = [];
+
+  /**
+   * Ids of the case categories created by createCategoryCase().
+   *
+   * @var int[]
+   */
+  private $createdCaseCategoryIds = [];
+
+  /**
    * Creates an active repeatable ("Tab with table") Case custom group.
    *
    * @param string $title
@@ -127,6 +141,48 @@ trait CRM_Civicase_Helpers_RepeatableCaseCustomDataTrait {
   }
 
   /**
+   * Creates a Case, for a new client, of a case type in a case category.
+   *
+   * @param string $categoryName
+   *   The case category, created if missing.
+   *
+   * @return int
+   *   Case id.
+   */
+  private function createCategoryCase(string $categoryName): int {
+    $category = [
+      'option_group_id' => 'case_type_categories',
+      'name' => $categoryName,
+    ];
+    if (!(int) civicrm_api3('OptionValue', 'getcount', $category)) {
+      // The value other test classes give this category too.
+      $created = civicrm_api3('OptionValue', 'create', $category + [
+        'label' => ucfirst($categoryName),
+        'value' => 2,
+      ]);
+      $this->createdCaseCategoryIds[] = (int) $created['id'];
+      CRM_Core_PseudoConstant::flush();
+    }
+    $caseType = CaseTypeFabricator::fabricate([
+      'name' => 'repeatable_records_' . $categoryName,
+      'title' => 'Repeatable records ' . $categoryName,
+      'case_type_category' => civicrm_api3('OptionValue', 'getvalue', $category + ['return' => 'value']),
+    ]);
+    if (!in_array((int) $caseType['id'], $this->createdCaseTypeIds, TRUE)) {
+      $this->createdCaseTypeIds[] = (int) $caseType['id'];
+    }
+
+    $case = CaseFabricator::fabricate([
+      'case_type_id' => $caseType['id'],
+      'contact_id' => $this->createContact(),
+      'creator_id' => CRM_Core_Session::getLoggedInContactID(),
+    ]);
+    $this->createdCaseIds[] = (int) $case['id'];
+
+    return (int) $case['id'];
+  }
+
+  /**
    * Custom field key as the importer uses it, e.g. custom_12.
    *
    * @param array $group
@@ -205,6 +261,15 @@ trait CRM_Civicase_Helpers_RepeatableCaseCustomDataTrait {
     foreach ($this->createdCaseIds as $caseId) {
       civicrm_api3('Case', 'delete', ['id' => $caseId, 'move_to_trash' => 0]);
     }
+    foreach ($this->createdCaseTypeIds as $caseTypeId) {
+      civicrm_api3('CaseType', 'delete', ['id' => $caseTypeId]);
+    }
+    foreach ($this->createdCaseCategoryIds as $categoryId) {
+      civicrm_api3('OptionValue', 'delete', ['id' => $categoryId]);
+    }
+    if ($this->createdCaseCategoryIds) {
+      CRM_Core_PseudoConstant::flush();
+    }
     // CiviCRM refuses to delete the logged-in contact.
     CRM_Core_Session::singleton()->set('userID', NULL);
     foreach ($this->createdContactIds as $contactId) {
@@ -216,6 +281,8 @@ trait CRM_Civicase_Helpers_RepeatableCaseCustomDataTrait {
     $this->createdCustomGroupIds = [];
     $this->createdCaseIds = [];
     $this->createdContactIds = [];
+    $this->createdCaseTypeIds = [];
+    $this->createdCaseCategoryIds = [];
   }
 
 }

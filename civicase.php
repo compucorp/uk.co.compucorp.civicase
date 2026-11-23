@@ -76,6 +76,13 @@ function civicase_civicrm_config(&$config) {
     10
   );
 
+  // After core's AngularLoader (priority 0) has collected the page's modules.
+  Civi::dispatcher()->addListener(
+    'civi.region.render',
+    ['CRM_Civicase_Event_Listener_CivicaseAngularResources', 'onRegionRender'],
+    -10
+  );
+
   // After core's API4 permission check (-100), so it only sees refusals.
   Civi::dispatcher()->addListener(
     'civi.api.authorize',
@@ -129,11 +136,22 @@ function civicase_civicrm_config(&$config) {
     ]
   );
 
+  // After core's check of custom records (priority 0), so it only sees its
+  // refusals.
+  Civi::dispatcher()->addListener(
+    'civi.api4.authorizeRecord',
+    [
+      'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccess',
+      'authorizeRecord',
+    ],
+    -150
+  );
+
   Civi::dispatcher()->addListener(
     'civi.api.prepare',
     [
-      'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataDownload',
-      'useFileUrlDownload',
+      'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataFileLinks',
+      'useFileLinkActions',
     ]
   );
 

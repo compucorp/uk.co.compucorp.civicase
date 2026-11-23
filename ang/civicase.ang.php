@@ -4,49 +4,21 @@
  * @file
  * Declares an Angular module which can be autoloaded in CiviCRM.
  *
+ * Core builds this declaration once and caches it for every user and URL
+ * (Civi\Angular\Manager::getModules()), so it must not depend on, or act for,
+ * the current request. Per-request work lives elsewhere:
+ * - case category access: CRM_Civicase_Page_CaseAngular;
+ * - page resources: CRM_Civicase_Event_Listener_CivicaseAngularResources;
+ * - settings, word replacements and breadcrumbs: CRM_Civicase_Settings.
+ *
  * See also:
  * http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_angularModules.
  */
 
-use CRM_Civicase_Helper_CaseCategory as CaseCategoryHelper;
-use CRM_Civicase_Helper_CaseUrl as CaseUrlHelper;
 use CRM_Civicase_Helper_GlobRecursive as GlobRecursive;
-use CRM_Civicase_Service_CaseCategoryPermission as CaseCategoryPermission;
 
 // Core can build the Angular module list more than once in a process (e.g.
 // after a cache flush), including this file again, so only declare it once.
-if (!function_exists('load_resources')) {
-
-  /**
-   * Loads Resources.
-   */
-  function load_resources() {
-    Civi::resources()
-      ->addScriptFile('org.civicrm.shoreditch', 'base/js/affix.js', 1000, 'html-header')
-      ->addSetting([
-        'config' => [
-          'enableComponents' => CRM_Core_Config::singleton()->enableComponents,
-          'user_contact_id' => (int) CRM_Core_Session::getLoggedInContactID(),
-        ],
-      ]);
-  }
-
-}
-
-if (!function_exists('adds_shoreditch_css')) {
-
-  /**
-   * Add shoreditch custom css if not already present.
-   */
-  function adds_shoreditch_css() {
-    if (!civicrm_api3('Setting', 'getvalue', ['name' => "customCSSURL"])) {
-      Civi::resources()
-        ->addStyleFile('org.civicrm.shoreditch', 'css/custom-civicrm.css', 99, 'html-header');
-    }
-  }
-
-}
-
 if (!function_exists('get_js_files')) {
 
   /**
@@ -67,29 +39,6 @@ if (!function_exists('get_js_files')) {
     );
   }
 
-}
-
-load_resources();
-[$caseCategoryId, $caseCategoryName] = CaseUrlHelper::getCategoryParamsFromUrl();
-
-// Word replacements are already loaded for the contact tab ContactCaseTab.
-if (CRM_Utils_System::currentPath() !== 'civicrm/case/contact-case-tab') {
-  $notTranslationPath = $caseCategoryName == CaseCategoryHelper::CASE_TYPE_CATEGORY_NAME && CRM_Utils_System::currentPath() != 'civicrm/case/a';
-
-  if (!$notTranslationPath) {
-    if (!in_array($caseCategoryName, CaseCategoryHelper::getAccessibleCaseTypeCategories())) {
-      throw new Exception('Access denied! You are not authorized to access this page.');
-    }
-  }
-}
-
-$permissionService = new CaseCategoryPermission();
-$caseCategoryPermissions = $permissionService->get($caseCategoryName);
-
-// The following changes are only relevant to the full-page app.
-if (CRM_Utils_System::currentPath() == 'civicrm/case/a') {
-  adds_shoreditch_css();
-  CaseCategoryHelper::updateBreadcrumbs($caseCategoryId);
 }
 
 $requires = [

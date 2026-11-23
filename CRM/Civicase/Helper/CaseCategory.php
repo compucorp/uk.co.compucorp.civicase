@@ -312,6 +312,23 @@ class CRM_Civicase_Helper_CaseCategory {
   }
 
   /**
+   * Checks whether the user can access the given Case Type Category.
+   *
+   * If the Contact Id is not passed, the logged in contact ID is used.
+   *
+   * @param int $caseCategoryId
+   *   The case type category (option value) to check.
+   * @param int|null $contactId
+   *   The contact Id to check for.
+   *
+   * @return bool
+   *   TRUE when the contact has "basic <category> information".
+   */
+  public static function isCaseTypeCategoryAccessible(int $caseCategoryId, ?int $contactId = NULL): bool {
+    return array_key_exists($caseCategoryId, self::getAccessibleCaseTypeCategories($contactId));
+  }
+
+  /**
    * Returns the Case Type Categories the user can access the activities for.
    *
    * If the Contact Id is not passed, the logged in contact ID is used.

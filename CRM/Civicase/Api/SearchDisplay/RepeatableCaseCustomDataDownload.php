@@ -10,9 +10,11 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
  * Download Spreadsheet for the records table of a repeatable Case group.
  *
  * Used in place of SearchKit's own action by
- * CRM_Civicase_Event_Listener_RepeatableCaseCustomDataDownload.
+ * CRM_Civicase_Event_Listener_RepeatableCaseCustomDataFileLinks.
  */
 class CRM_Civicase_Api_SearchDisplay_RepeatableCaseCustomDataDownload extends Download {
+
+  use CRM_Civicase_Api_SearchDisplay_RepeatableCaseCustomDataFileLinksTrait;
 
   /**
    * Suffix of the key of a column that shows a file's name.
@@ -23,24 +25,6 @@ class CRM_Civicase_Api_SearchDisplay_RepeatableCaseCustomDataDownload extends Do
    * The PhpSpreadsheet writer SearchKit makes PDFs with.
    */
   const PDF_WRITER = 'Dompdf';
-
-  /**
-   * A copy of a download request, with the same parameters.
-   *
-   * @param \Civi\Api4\Action\SearchDisplay\Download $download
-   *   SearchKit's download request.
-   *
-   * @return self
-   *   The same request, made by this action.
-   */
-  public static function copyOf(Download $download): self {
-    $copy = new self($download->getEntityName(), $download->getActionName());
-    foreach ($download->getParams() as $name => $value) {
-      $copy->$name = $value;
-    }
-
-    return $copy;
-  }
 
   /**
    * Loads the display, then exports its file links instead of file names.

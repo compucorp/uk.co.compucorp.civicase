@@ -1,10 +1,13 @@
 <?php
 
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Pdf\Dompdf;
 
 /**
  * PDF writer that lets the text of some columns wrap at any character.
+ *
+ * The URLs in those columns are written as links, so they stay clickable.
  */
 class CRM_Civicase_Api_SearchDisplay_WrappingPdfWriter extends Dompdf {
 
@@ -45,6 +48,42 @@ class CRM_Civicase_Api_SearchDisplay_WrappingPdfWriter extends Dompdf {
     $style = '<style>' . implode(', ', $selectors) . ' { overflow-wrap: anywhere; }</style>';
 
     return preg_replace('~</head>~i', $style . '</head>', $html, 1) ?? $html;
+  }
+
+  /**
+   * Generates the HTML, with the URLs in the wrap columns as links.
+   *
+   * The cells only hold the URL as text. PDF viewers make such text clickable
+   * only when they can spot the whole URL, which they cannot once it wraps
+   * over several lines. As a link, Dompdf adds a link to each of its lines.
+   *
+   * @return string
+   *   The spreadsheet as HTML.
+   */
+  public function generateHtmlAll() {
+    $this->linkWrapColumnUrls();
+
+    return parent::generateHtmlAll();
+  }
+
+  /**
+   * Adds a hyperlink to the cells of the wrap columns that hold a web URL.
+   */
+  private function linkWrapColumnUrls(): void {
+    foreach (self::$wrapColumns as $number) {
+      $column = Coordinate::stringFromColumnIndex((int) $number + 1);
+      foreach ($this->spreadsheet->getAllSheets() as $sheet) {
+        // Read once: it scans every cell of the sheet.
+        $highestRow = $sheet->getHighestDataRow($column);
+        for ($row = 1; $row <= $highestRow; $row++) {
+          $cell = $sheet->getCell($column . $row);
+          $value = $cell->getValue();
+          if (is_string($value) && preg_match('~^https?://\S+$~i', $value)) {
+            $cell->getHyperlink()->setUrl($value);
+          }
+        }
+      }
+    }
   }
 
 }

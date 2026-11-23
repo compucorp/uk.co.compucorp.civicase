@@ -224,4 +224,29 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAccess {
     return in_array($group['extends'] ?? NULL, CaseCustomAfforms::getCaseExtends(), TRUE);
   }
 
+  /**
+   * The Case a record being written names, under each key core reads it from.
+   *
+   * Core's writer takes the Case from `entityID` before `entity_id`
+   * (CRM_Core_BAO_CustomValueTable::setValues()), so a check of the Case must
+   * read both, or it could check one Case while the record goes to another.
+   *
+   * @param array $record
+   *   A record as written through APIv4.
+   *
+   * @return array
+   *   The values given, keyed by `entity_id` and `entityID`; keys that are
+   *   missing or empty are left out.
+   */
+  public static function getGivenCaseIds(array $record): array {
+    $given = [];
+    foreach (['entity_id', 'entityID'] as $key) {
+      if (isset($record[$key]) && $record[$key] !== '') {
+        $given[$key] = $record[$key];
+      }
+    }
+
+    return $given;
+  }
+
 }

@@ -45,7 +45,9 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseType {
    *   The records being saved, keyed as in the API call.
    *
    * @return array
-   *   Keys of the records whose case is of a type the group isn't for.
+   *   Keys of the records with a case of a type the group isn't for, from
+   *   either `entity_id` or `entityID` (see
+   *   CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAccess::getGivenCaseIds()).
    *   Records without a case, or with a case that doesn't exist, are left to
    *   core.
    */
@@ -55,22 +57,26 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseType {
       return [];
     }
 
-    $caseIds = [];
+    $caseIdsByRecord = [];
     foreach ($records as $key => $record) {
-      $caseId = $record['entity_id'] ?? NULL;
-      if (is_numeric($caseId) && (int) $caseId > 0) {
-        $caseIds[$key] = (int) $caseId;
+      foreach (CaseCustomDataAccess::getGivenCaseIds($record) as $caseId) {
+        if (is_numeric($caseId) && (int) $caseId > 0) {
+          $caseIdsByRecord[$key][] = (int) $caseId;
+        }
       }
     }
-    if (!$caseIds) {
+    if (!$caseIdsByRecord) {
       return [];
     }
 
-    $caseTypes = self::getCaseTypeIdsByCase(array_unique($caseIds));
+    $caseTypes = self::getCaseTypeIdsByCase(array_unique(array_merge(...array_values($caseIdsByRecord))));
     $keys = [];
-    foreach ($caseIds as $key => $caseId) {
-      if (isset($caseTypes[$caseId]) && !in_array($caseTypes[$caseId], $caseTypeIds, TRUE)) {
-        $keys[] = $key;
+    foreach ($caseIdsByRecord as $key => $caseIds) {
+      foreach ($caseIds as $caseId) {
+        if (isset($caseTypes[$caseId]) && !in_array($caseTypes[$caseId], $caseTypeIds, TRUE)) {
+          $keys[] = $key;
+          break;
+        }
       }
     }
 

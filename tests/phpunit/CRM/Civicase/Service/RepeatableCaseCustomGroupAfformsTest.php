@@ -230,9 +230,12 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
   }
 
   /**
-   * Files are joined from the record's Case, once per File field.
+   * Files are joined on the record's Case id, once per File field.
+   *
+   * The Case itself is not joined, as users with only a case category
+   * permission cannot join it.
    */
-  public function testFileJoinsGoThroughTheCase() {
+  public function testFileJoinsUseTheRecordsCaseId() {
     $method = new ReflectionMethod(Service::class, 'fileJoins');
     $method->setAccessible(TRUE);
     $fields = [
@@ -243,12 +246,11 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
     $joins = $method->invoke($this->serviceWhereCoreJoinsFiles(FALSE), $fields, 'civicrm_value_pubs_9');
 
     $this->assertEquals([
-      ['Case AS record_case', 'LEFT', ['record_case.id', '=', 'entity_id']],
       [
         'File AS record_file_a_file',
         'LEFT',
         'EntityFile',
-        ['record_case.id', '=', 'record_file_a_file.entity_id'],
+        ['entity_id', '=', 'record_file_a_file.entity_id'],
         ['record_file_a_file.entity_table', '=', "'civicrm_value_pubs_9'"],
         ['record_file_a_file.id', '=', 'a_file'],
       ],
@@ -256,7 +258,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfformsTest extends BaseHead
         'File AS record_file_b_file',
         'LEFT',
         'EntityFile',
-        ['record_case.id', '=', 'record_file_b_file.entity_id'],
+        ['entity_id', '=', 'record_file_b_file.entity_id'],
         ['record_file_b_file.entity_table', '=', "'civicrm_value_pubs_9'"],
         ['record_file_b_file.id', '=', 'b_file'],
       ],
