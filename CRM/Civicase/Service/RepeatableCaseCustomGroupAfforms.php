@@ -47,11 +47,6 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
   const FORM_STYLES_MODULE = 'civicase-repeatable-custom-data-form';
 
   /**
-   * Alias of the record's Case, joined to reach its files (see fileJoins()).
-   */
-  const FILE_CASE_JOIN = 'record_case';
-
-  /**
    * Prefix of the alias of a File field's file (see fileJoins()).
    */
   const FILE_JOIN_PREFIX = 'record_file_';
@@ -210,8 +205,12 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
     $select = array_map([$this, 'fieldDisplayKey'], array_values($displayFields));
     $fileFields = array_filter($displayFields, [$this, 'fieldIsFile']);
     foreach ($fileFields as $field) {
-      // The file column links its name to this URL.
+      // The file column links its name to this URL, which is built from the
+      // file's id where core does not join files (see fileJoins()).
       $select[] = $this->fileFieldPrefix($field) . '.url';
+      if (!$this->coreJoinsFileFields()) {
+        $select[] = $this->fileFieldPrefix($field) . '.id';
+      }
     }
     $select[] = 'id';
     $select[] = 'entity_id';
@@ -430,15 +429,14 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms {
       return [];
     }
 
-    $case = self::FILE_CASE_JOIN;
-    $joins = [["Case AS $case", 'LEFT', ["$case.id", '=', 'entity_id']]];
+    $joins = [];
     foreach ($fileFields as $field) {
       $file = $this->fileFieldPrefix($field);
       $joins[] = [
         "File AS $file",
         'LEFT',
         'EntityFile',
-        ["$case.id", '=', "$file.entity_id"],
+        ['entity_id', '=', "$file.entity_id"],
         ["$file.entity_table", '=', "'$tableName'"],
         ["$file.id", '=', $field['name']],
       ];

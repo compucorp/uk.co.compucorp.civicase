@@ -3,6 +3,7 @@
 use Civi\Test;
 use Civi\Test\HeadlessInterface;
 use CRM_Civicase_Api_SearchDisplay_RepeatableCaseCustomDataDownload as FileUrlDownload;
+use CRM_Civicase_Api_SearchDisplay_RepeatableCaseCustomDataRun as RecordsRun;
 use CRM_Civicase_Api_SearchDisplay_WrappingPdfWriter as WrappingPdfWriter;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PHPUnit\Framework\TestCase;
@@ -49,9 +50,10 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupFileColumnTest extends TestC
   }
 
   /**
-   * Removes the files, groups, Cases and contacts the test created.
+   * Removes the files, groups, Cases, case types and contacts the test created.
    */
   public function tearDown(): void {
+    $this->resetPermissions();
     foreach ($this->fileIds as $fileId) {
       CRM_Core_DAO::executeQuery('DELETE FROM civicrm_entity_file WHERE file_id = %1', [1 => [$fileId, 'Integer']]);
       CRM_Core_DAO::executeQuery('DELETE FROM civicrm_file WHERE id = %1', [1 => [$fileId, 'Integer']]);
@@ -152,6 +154,62 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupFileColumnTest extends TestC
   }
 
   /**
+   * A user with only a case category permission gets the table's file links.
+   *
+   * Such a user cannot join the Case, which used to make the table fail.
+   */
+  public function testCaseCategoryUserGetsFileLinks() {
+    $group = $this->createRepeatableCaseGroup('Documents', [
+      'attachment' => [
+        'data_type' => 'File',
+        'html_type' => 'File',
+        'in_selector' => 1,
+      ],
+    ]);
+    $caseId = $this->createCategoryCase('award');
+    $fileId = $this->createFile('report');
+    $this->createRecord($group, $caseId, ['attachment' => $fileId]);
+    $this->setPermissions([
+      'access CiviCRM',
+      'view all contacts',
+      'access all custom data',
+      'access all award and activities',
+    ]);
+
+    $column = $this->runTable($group, $caseId, TRUE)[0]['columns'][0];
+
+    $this->assertEquals('report.txt', $column['val']);
+    parse_str((string) parse_url($column['links'][0]['url'], PHP_URL_QUERY), $query);
+    $this->assertEquals($fileId, $query['id'] ?? NULL);
+    $this->assertEquals($caseId, $query['eid'] ?? NULL);
+    $this->assertTrue(CRM_Core_BAO_File::validateFileHash($query['fcs'] ?? '', $caseId, $fileId));
+    [$path] = CRM_Core_BAO_File::path($fileId, $caseId);
+    $this->assertNotNull($path, 'The download link must find the file.');
+  }
+
+  /**
+   * A joined file is linked through the record's Case; other links are kept.
+   */
+  public function testFileLinksGoThroughTheRecordsCase() {
+    $row = RecordsRun::linkFilesToCase([
+      'entity_id' => 51,
+      'record_file_attachment.id' => 7,
+      'record_file_attachment.url' => 'https://example.org/record-link',
+      'record_file_empty.id' => NULL,
+      'record_file_empty.url' => 'https://example.org/no-file',
+      'record_file_unselected.url' => 'https://example.org/kept',
+      'other.url' => 'https://example.org/other',
+    ]);
+
+    parse_str((string) parse_url($row['record_file_attachment.url'], PHP_URL_QUERY), $query);
+    $this->assertEquals(['7', '51'], [$query['id'] ?? NULL, $query['eid'] ?? NULL]);
+    $this->assertTrue(CRM_Core_BAO_File::validateFileHash($query['fcs'] ?? '', 51, 7));
+    $this->assertNull($row['record_file_empty.url']);
+    $this->assertEquals('https://example.org/kept', $row['record_file_unselected.url']);
+    $this->assertEquals('https://example.org/other', $row['other.url']);
+  }
+
+  /**
    * A PDF lets only the file link columns wrap, counted as exported.
    *
    * SearchKit leaves columns without a key, such as buttons, out of the file.
@@ -206,16 +264,18 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupFileColumnTest extends TestC
    *   A group returned by createRepeatableCaseGroup().
    * @param int $caseId
    *   The Case.
+   * @param bool $checkPermissions
+   *   Whether to run it as the logged-in user.
    *
    * @return array
    *   The table rows.
    */
-  private function runTable(array $group, int $caseId): array {
+  private function runTable(array $group, int $caseId, bool $checkPermissions = FALSE): array {
     return (array) civicrm_api4('SearchDisplay', 'run', [
       'savedSearch' => 'Custom_' . $group['name'] . '_Search',
       'display' => 'Custom_' . $group['name'] . '_Tab',
       'filters' => ['entity_id' => $caseId],
-      'checkPermissions' => FALSE,
+      'checkPermissions' => $checkPermissions,
     ]);
   }
 
