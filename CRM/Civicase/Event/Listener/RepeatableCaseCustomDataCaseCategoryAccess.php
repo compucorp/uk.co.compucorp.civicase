@@ -47,7 +47,7 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccess {
    * The Case a record is written to.
    *
    * @param array $group
-   *   The record's group, with its table.
+   *   The record's group, with its name.
    * @param array $record
    *   The record as written: a new record's `entity_id`, or an existing
    *   record's `id`.
@@ -61,10 +61,13 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccess {
       return $givenCaseId ?: NULL;
     }
 
-    $storedCaseId = (int) CRM_Core_DAO::singleValueQuery(
-      sprintf('SELECT entity_id FROM `%s` WHERE id = %%1', $group['table_name']),
-      [1 => [$record['id'], 'Integer']]
-    );
+    // The stored record is read whatever the user's access, to compare Cases.
+    $storedRecord = civicrm_api4('Custom_' . $group['name'], 'get', [
+      'checkPermissions' => FALSE,
+      'select' => ['entity_id'],
+      'where' => [['id', '=', (int) $record['id']]],
+    ])->first();
+    $storedCaseId = is_array($storedRecord) ? (int) $storedRecord['entity_id'] : 0;
     if (!$storedCaseId || ($givenCaseId !== NULL && $givenCaseId !== $storedCaseId)) {
       return NULL;
     }
@@ -137,7 +140,9 @@ class CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccess {
    */
   private static function canSeeCase(int $caseId): bool {
     try {
+      // APIv4 checks permissions by default; set explicitly as it is the point.
       return civicrm_api4('Case', 'get', [
+        'checkPermissions' => TRUE,
         'select' => ['id'],
         'where' => [['id', '=', $caseId]],
       ])->count() === 1;
