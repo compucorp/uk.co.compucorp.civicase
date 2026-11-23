@@ -258,6 +258,36 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupFileColumnTest extends TestC
   }
 
   /**
+   * The PDF links URLs in the given columns, so wrapped ones stay clickable.
+   */
+  public function testPdfWriterLinksUrlsInGivenColumns() {
+    $url = 'https://example.org/civicrm/file?reset=1&id=1&eid=2&fcs=' . str_repeat('a', 64);
+    $rows = [
+      ['Title', 'Attachment'],
+      ['https://example.org/title', $url],
+      ['Report', 'No file'],
+    ];
+    $wrapped = new Spreadsheet();
+    $wrapped->getActiveSheet()->fromArray($rows);
+    $unwrapped = new Spreadsheet();
+    $unwrapped->getActiveSheet()->fromArray($rows);
+
+    try {
+      WrappingPdfWriter::$wrapColumns = [1];
+      $html = (new WrappingPdfWriter($wrapped))->generateHTMLAll();
+      WrappingPdfWriter::$wrapColumns = [];
+      $unchanged = (new WrappingPdfWriter($unwrapped))->generateHTMLAll();
+    }
+    finally {
+      WrappingPdfWriter::$wrapColumns = [];
+    }
+
+    $this->assertSame(1, substr_count($html, '<a href='));
+    $this->assertStringContainsString('<a href="' . htmlspecialchars($url) . '"', $html);
+    $this->assertStringNotContainsString('<a href=', $unchanged);
+  }
+
+  /**
    * Runs the group's records table for a Case.
    *
    * @param array $group
