@@ -157,6 +157,8 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupFileColumnTest extends TestC
    * A user with only a case category permission gets the table's file links.
    *
    * Such a user cannot join the Case, which used to make the table fail.
+   * Like any user shown files, they need "access uploaded files": without it
+   * APIv4 leaves out the File join, as core's download page would refuse them.
    */
   public function testCaseCategoryUserGetsFileLinks() {
     $group = $this->createRepeatableCaseGroup('Documents', [
@@ -173,6 +175,7 @@ class CRM_Civicase_Service_RepeatableCaseCustomGroupFileColumnTest extends TestC
       'access CiviCRM',
       'view all contacts',
       'access all custom data',
+      'access uploaded files',
       'access all award and activities',
     ]);
 
