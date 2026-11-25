@@ -14,8 +14,11 @@
         });
       }
 
-      $('body').off('submit', $form);
-      $('body').on('submit', $form, openFileNamePopup);
+      // Only the Print/Merge form's own submit asks for a filename. Other
+      // forms in the page submit too, such as the editor's link box when
+      // Enter is pressed in it, and must not validate the Print/Merge form.
+      $('body').off('submit.civicasePdfFilename');
+      $('body').on('submit.civicasePdfFilename', '.CRM_Contact_Form_Task_PDF', openFileNamePopup);
 
       // Update only the data-identifier on the button that already has it
       $('button[data-identifier="buttons[_qf_PDF_submit_preview]"]').attr('data-identifier', '_qf_PDF_submit_preview');
