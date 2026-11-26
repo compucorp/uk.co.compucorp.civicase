@@ -1,6 +1,10 @@
 (function ($, _) {
   $(document).one('crmLoad', function () {
     var $dialog;
+    // data-identifier of the popup's Download Document button. CiviCRM sets it
+    // to the form button's name, `_qf_PDF_upload` (5.75 and 6.4.1). The
+    // `buttons[...]` form is the one this script was first written against.
+    var DOWNLOAD_BUTTON_IDENTIFIERS = ['_qf_PDF_upload', 'buttons[_qf_PDF_upload]'];
 
     (function init () {
       var $form = $('.CRM_Contact_Form_Task_PDF');
@@ -36,7 +40,7 @@
 
       var $form = $(event.target);
       var $clickedButtonIdentifier = $(document.activeElement).data('identifier');
-      var isDownloadDocumentButtonClicked = $clickedButtonIdentifier === 'buttons[_qf_PDF_upload]';
+      var isDownloadDocumentButtonClicked = DOWNLOAD_BUTTON_IDENTIFIERS.includes($clickedButtonIdentifier);
 
       if (!isDownloadDocumentButtonClicked) {
         return;
@@ -111,7 +115,7 @@
               $('[name="pdf_file_name"]').val($('#pdf_filename').val());
 
               $dialog.remove();
-              $('[data-identifier="buttons[_qf_PDF_upload]"]').trigger('click');
+              getDownloadDocumentButton().trigger('click');
 
               closePDFPopup();
             }
@@ -124,6 +128,19 @@
           }
         ]
       };
+    }
+
+    /**
+     * Get the popup's Download Document button.
+     *
+     * @returns {object} button element
+     */
+    function getDownloadDocumentButton () {
+      var selector = DOWNLOAD_BUTTON_IDENTIFIERS.map(function (identifier) {
+        return '[data-identifier="' + identifier + '"]';
+      }).join(', ');
+
+      return $(selector).first();
     }
 
     /**
