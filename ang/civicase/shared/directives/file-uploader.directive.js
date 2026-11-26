@@ -53,6 +53,12 @@
     function createUploader () {
       return new FileUploader({
         url: civicaseCrmUrl('civicrm/ajax/attachment'),
+        // CiviCRM 6.20 marks civicrm/ajax/attachment as an ajax route and refuses a request without
+        // this header ("Ajax requests can only be issued by javascript clients"); core's own
+        // crmAttachment uploader sends it too.
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest'
+        },
         onAfterAddingFile: function onAfterAddingFile (item) {
           item.crmData = { description: '' };
         },
