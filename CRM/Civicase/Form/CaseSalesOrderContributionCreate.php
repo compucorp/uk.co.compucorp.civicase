@@ -3,7 +3,7 @@
 use Civi\Api4\CaseSalesOrder;
 use Civi\Api4\CaseSalesOrderLine;
 use Civi\Api4\OptionValue;
-use CRM_Certificate_ExtensionUtil as E;
+use CRM_Civicase_ExtensionUtil as E;
 
 /**
  * Case sales order contribution create Form controller class.
