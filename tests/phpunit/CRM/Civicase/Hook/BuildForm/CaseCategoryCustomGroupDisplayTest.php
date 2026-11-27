@@ -9,6 +9,8 @@ use CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplay as CaseCategoryCu
  */
 class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplayTest extends BaseHeadlessTest {
 
+  use CRM_Civicase_Helpers_FormHookTestTrait;
+
   /**
    * Tests shouldRun returns TRUE for a valid case category custom group form.
    *
@@ -25,7 +27,10 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplayTest extends Bas
       'extends_entity_column_id' => $this->getValidCaseCategoryId(),
     ], CRM_Core_Action::UPDATE);
 
-    $result = $this->invokePrivateMethod('shouldRun', [CRM_Custom_Form_Group::class, $form]);
+    $result = $this->invokePrivateMethod(new CaseCategoryCustomGroupDisplay(), 'shouldRun', [
+      CRM_Custom_Form_Group::class,
+      $form,
+    ]);
 
     $this->assertTrue($result);
   }
@@ -38,7 +43,10 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplayTest extends Bas
       'extends_entity_column_id' => $this->getValidCaseCategoryId(),
     ], CRM_Core_Action::UPDATE);
 
-    $result = $this->invokePrivateMethod('shouldRun', [CRM_Custom_Form_Group::class, $form]);
+    $result = $this->invokePrivateMethod(new CaseCategoryCustomGroupDisplay(), 'shouldRun', [
+      CRM_Custom_Form_Group::class,
+      $form,
+    ]);
 
     $this->assertFalse($result);
   }
@@ -52,7 +60,10 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplayTest extends Bas
       'extends_entity_column_id' => $this->getValidCaseCategoryId(),
     ], CRM_Core_Action::UPDATE);
 
-    $result = $this->invokePrivateMethod('shouldRun', [CRM_Custom_Form_Group::class, $form]);
+    $result = $this->invokePrivateMethod(new CaseCategoryCustomGroupDisplay(), 'shouldRun', [
+      CRM_Custom_Form_Group::class,
+      $form,
+    ]);
 
     $this->assertFalse($result);
   }
@@ -66,7 +77,10 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplayTest extends Bas
       'extends_entity_column_id' => $this->getValidCaseCategoryId(),
     ], CRM_Core_Action::ADD);
 
-    $result = $this->invokePrivateMethod('shouldRun', [CRM_Custom_Form_Group::class, $form]);
+    $result = $this->invokePrivateMethod(new CaseCategoryCustomGroupDisplay(), 'shouldRun', [
+      CRM_Custom_Form_Group::class,
+      $form,
+    ]);
 
     $this->assertFalse($result);
   }
@@ -80,7 +94,10 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplayTest extends Bas
       'extends_entity_column_id' => $this->getValidCaseCategoryId(),
     ], CRM_Core_Action::UPDATE);
 
-    $result = $this->invokePrivateMethod('shouldRun', ['CRM_Some_Other_Form', $form]);
+    $result = $this->invokePrivateMethod(new CaseCategoryCustomGroupDisplay(), 'shouldRun', [
+      'CRM_Some_Other_Form',
+      $form,
+    ]);
 
     $this->assertFalse($result);
   }
@@ -94,7 +111,10 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplayTest extends Bas
       'extends_entity_column_id' => NULL,
     ], CRM_Core_Action::UPDATE);
 
-    $result = $this->invokePrivateMethod('shouldRun', [CRM_Custom_Form_Group::class, $form]);
+    $result = $this->invokePrivateMethod(new CaseCategoryCustomGroupDisplay(), 'shouldRun', [
+      CRM_Custom_Form_Group::class,
+      $form,
+    ]);
 
     $this->assertFalse($result);
   }
@@ -153,7 +173,7 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplayTest extends Bas
           && $attrs['data-select-params'] === json_encode(['data' => []]);
       }));
 
-    $this->invokePrivateMethod('setDefaultFormValueForCaseCategory', [$form]);
+    $this->invokePrivateMethod(new CaseCategoryCustomGroupDisplay(), 'setDefaultFormValueForCaseCategory', [$form]);
   }
 
   /**
@@ -172,7 +192,7 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplayTest extends Bas
     $form->expects($this->never())->method('setDefaults');
     $form->expects($this->never())->method('getElement');
 
-    $this->invokePrivateMethod('setDefaultFormValueForCaseCategory', [$form]);
+    $this->invokePrivateMethod(new CaseCategoryCustomGroupDisplay(), 'setDefaultFormValueForCaseCategory', [$form]);
   }
 
   /**
@@ -192,19 +212,7 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplayTest extends Bas
     $form->expects($this->never())->method('setDefaults');
     $form->expects($this->never())->method('getElement');
 
-    $this->invokePrivateMethod('setDefaultFormValueForCaseCategory', [$form]);
-  }
-
-  /**
-   * Returns the first valid case type category ID from the system.
-   *
-   * @return int
-   *   A valid case type category ID.
-   */
-  private function getValidCaseCategoryId() {
-    $caseTypeCategories = CRM_Case_BAO_CaseType::buildOptions('case_type_category', 'validate');
-
-    return (int) array_key_first($caseTypeCategories);
+    $this->invokePrivateMethod(new CaseCategoryCustomGroupDisplay(), 'setDefaultFormValueForCaseCategory', [$form]);
   }
 
   /**
@@ -264,36 +272,6 @@ class CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplayTest extends Bas
     );
 
     return $form;
-  }
-
-  /**
-   * Invokes a private method of the hook class via a bound closure.
-   *
-   * A bound closure is used rather than ReflectionMethod::invokeArgs so
-   * that parameters declared as pass-by-reference (for example the
-   * `CRM_Core_Form &$form` parameter of
-   * `setDefaultFormValueForCaseCategory`) are bound correctly without
-   * the caller having to build a reference array by hand.
-   *
-   * @param string $methodName
-   *   The name of the private method.
-   * @param array $arguments
-   *   Arguments to pass to the method.
-   *
-   * @return mixed
-   *   The return value of the invoked method.
-   */
-  private function invokePrivateMethod($methodName, array $arguments) {
-    $hook = new CaseCategoryCustomGroupDisplay();
-    $closure = Closure::bind(
-      function () use ($methodName, $arguments) {
-        return $this->{$methodName}(...$arguments);
-      },
-      $hook,
-      CaseCategoryCustomGroupDisplay::class
-    );
-
-    return $closure();
   }
 
 }

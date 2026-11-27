@@ -595,6 +595,95 @@
           });
         });
 
+        describe('tabs limited to some cases', () => {
+          let isVisibleSpy, otherCaseItem;
+
+          beforeEach(() => {
+            isVisibleSpy = jasmine.createSpy('isVisible')
+              .and.callFake((item) => item.case_type_id === caseItem.case_type_id);
+            caseItem['api.CustomValue.getalltreevalues'] = { values: [] };
+            otherCaseItem = _.cloneDeep(caseItem);
+            otherCaseItem.case_type_id = caseItem.case_type_id === '1' ? '2' : '1';
+          });
+
+          describe('when the case is one the tab is for', () => {
+            beforeEach(() => {
+              initController(caseItem, { CaseDetailsTabs: limitedTabs() });
+            });
+
+            it('shows the tab', () => {
+              expect(_.pluck($scope.tabs, 'name')).toEqual(['Summary', 'Limited']);
+            });
+
+            it('asks the tab about the case being viewed', () => {
+              expect(isVisibleSpy).toHaveBeenCalledWith($scope.item);
+            });
+          });
+
+          describe('when the case is not one the tab is for', () => {
+            beforeEach(() => {
+              apiResponses['Case.getdetails'] = { values: [otherCaseItem] };
+              initController(otherCaseItem, { CaseDetailsTabs: limitedTabs() });
+            });
+
+            it('hides the tab and keeps the others', () => {
+              expect(_.pluck($scope.tabs, 'name')).toEqual(['Summary']);
+            });
+          });
+
+          describe('when the hidden tab is the open one', () => {
+            beforeEach(() => {
+              apiResponses['Case.getdetails'] = { values: [otherCaseItem] };
+              initController(otherCaseItem, { CaseDetailsTabs: limitedTabs() });
+              $scope.activeTab = 'Limited';
+              $scope.pushCaseData(refreshedCaseData(otherCaseItem.case_type_id));
+            });
+
+            it('opens the Summary tab instead', () => {
+              expect($scope.activeTab).toBe('Summary');
+            });
+          });
+
+          describe('when the next case is one the tab is for', () => {
+            beforeEach(() => {
+              apiResponses['Case.getdetails'] = { values: [otherCaseItem] };
+              initController(otherCaseItem, { CaseDetailsTabs: limitedTabs() });
+              $scope.pushCaseData(refreshedCaseData(caseItem.case_type_id));
+            });
+
+            it('shows the tab again', () => {
+              expect(_.pluck($scope.tabs, 'name')).toEqual(['Summary', 'Limited']);
+            });
+          });
+
+          /**
+           * @returns {object[]} a Summary tab and a tab limited to the case
+           *   type of `caseItem`.
+           */
+          function limitedTabs () {
+            return [
+              { name: 'Summary', label: 'Summary' },
+              { name: 'Limited', label: 'Limited', isVisible: isVisibleSpy }
+            ];
+          }
+
+          /**
+           * @param {string} caseTypeId the case type of the refreshed case
+           * @returns {object} the viewed case as getdetails returns it
+           */
+          function refreshedCaseData (caseTypeId) {
+            return _.extend(_.cloneDeep(CasesData.get().values[0]), {
+              case_type_id: caseTypeId,
+              'api.Case.getcaselist.relatedCasesByContact': { values: [] },
+              'api.Case.getcaselist.linkedCases': { values: [] },
+              'api.Activity.getAll.recentCommunication': { values: [] },
+              'api.Activity.getAll.tasks': { values: [] },
+              'api.Activity.getAll.nextActivitiesWhichIsNotMileStone': { values: [] },
+              'api.CustomValue.getalltreevalues': { values: [] }
+            });
+          }
+        });
+
         /**
          * @param {object} defaultValues default values to use when generating the
          *   custom data block.

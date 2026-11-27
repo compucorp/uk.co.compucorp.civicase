@@ -12,6 +12,7 @@ use CRM_Civicase_Setup_CaseCategoryInstanceSupport as CaseCategoryInstanceSuppor
 use CRM_Civicase_Setup_CaseTypeCategorySupport as CaseTypeCategorySupport;
 use CRM_Civicase_Setup_CreateCasesOptionValue as CreateCasesOptionValue;
 use CRM_Civicase_Setup_CreateSafeFileExtensionOptionValue as CreateSafeFileExtensionOptionValue;
+use CRM_Civicase_Setup_EnableMultiRecordSupportForCaseCustomGroups as EnableMultiRecordSupportForCaseCustomGroups;
 use CRM_Civicase_Setup_Manage_CaseSalesOrderStatusManager as CaseSalesOrderStatusManager;
 use CRM_Civicase_Setup_Manage_CaseTypeCategoryFeaturesManager as CaseTypeCategoryFeaturesManager;
 use CRM_Civicase_Setup_Manage_MembershipTypeCustomFieldManager as MembershipTypeCustomFieldManager;
@@ -85,6 +86,7 @@ class CRM_Civicase_Upgrader extends CRM_Extension_Upgrader_Base {
       new MoveCaseTypesToCasesCategory(),
       new CreateSafeFileExtensionOptionValue(),
       new ProcessCaseCategoryForCustomGroupSupport(),
+      new EnableMultiRecordSupportForCaseCustomGroups(),
       new AddChangeCaseRoleDateActivityTypes(),
       new AddSingularLabels(),
       new AddMyActivitiesMenu(),

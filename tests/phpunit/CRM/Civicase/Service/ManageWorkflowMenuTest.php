@@ -22,7 +22,7 @@ class CRM_Civicase_Service_ManageWorkflowMenuTest extends BaseHeadlessTest {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->manageWorkflowMenu = new ManageWorkflowMenu();

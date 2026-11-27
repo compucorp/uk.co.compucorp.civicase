@@ -19,7 +19,7 @@ class CRM_Civicase_Service_CaseCategoryCustomDataTypeTest extends BaseHeadlessTe
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(): void {
     parent::setUp();
 
     $this->cleanCustomDataTypes();

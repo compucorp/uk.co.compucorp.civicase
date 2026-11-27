@@ -93,6 +93,20 @@ function civicase_civicrm_config(&$config) {
     10
   );
 
+  // After core's AngularLoader (priority 0) has collected the page's modules.
+  Civi::dispatcher()->addListener(
+    'civi.region.render',
+    ['CRM_Civicase_Event_Listener_CivicaseAngularResources', 'onRegionRender'],
+    -10
+  );
+
+  // After core's API4 permission check (-100), so it only sees refusals.
+  Civi::dispatcher()->addListener(
+    'civi.api.authorize',
+    ['CRM_Civicase_Event_Listener_CaseCategoryApiAuthorization', 'onAuthorize'],
+    -150
+  );
+
   Civi::dispatcher()->addListener(
     'civi.token.list',
     ['CRM_Civicase_Hook_Tokens_SalesOrderTokens', 'listSalesOrderTokens']
@@ -110,6 +124,124 @@ function civicase_civicrm_config(&$config) {
       'evaluateCaseCustomFieldsTokens',
     ]
   );
+
+  // Dynamically contribute the add/edit afforms for repeatable Case custom
+  // groups (TCOSB-51). Generated on the fly, never saved. See the service.
+  Civi::dispatcher()->addListener(
+    'civi.afform.get',
+    [
+      'CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms',
+      'getCaseCustomGroupAfforms',
+    ]
+  );
+
+  // Add Add/Edit links to the Case custom entities so SearchKit renders the
+  // "Add" toolbar and row "Edit" (opening the afforms above). See the service.
+  Civi::dispatcher()->addListener(
+    'civi.api4.getLinks',
+    [
+      'CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms',
+      'alterCustomEntityLinks',
+    ]
+  );
+
+  Civi::dispatcher()->addListener(
+    'civi.api.authorize',
+    [
+      'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAccess',
+      'authorizeApi',
+    ]
+  );
+
+  // After core's check of custom records (priority 0), so it only sees its
+  // refusals.
+  Civi::dispatcher()->addListener(
+    'civi.api4.authorizeRecord',
+    [
+      'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseCategoryAccess',
+      'authorizeRecord',
+    ],
+    -150
+  );
+
+  Civi::dispatcher()->addListener(
+    'civi.api.prepare',
+    [
+      'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataFileLinks',
+      'useFileLinkActions',
+    ]
+  );
+
+  Civi::dispatcher()->addListener(
+    'civi.api.prepare',
+    [
+      'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataClearedNumbers',
+      'keepClearedNumbersEmpty',
+    ]
+  );
+
+  Civi::dispatcher()->addListener(
+    'civi.api4.validate',
+    [
+      'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataCaseType',
+      'validateValues',
+    ]
+  );
+
+  // Form Builder support for repeatable Case custom groups. See
+  // the listener for what each step fixes in afform core.
+  // After core generates the custom group field blocks (priority 0).
+  Civi::dispatcher()->addListener(
+    'civi.afform.get',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'markRequiredFields'],
+    -100
+  );
+  // After afform declares its Angular modules (priority -1000).
+  Civi::dispatcher()->addListener(
+    'hook_civicrm_angularModules',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'addFormMessagesToAfform'],
+    -2000
+  );
+  // Next to core's own checks (required fields at 50, references at 45).
+  Civi::dispatcher()->addListener(
+    'civi.afform.validate',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'validate'],
+    40
+  );
+  // Last, once every check has run.
+  Civi::dispatcher()->addListener(
+    'civi.afform.validate',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'reportErrors'],
+    -1000
+  );
+  // Around core's save of each entity (processGenericEntity, priority 0).
+  Civi::dispatcher()->addListener(
+    'civi.afform.submit',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'detachEntries'],
+    5
+  );
+  Civi::dispatcher()->addListener(
+    'civi.afform.submit',
+    ['CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAfform', 'saveEntries'],
+    -5
+  );
+}
+
+/**
+ * Implements hook_civicrm_managed().
+ *
+ * Dynamically declares the SavedSearch + SearchDisplay (Tab-with-table list)
+ * for each repeatable Case custom group (TCOSB-51).
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_managed/
+ */
+function civicase_civicrm_managed(&$entities, $modules = NULL) {
+  if ($modules && !in_array('uk.co.compucorp.civicase', $modules, TRUE)) {
+    return;
+  }
+  foreach (CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms::getManagedEntities() as $entity) {
+    $entities[] = $entity;
+  }
 }
 
 /**
@@ -136,6 +268,11 @@ function civicase_civicrm_enable() {
  * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_alterMenu
  */
 function civicase_civicrm_alterMenu(&$items) {
+  // Core's custom-value delete endpoint fires no pre hook, so route it through
+  // a wrapper that enforces the repeatable Case custom data permission.
+  if (isset($items['civicrm/ajax/customvalue'])) {
+    $items['civicrm/ajax/customvalue']['page_callback'] = 'CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAccess::deleteCustomValueAjax';
+  }
   $items['civicrm/case/activity']['ids_arguments']['json'][] = 'civicase_reload';
   $items['civicrm/activity']['ids_arguments']['json'][] = 'civicase_reload';
   $items['civicrm/activity/email/add']['ids_arguments']['json'][] = 'civicase_reload';
@@ -157,9 +294,10 @@ function civicase_civicrm_buildForm($formName, &$form) {
     new CRM_Civicase_Hook_BuildForm_CaseCategoryFormLabelTranslationForChangeCase(),
     new CRM_Civicase_Hook_BuildForm_EnableCaseCategoryIconField(),
     new CRM_Civicase_Hook_BuildForm_CaseCategoryCustomGroupDisplay(),
+    new CRM_Civicase_Hook_BuildForm_HideMaxMultipleForCaseCustomGroups(),
+    new CRM_Civicase_Hook_BuildForm_HideCaseGroupsFromCustomDataImport(),
     new CRM_Civicase_Hook_BuildForm_ModifyCaseTypesForAdvancedSearch(),
     new CRM_Civicase_Hook_BuildForm_AddCaseCategoryInstanceField(),
-    new CRM_Civicase_Hook_BuildForm_AddStyleFieldToCaseCustomGroups(),
     new CRM_Civicase_Hook_BuildForm_RemoveExportActionFromReports(),
     new CRM_Civicase_Hook_BuildForm_RestrictCaseEmailContacts(),
     new CRM_Civicase_Hook_BuildForm_LimitRecipientFieldsToOnlySelectedContacts(),
@@ -275,6 +413,8 @@ function civicase_civicrm_validateForm($formName, &$fields, &$files, &$form, &$e
     new CRM_Civicase_Hook_ValidateForm_SaveCaseTypeCategory(),
     new CRM_Civicase_Hook_ValidateForm_SendBulkEmail(),
     new CRM_Civicase_Hook_ValidateForm_RemoveEmptyTargetContactFromActivity(),
+    new CRM_Civicase_Hook_ValidateForm_RestrictRepeatableCaseCustomData(),
+    new CRM_Civicase_Hook_ValidateForm_RejectCaseGroupsInCustomDataImport(),
   ];
 
   foreach ($hooks as $hook) {
@@ -294,6 +434,7 @@ function civicase_civicrm_post($op, $objectName, $objectId, &$objectRef) {
     new CRM_Civicase_Hook_Post_UpdateCaseTypeListForCaseCategoryCustomGroup(),
     new CRM_Civicase_Hook_Post_LinkCase(),
     new CRM_Civicase_Hook_Post_CaseTypeCache(),
+    new CRM_Civicase_Hook_Post_ReconcileRepeatableCaseCustomArtifacts(),
   ];
 
   foreach ($hooks as $hook) {
@@ -494,17 +635,14 @@ function civicase_civicrm_navigationMenu(&$menu) {
 /**
  * Implements hook_civicrm_selectWhereClause().
  */
-function civicase_civicrm_selectWhereClause($entity, &$clauses) {
-  if ($entity === 'Case') {
-    unset($clauses['id']);
-  }
-
+function civicase_civicrm_selectWhereClause($entity, &$clauses, $userId = NULL) {
   $hooks = [
+    new CRM_Civicase_Hook_SelectWhereClause_RestrictCaseQueryByCaseCategoryPermissions(),
     new CRM_Civicase_Hook_SelectWhereClause_LimitCaseQueryToAccessibleCaseCategories(),
   ];
 
   foreach ($hooks as $hook) {
-    $hook->run($entity, $clauses);
+    $hook->run($entity, $clauses, $userId);
   }
 }
 
@@ -521,6 +659,7 @@ function civicase_civicrm_entityTypes(&$entityTypes) {
 function civicase_civicrm_queryObjects(&$queryObjects, $type) {
   if ($type == 'Contact') {
     $queryObjects[] = new CRM_Civicase_BAO_Query_ContactLock();
+    $queryObjects[] = new CRM_Civicase_BAO_Query_RepeatableCaseCustomFields();
   }
 }
 
@@ -547,6 +686,7 @@ function civicase_civicrm_preProcess($formName, &$form) {
     new CRM_Civicase_Hook_PreProcess_CaseCategoryWordReplacementsForChangeCase(),
     new CRM_Civicase_Hook_PreProcess_AddCaseAdminSettings(),
     new CRM_Civicase_Hook_PreProcess_CaseTypeCategoryWebFormRedirect(),
+    new CRM_Civicase_Hook_PreProcess_AddRepeatableCaseCustomFieldsToSearchBuilder(),
   ];
 
   foreach ($hooks as $hook) {

@@ -10,22 +10,28 @@
 
 use CRM_Civicase_Helper_GlobRecursive as GlobRecursive;
 
-/**
- * Get a list of JS files.
- *
- * @return array
- *   list of js files
- */
-function get_workflow_js_files() {
-  return array_merge(
-    [
-      'ang/workflow.js',
-    ],
-    GlobRecursive::getRelativeToExtension(
-      'uk.co.compucorp.civicase',
-      'ang/workflow/*.js'
-    )
-  );
+// Core can build the Angular module list more than once in a process (e.g.
+// after a cache flush), including this file again, so only declare it once.
+if (!function_exists('get_workflow_js_files')) {
+
+  /**
+   * Get a list of JS files.
+   *
+   * @return array
+   *   list of js files
+   */
+  function get_workflow_js_files() {
+    return array_merge(
+      [
+        'ang/workflow.js',
+      ],
+      GlobRecursive::getRelativeToExtension(
+        'uk.co.compucorp.civicase',
+        'ang/workflow/*.js'
+      )
+    );
+  }
+
 }
 
 $requires = [

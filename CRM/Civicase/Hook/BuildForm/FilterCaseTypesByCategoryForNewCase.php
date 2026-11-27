@@ -1,5 +1,6 @@
 <?php
 
+use CRM_Civicase_Helper_CaseForm as CaseFormHelper;
 use CRM_Civicase_Hook_Helper_CaseTypeCategory as CaseTypeCategoryHelper;
 
 /**
@@ -18,17 +19,11 @@ class CRM_Civicase_Hook_BuildForm_FilterCaseTypesByCategoryForNewCase {
    *   Form Name.
    */
   public function run(CRM_Core_Form &$form, $formName) {
-    $caseCategoryId = $this->getCaseCategoryId($form);
-
-    if (!$this->shouldRun($formName, $caseCategoryId)) {
+    if (!$this->shouldRun($form, $formName)) {
       return;
     }
 
-    if (!CaseTypeCategoryHelper::isValidCategory($caseCategoryId)) {
-      return;
-    }
-
-    $this->filterCaseTypeOptionValues($form, $caseCategoryId);
+    $this->filterCaseTypeOptionValues($form, $this->getCaseCategoryId($form));
   }
 
   /**
@@ -36,7 +31,7 @@ class CRM_Civicase_Hook_BuildForm_FilterCaseTypesByCategoryForNewCase {
    *
    * @param CRM_Core_Form $form
    *   Form class object.
-   * @param int $caseCategoryId
+   * @param string|int $caseCategoryId
    *   Case category Id.
    */
   private function filterCaseTypeOptionValues(CRM_Core_Form $form, $caseCategoryId) {
@@ -63,22 +58,25 @@ class CRM_Civicase_Hook_BuildForm_FilterCaseTypesByCategoryForNewCase {
   /**
    * Determines if the hook will run.
    *
+   * The hook runs only on the New Case form (not when the case form is
+   * used to delete or restore a case) and when the case category is valid.
+   *
+   * @param CRM_Core_Form $form
+   *   Form class object.
    * @param string $formName
    *   Form name.
-   * @param int $caseCategoryId
-   *   Case category name.
    *
    * @return bool
    *   returns a boolean to determine if hook will run or not.
    */
-  private function shouldRun($formName, $caseCategoryId) {
-    if (!$caseCategoryId) {
+  private function shouldRun(CRM_Core_Form $form, $formName) {
+    if (!CaseFormHelper::isNewCaseForm($formName, $form)) {
       return FALSE;
     }
 
-    $isCaseForm = $formName == CRM_Case_Form_Case::class;
+    $caseCategoryId = $this->getCaseCategoryId($form);
 
-    return $isCaseForm && $caseCategoryId;
+    return $caseCategoryId && CaseTypeCategoryHelper::isValidCategory($caseCategoryId);
   }
 
   /**
@@ -87,7 +85,7 @@ class CRM_Civicase_Hook_BuildForm_FilterCaseTypesByCategoryForNewCase {
    * @param CRM_Core_Form $form
    *   Form name.
    *
-   * @return int
+   * @return string|int|null
    *   Case category id.
    */
   private function getCaseCategoryId(CRM_Core_Form $form) {

@@ -71,10 +71,9 @@ class CRM_Civicase_BAO_CaseContactLockTest extends TestCase implements HeadlessI
    *
    * Tests an exception is thrown if one if either of the parameters passed to
    * createLocks method of BAO is not an array.
-   *
-   * @expectedException API_Exception
    */
   public function testExceptionThrownOnNonInputParametersToCreateLocks() {
+    $this->expectException(API_Exception::class);
     CRM_Civicase_BAO_CaseContactLock::createLocks(1, 2);
   }
 

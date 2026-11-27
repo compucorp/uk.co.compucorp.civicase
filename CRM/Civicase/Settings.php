@@ -81,6 +81,7 @@ class CRM_Civicase_Settings {
     self::setCurrencyCodes($options);
     self::setCaseTypesWithFeaturesEnabled($options);
     self::setCaseSalesOrderStatus($options);
+    self::setRepeatableCaseCustomGroups($options);
 
     return $options;
   }
@@ -368,14 +369,27 @@ class CRM_Civicase_Settings {
 
   /**
    * Sets the custom fields information to javascript global variable.
+   *
+   * Only the groups the user may view are offered as filters, as in core's
+   * contact search.
    */
   public static function setCustomFieldsInfoToJsVars(array &$options): void {
+    $options['customSearchFields'] = $options['customActivityFields'] = [];
+    $viewableGroupIds = array_keys(CRM_Core_BAO_CustomGroup::getAll(
+      ['extends' => ['Case', 'Activity'], 'is_active' => TRUE],
+      CRM_Core_Permission::VIEW
+    ));
+    if (!$viewableGroupIds) {
+      return;
+    }
+
     $result = civicrm_api3('CustomGroup', 'get', [
       'sequential' => 1,
       'return' => ['extends_entity_column_value', 'title', 'extends'],
+      'id' => ['IN' => $viewableGroupIds],
       'extends' => ['IN' => ['Case', 'Activity']],
       'is_active' => 1,
-      'options' => ['sort' => 'weight'],
+      'options' => ['sort' => 'weight', 'limit' => 0],
       'api.CustomField.get' => [
         'is_active' => 1,
         'is_searchable' => 1,
@@ -383,10 +397,9 @@ class CRM_Civicase_Settings {
           'label', 'html_type', 'data_type', 'is_search_range',
           'filter', 'option_group_id',
         ],
-        'options' => ['sort' => 'weight'],
+        'options' => ['sort' => 'weight', 'limit' => 0],
       ],
     ]);
-    $options['customSearchFields'] = $options['customActivityFields'] = [];
     foreach ($result['values'] as $group) {
       if (!empty($group['api.CustomField.get']['values'])) {
         if ($group['extends'] == 'Case') {
@@ -452,6 +465,42 @@ class CRM_Civicase_Settings {
    */
   public static function setCurrencyCodes(array &$options): void {
     $options['currencyCodes'] = CurrencyUtils::getCurrencies();
+  }
+
+  /**
+   * Exposes repeatable (multi-record) Case custom groups to Angular.
+   *
+   * Used by the case-custom-data feature to render one Tab-with-table tab per
+   * repeatable Case custom group the current user can see, on cases of the
+   * types the group applies to. See TCOSB-51 and TCOSB-104.
+   *
+   * @param array $options
+   *   List of options to pass to the front-end.
+   */
+  public static function setRepeatableCaseCustomGroups(array &$options): void {
+    $groups = (new \CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms())
+      ->getRepeatableCaseGroups();
+    // Only groups the user can see get a tab: "access all custom data" (or
+    // "administer CiviCRM data"), or an ACL granting View/Edit on the group.
+    // Without that the table could only ever be empty. This is display only;
+    // core's ACL on reads and the write checks protect the data itself.
+    $groups = array_values(array_filter($groups, function ($group) {
+      return \CRM_Core_BAO_CustomGroup::checkGroupAccess((int) $group['id'], \CRM_Core_Permission::VIEW);
+    }));
+    $options['repeatableCaseCustomGroups'] = array_map(function ($group) {
+      return [
+        'name' => $group['name'],
+        'title' => $group['title'],
+        'max_multiple' => $group['max_multiple'] ?? NULL,
+        // The case types the group is limited to (NULL for all); the case
+        // screen only shows the tab on cases of these types. See TCOSB-104.
+        'case_type_ids' => \CRM_Civicase_Service_RepeatableCaseCustomGroupAfforms::getGroupCaseTypeIds($group),
+        // Edit access ("access all custom data" or an ACL "Edit" grant on the
+        // group); the tab hides Delete and bulk actions without it. The server
+        // enforces it either way.
+        'can_manage' => CRM_Civicase_Event_Listener_RepeatableCaseCustomDataAccess::canManageGroup($group),
+      ];
+    }, $groups);
   }
 
   /**

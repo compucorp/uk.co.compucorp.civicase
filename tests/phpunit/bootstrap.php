@@ -2,7 +2,17 @@
 
 ini_set('memory_limit', '2G');
 ini_set('safe_mode', 0);
-eval(cv('php:boot --level=classloader', 'phpcode'));
+
+// Boot to settings in UnitTests mode, so the test listener does not fully
+// boot CiviCRM against the still-empty test database before the headless
+// harness has installed its schema.
+define('CIVICRM_CONTAINER_CACHE', 'never');
+define('CIVICRM_TEST', 1);
+putenv('CIVICRM_UF=' . ($_ENV['CIVICRM_UF'] = 'UnitTests'));
+
+// phpcs:disable
+eval(cv('php:boot --level=settings', 'phpcode'));
+// phpcs:enable
 
 //This will redirect all mails to the database.
 define('CIVICRM_MAILER_SPOOL', 1);

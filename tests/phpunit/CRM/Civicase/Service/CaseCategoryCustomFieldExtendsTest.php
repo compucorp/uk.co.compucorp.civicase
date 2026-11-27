@@ -27,6 +27,23 @@ class CRM_Civicase_Service_CaseCategoryCustomFieldExtendsTest extends BaseHeadle
   }
 
   /**
+   * Test that created Case CG extend entities allow multiple records.
+   *
+   * `filter = 1` maps to `allow_is_multiple` in
+   * CRM_Core_BAO_CustomGroup::getCustomGroupExtendsOptions(), enabling
+   * repeatable custom field sets for Cases (TCOSB-23 / ESE-404).
+   */
+  public function testIsCreatedWithMultipleRecordsEnabled() {
+    $entityValue = 'Test Entity Value';
+    $label = 'Test Label';
+
+    (new CaseCategoryCustomFieldExtendsService())->create($entityValue, $label);
+
+    $cgExtendOptionValue = $this->getCgExtendOptionValue($entityValue);
+    $this->assertEquals(1, $cgExtendOptionValue['values'][0]['filter']);
+  }
+
+  /**
    * Test CG extend option value creation using only the required parameters.
    */
   public function testIsSuccessfullyCreatedWithOnlyRequiredParameters() {

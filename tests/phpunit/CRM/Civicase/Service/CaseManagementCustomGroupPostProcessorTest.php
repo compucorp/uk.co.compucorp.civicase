@@ -38,7 +38,7 @@ class CRM_Civicase_Service_CaseManagementCustomGroupPostProcessorTest extends Ba
    * @param mixed $toReturn
    *   What to return for the getCaseTypeIdsForCaseCategory method.
    *
-   * @return \PHPUnit_Framework_MockObject_MockObject
+   * @return \PHPUnit\Framework\MockObject\MockObject
    *   CaseManagementHelper mock object.
    */
   private function getCaseManagementHelperMock($toReturn) {
@@ -76,8 +76,8 @@ class CRM_Civicase_Service_CaseManagementCustomGroupPostProcessorTest extends Ba
         // This is the case category value for the case category type.
         1,
         CRM_Core_DAO::VALUE_SEPARATOR .
-        implode(CRM_Core_DAO::VALUE_SEPARATOR, [1, 2, 3]) .
-        CRM_Core_DAO::VALUE_SEPARATOR,
+          implode(CRM_Core_DAO::VALUE_SEPARATOR, [1, 2, 3]) .
+          CRM_Core_DAO::VALUE_SEPARATOR,
         [1, 2, 3],
       ],
       [

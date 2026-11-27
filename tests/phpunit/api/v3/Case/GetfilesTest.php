@@ -57,7 +57,7 @@ class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements Headl
   /**
    * Setup data before tests run.
    */
-  public function setUp() {
+  public function setUp(): void {
     parent::setUp();
     $this->creator = ContactFabricator::fabricate();
     $this->client = ContactFabricator::fabricate();
@@ -68,7 +68,7 @@ class api_v3_Case_GetfilesTest extends api_v3_Case_BaseTestCase implements Headl
   /**
    * Cleanup test files.
    */
-  public function tearDown() {
+  public function tearDown(): void {
     parent::tearDown();
     $this->cleanupFiles();
   }

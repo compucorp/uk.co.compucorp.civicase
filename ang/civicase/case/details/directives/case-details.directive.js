@@ -290,6 +290,7 @@
       $scope.areRelatedCasesVisibleOnSummaryTab = !allowLinkedCasesTab &&
         $scope.item.relatedCases.length > 0;
 
+      showTabsForCase();
       includeDetailsTab();
       $scope.$broadcast('updateCaseData');
       $scope.$emit('civicase::ActivitiesCalendar::reload');
@@ -452,6 +453,32 @@
       delete (item['api.Activity.getAll.nextActivitiesWhichIsNotMileStone']);
 
       return item;
+    }
+
+    /**
+     * Shows the tabs that apply to the current case.
+     *
+     * A tab can define `isVisible(caseItem)`, e.g. a custom data tab limited
+     * to some case types. The list is rebuilt for every case, so a tab hidden
+     * for one case comes back for the next. If the open tab is hidden, the
+     * Summary tab is opened instead.
+     */
+    function showTabsForCase () {
+      var hiddenTabNames = [];
+
+      $scope.tabs = _.filter(_.cloneDeep(CaseDetailsTabs), function (tab) {
+        var isVisible = !_.isFunction(tab.isVisible) || tab.isVisible($scope.item);
+
+        if (!isVisible) {
+          hiddenTabNames.push(tab.name);
+        }
+
+        return isVisible;
+      });
+
+      if (_.includes(hiddenTabNames, $scope.activeTab)) {
+        $scope.activeTab = 'Summary';
+      }
     }
 
     /**

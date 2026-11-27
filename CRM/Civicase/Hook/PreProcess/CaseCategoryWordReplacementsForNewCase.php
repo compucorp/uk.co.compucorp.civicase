@@ -1,6 +1,7 @@
 <?php
 
 use CRM_Civicase_Helper_CaseCategory as CaseCategoryHelper;
+use CRM_Civicase_Helper_CaseForm as CaseFormHelper;
 use CRM_Civicase_Hook_Helper_CaseTypeCategory as CaseTypeCategoryHelper;
 
 /**
@@ -17,17 +18,11 @@ class CRM_Civicase_Hook_PreProcess_CaseCategoryWordReplacementsForNewCase {
    *   Form Class object.
    */
   public function run($formName, CRM_Core_Form &$form) {
-    $caseCategoryId = $this->getCaseCategoryId($form);
-
-    if (!$this->shouldRun($formName)) {
+    if (!$this->shouldRun($formName, $form)) {
       return;
     }
 
-    if (!CaseTypeCategoryHelper::isValidCategory($caseCategoryId)) {
-      return;
-    }
-
-    $this->addWordReplacements($form, $caseCategoryId);
+    $this->addWordReplacements($form, $this->getCaseCategoryId($form));
   }
 
   /**
@@ -57,7 +52,7 @@ class CRM_Civicase_Hook_PreProcess_CaseCategoryWordReplacementsForNewCase {
    * @param CRM_Core_Form $form
    *   Form name.
    *
-   * @return string|null
+   * @return string|int|null
    *   case category Id.
    */
   private function getCaseCategoryId(CRM_Core_Form $form) {
@@ -70,14 +65,27 @@ class CRM_Civicase_Hook_PreProcess_CaseCategoryWordReplacementsForNewCase {
   /**
    * Determines if the hook will run.
    *
+   * The hook runs only on the New Case form (not when the case form is
+   * used to delete or restore a case, where core doesn't assign the
+   * activity type used for the page title) and when the case category is
+   * valid.
+   *
    * @param string $formName
    *   Form name.
+   * @param CRM_Core_Form $form
+   *   Form object.
    *
    * @return bool
    *   returns a boolean to determine if hook will run or not.
    */
-  private function shouldRun($formName) {
-    return $formName == CRM_Case_Form_Case::class;
+  private function shouldRun($formName, CRM_Core_Form $form) {
+    if (!CaseFormHelper::isNewCaseForm($formName, $form)) {
+      return FALSE;
+    }
+
+    $caseCategoryId = $this->getCaseCategoryId($form);
+
+    return $caseCategoryId && CaseTypeCategoryHelper::isValidCategory($caseCategoryId);
   }
 
 }

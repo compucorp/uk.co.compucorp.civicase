@@ -11,7 +11,7 @@ use CRM_Civicase_Test_Fabricator_Contact as ContactFabricator;
  *
  * @group headless
  */
-class api_v3_CaseRoleCreationTest extends BaseHeadlessTest {
+class api_v3_CaseRoleCreationTest extends BaseHeadlessTest { // phpcs:ignore
 
   use CRM_Civicase_Helpers_CaseSettingsTrait;
   use CRM_Civicase_Helpers_SessionTrait;
@@ -19,7 +19,7 @@ class api_v3_CaseRoleCreationTest extends BaseHeadlessTest {
   /**
    * Setup data before tests run.
    */
-  public function setUp() {
+  public function setUp(): void {
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
   }

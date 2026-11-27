@@ -18,8 +18,12 @@ class CRM_Civicase_Form_CaseSalesOrderInvoiceTest extends BaseHeadlessTest {
   /**
    * Setup data before tests run.
    */
-  public function setUp() {
+  public function setUp(): void {
     CRM_Core_Invoke::rebuildMenuAndCaches(TRUE);
+    // In the headless test process the smarty mixin does not register
+    // civicase's templates folder (a normal page load does), and these tests
+    // render a civicase form.
+    CRM_Core_Smarty::singleton()->addTemplateDir(CRM_Civicase_ExtensionUtil::path('templates'));
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
   }
@@ -47,8 +51,8 @@ class CRM_Civicase_Form_CaseSalesOrderInvoiceTest extends BaseHeadlessTest {
     $link = "civicrm/case-features/quotations/email?id={$salesOrder->id}";
     $page = $this->imitateLinkVisit($link);
 
-    $this->assertRegExp('/name="subject"/', $page);
-    $this->assertRegExp('/name="from_email_address"/', $page);
+    $this->assertMatchesRegularExpression('/name="subject"/', $page);
+    $this->assertMatchesRegularExpression('/name="from_email_address"/', $page);
   }
 
   /**
@@ -75,7 +79,7 @@ class CRM_Civicase_Form_CaseSalesOrderInvoiceTest extends BaseHeadlessTest {
     $link = "civicrm/case-features/quotations/email?id={$salesOrder->id}";
     $page = $this->imitateLinkVisit($link);
 
-    $this->assertRegExp('/<' . $expectedToEmail . '>/', $page);
+    $this->assertMatchesRegularExpression('/<' . $expectedToEmail . '>/', $page);
   }
 
   /**
@@ -129,16 +133,16 @@ class CRM_Civicase_Form_CaseSalesOrderInvoiceTest extends BaseHeadlessTest {
     $totalBeforeTax = CRM_Utils_Money::format($salesOrder->total_before_tax, $salesOrder->currency);
     $totalAfterTax = CRM_Utils_Money::format($salesOrder->total_after_tax, $salesOrder->currency);
     $this->assertArrayHasKey("html", $invoice);
-    $this->assertRegExp('/' . $contact->display_name . '/', $invoice['html']);
-    $this->assertRegExp('/Supplementary Address 1/', $invoice['html']);
-    $this->assertRegExp('/Supplementary Address 2/', $invoice['html']);
-    $this->assertRegExp('/' . $salesOrder->description . '/', $invoice['html']);
-    $this->assertRegExp('/' . str_replace(' ', '', $totalBeforeTax) . '/', $invoice['html']);
-    $this->assertRegExp('/' . str_replace(' ', '', $totalAfterTax) . '/', $invoice['html']);
-    $this->assertRegExp('/' . $lineItem1['item_description'] . '/', $invoice['html']);
-    $this->assertRegExp('/' . $lineItem2['item_description'] . '/', $invoice['html']);
-    $this->assertRegExp('/' . $lineItem1['quantity'] . '/', $invoice['html']);
-    $this->assertRegExp('/' . $lineItem2['quantity'] . '/', $invoice['html']);
+    $this->assertMatchesRegularExpression('/' . $contact->display_name . '/', $invoice['html']);
+    $this->assertMatchesRegularExpression('/Supplementary Address 1/', $invoice['html']);
+    $this->assertMatchesRegularExpression('/Supplementary Address 2/', $invoice['html']);
+    $this->assertMatchesRegularExpression('/' . $salesOrder->description . '/', $invoice['html']);
+    $this->assertMatchesRegularExpression('/' . str_replace(' ', '', $totalBeforeTax) . '/', $invoice['html']);
+    $this->assertMatchesRegularExpression('/' . str_replace(' ', '', $totalAfterTax) . '/', $invoice['html']);
+    $this->assertMatchesRegularExpression('/' . $lineItem1['item_description'] . '/', $invoice['html']);
+    $this->assertMatchesRegularExpression('/' . $lineItem2['item_description'] . '/', $invoice['html']);
+    $this->assertMatchesRegularExpression('/' . $lineItem1['quantity'] . '/', $invoice['html']);
+    $this->assertMatchesRegularExpression('/' . $lineItem2['quantity'] . '/', $invoice['html']);
   }
 
   /**

@@ -12,7 +12,7 @@ use CRM_Civicase_Test_Fabricator_CustomField as CustomFieldFabricator;
  *
  * @group headless
  */
-class api_v3_Case_GetcaselistTest extends BaseHeadlessTest {
+class api_v3_Case_GetcaselistTest extends BaseHeadlessTest { // phpcs:ignore
 
   use CRM_Civicase_Helpers_SessionTrait;
 
@@ -26,7 +26,7 @@ class api_v3_Case_GetcaselistTest extends BaseHeadlessTest {
   /**
    * Setup data before tests run.
    */
-  public function setUp() {
+  public function setUp(): void {
     $contact = ContactFabricator::fabricate();
     $this->registerCurrentLoggedInContactInSession($contact['id']);
     $this->creator = $contact['id'];
