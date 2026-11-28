@@ -106,7 +106,30 @@ class CRM_Civicase_Hook_Helper_CaseTypeCategory {
     // The Angular bundles are built per case category (see
     // CRM_Civicase_Event_Listener_CaseCategoryAssets), so switching category
     // no longer resets the site-wide resource cache code.
+    $locale = CRM_Core_I18n::getLocale();
+    $wordingBefore = Civi::$statics[CRM_Core_I18n::class][$locale] ?? NULL;
     self::applyWordReplacements($caseCategoryName);
+    // Only when the wording has changed: a category without replacements, or
+    // one whose wording is already in force, leaves the labels as they are.
+    if ($wordingBefore !== (Civi::$statics[CRM_Core_I18n::class][$locale] ?? NULL)) {
+      self::forgetFieldLabels();
+    }
+  }
+
+  /**
+   * Forgets the field labels CiviCRM has already translated in this request.
+   *
+   * Since CiviCRM 6.7 the fields of an entity are translated once per request
+   * and kept (Civi\Schema\EntityProvider::getFields). A form that reads an
+   * entity's fields before the category's wording is added (the new case form
+   * builds its case type options in its own preProcess) would otherwise keep
+   * showing the labels without that wording, e.g. "- select Case Type -".
+   *
+   * Only for wording that stays for the rest of the request: the asset
+   * listener, which takes its wording away again, must not call this.
+   */
+  private static function forgetFieldLabels() {
+    unset(\Civi::$statics['civi.entity.fields']);
   }
 
   /**
